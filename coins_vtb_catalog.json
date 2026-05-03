@@ -1,0 +1,2967 @@
+{
+  "scraped_at": "2026-05-03T17:30:38.666795",
+  "total_pages": 33,
+  "total_coins": 296,
+  "coins": [
+    {
+      "name": "Золотой червонец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5214-0009&id=e4f91a29-b580-45fd-bc71-962fce58fbd7",
+      "nominal": "10 рублей РФ",
+      "metal": "Золото",
+      "weight_g": 7.78,
+      "price1": 132900.0,
+      "article": "5214-0009",
+      "sku": "5214-0009"
+    },
+    {
+      "name": "Георгий Победоносец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5216-0060&id=cee4944c-bb72-4cec-a68a-cb2aaf225c8e",
+      "nominal": "50 рублей РФ",
+      "metal": "Золото",
+      "weight_g": 7.78,
+      "price1": 132900.0,
+      "article": "5216-0060",
+      "sku": "5216-0060"
+    },
+    {
+      "name": "Георгий Победоносец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5217-0048&id=19fdb1ae-585f-4096-bd42-20dc5313d86e",
+      "nominal": "100 рублей РФ",
+      "metal": "Золото",
+      "weight_g": 15.55,
+      "price1": 251900.0,
+      "article": "5217-0048",
+      "sku": "5217-0048"
+    },
+    {
+      "name": "Георгий Победоносец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5219-0033&id=cf50b229-805e-4fd1-be2b-37f68320c384",
+      "nominal": "200 рублей РФ",
+      "metal": "Золото",
+      "weight_g": 31.1,
+      "price1": 479000.0,
+      "article": "5219-0033",
+      "sku": "5219-0033"
+    },
+    {
+      "name": "Календарь ацтеков",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30059&id=8de4cec5-cf29-4b78-941b-c83936be4660",
+      "nominal": "100 песо",
+      "metal": "Серебро",
+      "weight_g": 1000.0,
+      "price1": 300000.0,
+      "article": "30059",
+      "sku": "30059"
+    },
+    {
+      "name": "Набор Сикстинская Мадонна",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=807163&id=81d30e3e-161f-42fd-abd1-2c234b0678e5",
+      "nominal": "60 долларов",
+      "metal": "Серебро",
+      "weight_g": 960.0,
+      "price1": 288000.0,
+      "article": "807163",
+      "sku": "807163"
+    },
+    {
+      "name": "Гигантские небесные окна-Базилика Св.Петра",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=823000&id=7ca00a37-abca-4b95-8e4f-d325d4c868d7",
+      "nominal": "40 долларов",
+      "metal": "Серебро",
+      "weight_g": 311.0,
+      "price1": 279174.0,
+      "article": "823000",
+      "sku": "823000"
+    },
+    {
+      "name": "ПОБЕДА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5216-0128&id=bc89a54d-54df-451c-a908-6df82ed44168",
+      "nominal": "50 рублей",
+      "metal": "Золото",
+      "weight_g": 7.78,
+      "price1": 250000.0,
+      "article": "5216-0128",
+      "sku": "5216-0128"
+    },
+    {
+      "name": "Кафедральный собор Нотр-Дам",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30065&id=e243a2e0-0f6d-44f4-8894-7da5ca0f5100",
+      "nominal": "35 долларов",
+      "metal": "Серебро",
+      "weight_g": 311.0,
+      "price1": 212141.0,
+      "article": "30065",
+      "sku": "30065"
+    },
+    {
+      "name": "Набор ОКНА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=808000&id=99a9ee5d-5715-442b-89ab-68baf84f96e7",
+      "nominal": "60 долларов",
+      "metal": "Серебро",
+      "weight_g": 279.9,
+      "price1": 151088.0,
+      "article": "808000",
+      "sku": "808000"
+    },
+    {
+      "name": "КРЫМ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500713&id=aa886ce6-ef29-438d-a862-5b763c694cb4",
+      "nominal": "10000 франков",
+      "metal": "Серебро",
+      "weight_g": 250.0,
+      "price1": 134947.0,
+      "article": "500713",
+      "sku": "500713"
+    },
+    {
+      "name": "Набор КОНТИНЕНТЫ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=815937&id=1d1027a8-000c-4a2a-94db-8bbfe5a048fa",
+      "nominal": "7000 франков",
+      "metal": "Серебро",
+      "weight_g": 140.0,
+      "price1": 67750.0,
+      "article": "815937",
+      "sku": "815937"
+    },
+    {
+      "name": "НОВОТОРЖСКИЙ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5115-0163&id=af037fae-ba96-413f-809b-5f5d8452b65c",
+      "nominal": "25 рублей",
+      "metal": "Серебро",
+      "weight_g": 155.5,
+      "price1": 46650.0,
+      "article": "5115-0163",
+      "sku": "5115-0163"
+    },
+    {
+      "name": "Свияжск",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5115-0158&id=77a6f046-98a3-4dea-959f-166318dcea01",
+      "nominal": "25 рублей",
+      "metal": "Серебро",
+      "weight_g": 155.5,
+      "price1": 46650.0,
+      "article": "5115-0158",
+      "sku": "5115-0158"
+    },
+    {
+      "name": "Корчик",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5115-0164&id=6fde0235-fea3-44b3-98db-ddf904b5b295",
+      "nominal": "25 рублей",
+      "metal": "Серебро",
+      "weight_g": 155.5,
+      "price1": 46650.0,
+      "article": "5115-0164",
+      "sku": "5115-0164"
+    },
+    {
+      "name": "Набор Нагая и одетая Майя",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821011&id=93f49157-b474-4a3c-829e-a8737b8ac3a3",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 62.2,
+      "price1": 34776.0,
+      "article": "821011",
+      "sku": "821011"
+    },
+    {
+      "name": "Королевский дворец в Казерте",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=823568&id=5393e1b4-b515-40c7-82c8-c1e9b3e9988a",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 77.75,
+      "price1": 34328.0,
+      "article": "823568",
+      "sku": "823568"
+    },
+    {
+      "name": "Леди Готива",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=777592&id=21e2674b-0969-45fc-b0c7-42ce06a80cfb",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 32789.0,
+      "article": "777592",
+      "sku": "777592"
+    },
+    {
+      "name": "Клод Моне-Водяные лилии",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821006&id=95ae5d8b-ecaf-415b-a3a9-841474bd2862",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 32789.0,
+      "article": "821006",
+      "sku": "821006"
+    },
+    {
+      "name": "Свобода,ведущая народ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=773305&id=3e144cd8-2126-4329-8d58-a96e6273643c",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 32789.0,
+      "article": "773305",
+      "sku": "773305"
+    },
+    {
+      "name": "Винсент Ван Гог - Звездная ночь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821005&id=2d9a81fa-56f2-41d4-aedc-3094e009bc39",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 32789.0,
+      "article": "821005",
+      "sku": "821005"
+    },
+    {
+      "name": "Леда и лебедь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=811820&id=76955903-1074-4c1b-b127-14177fc8d7ba",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 32789.0,
+      "article": "811820",
+      "sku": "811820"
+    },
+    {
+      "name": "Благовещение пресвятой богородицы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=817117&id=c4171aed-4d92-4e10-85c0-e4058acdf03a",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 32789.0,
+      "article": "817117",
+      "sku": "817117"
+    },
+    {
+      "name": "Три богатыря",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821000&id=b6ef3915-edf0-4c4e-b316-12ec85d15f04",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 30404.0,
+      "article": "821000",
+      "sku": "821000"
+    },
+    {
+      "name": "Монета-слиток",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500725&id=6bf60a8d-4780-45a7-af7f-dd178b7e8e3e",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 100.0,
+      "price1": 30000.0,
+      "article": "500725",
+      "sku": "500725"
+    },
+    {
+      "name": "Кафедральный собор в Кракове",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=811923&id=f3e05299-41ac-416e-96f5-9f70c7f8c365",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 28296.0,
+      "article": "811923",
+      "sku": "811923"
+    },
+    {
+      "name": "Мона Лиза",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=822003&id=dc25eb2a-654b-4719-9d84-8ea5f44eee8d",
+      "nominal": "20 долларов",
+      "metal": "Серебро",
+      "weight_g": 93.3,
+      "price1": 27990.0,
+      "article": "822003",
+      "sku": "822003"
+    },
+    {
+      "name": "Кафедральный собор в Вашингтоне",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=806929&id=ed6b725d-7d91-440a-a23f-18c58e349abf",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 27904.0,
+      "article": "806929",
+      "sku": "806929"
+    },
+    {
+      "name": "Исаакиевский Кафедральный Собор в Санкт-Петербурге",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821004&id=7f4346a0-b64a-41db-9145-a5253a5ff5ff",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 26683.0,
+      "article": "821004",
+      "sku": "821004"
+    },
+    {
+      "name": "Центральный вокзал в Нью-Йорке",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=811922&id=2b63981a-4322-4cf8-8b14-dfbb700dbf39",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 24284.0,
+      "article": "811922",
+      "sku": "811922"
+    },
+    {
+      "name": "Миланский Кафедральный Собор",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26815&id=9df6482a-ed44-4189-8b39-dd167bd48f79",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 24284.0,
+      "article": "26815",
+      "sku": "26815"
+    },
+    {
+      "name": "Шартрский Кафедральный Собор",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=772183&id=043d1134-3608-4357-86f8-3f2b79d9da55",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 24284.0,
+      "article": "772183",
+      "sku": "772183"
+    },
+    {
+      "name": "Базилика Сакре - Кер",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821001&id=870fc134-747c-4552-900f-4a39a4cea5ff",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 24284.0,
+      "article": "821001",
+      "sku": "821001"
+    },
+    {
+      "name": "Буэнос-Айрес",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=806509&id=1374ce9a-fb36-4e15-b48a-f98c5dbd5796",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 24284.0,
+      "article": "806509",
+      "sku": "806509"
+    },
+    {
+      "name": "Новодевичий",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5115-0128&id=5293b159-5e38-483b-a8fb-b667d188258b",
+      "nominal": "25 рублей",
+      "metal": "Серебро",
+      "weight_g": 155.5,
+      "price1": 23325.0,
+      "article": "5115-0128",
+      "sku": "5115-0128"
+    },
+    {
+      "name": "Казанский",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5115-0064&id=fd16e972-57f6-4566-ba31-8a4d73a0c048",
+      "nominal": "25 рублей",
+      "metal": "Серебро",
+      "weight_g": 155.5,
+      "price1": 23325.0,
+      "article": "5115-0064",
+      "sku": "5115-0064"
+    },
+    {
+      "name": "Кафедральный собор в Загребе",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821007&id=ab54d60f-31c5-4bdb-a237-b3fc92fc82df",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 21942.0,
+      "article": "821007",
+      "sku": "821007"
+    },
+    {
+      "name": "Большая церковь в Стокгольме",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821008&id=c3962021-0afc-46b1-a3a2-641a236e2c27",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 21942.0,
+      "article": "821008",
+      "sku": "821008"
+    },
+    {
+      "name": "Тадж Махал",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=822005&id=e7d915b1-c426-4f9f-a72a-4769fe3cc97f",
+      "nominal": "2000 франков",
+      "metal": "Серебро",
+      "weight_g": 62.2,
+      "price1": 20169.0,
+      "article": "822005",
+      "sku": "822005"
+    },
+    {
+      "name": "Год Обезьяны",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500688&id=c0d6658b-8756-4b2c-b920-91f210c3b702",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 19306.0,
+      "article": "500688",
+      "sku": "500688"
+    },
+    {
+      "name": "Эмпайр-стейт-билдинг",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=818819&id=97c66aa7-59ce-4a9e-a342-50253ed65493",
+      "nominal": "1500 франков",
+      "metal": "Серебро",
+      "weight_g": 62.2,
+      "price1": 18660.0,
+      "article": "818819",
+      "sku": "818819"
+    },
+    {
+      "name": "Собор Святого Витуса",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=796665&id=9f044b7d-cf7d-4eab-a0a0-f264a747d103",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 17968.0,
+      "article": "796665",
+      "sku": "796665"
+    },
+    {
+      "name": "Базилика Святого Петра",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25209&id=591d56e5-1bf3-488e-a658-966a27515cd1",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 16248.0,
+      "article": "25209",
+      "sku": "25209"
+    },
+    {
+      "name": "Малая Мадонна (Рафаэль Санти)",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40010&id=6f6e3ee3-3a17-4461-af54-b2ee93151ac5",
+      "nominal": "15 динар",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "40010",
+      "sku": "40010"
+    },
+    {
+      "name": "Мадонна с Младенцем под яблоней (Л.Кранах ст.)",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40009&id=5c1ee2bb-db70-457e-8992-9be5f0daec7c",
+      "nominal": "15 динар",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "40009",
+      "sku": "40009"
+    },
+    {
+      "name": "Вотивная церковь в Вене",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26245&id=40eccdc0-abda-41c0-bcbf-fd077c98d576",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "26245",
+      "sku": "26245"
+    },
+    {
+      "name": "Сантьяго де Компостело",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30049&id=96e1e831-4d50-40d7-a5a5-7d6f199986ed",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "30049",
+      "sku": "30049"
+    },
+    {
+      "name": "Компас Мекка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26099&id=a27ace82-3de9-4bae-b654-876189a16e63",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "26099",
+      "sku": "26099"
+    },
+    {
+      "name": "Собор Святого Патрика Нью-Йорк",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25564&id=ca1f5569-7960-45d1-8546-731a4b91bdf1",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "25564",
+      "sku": "25564"
+    },
+    {
+      "name": "Мадонна с двумя ангелами (С.Ботичелли)",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40007&id=ef667208-8bb3-44e9-b706-4a2c9c6f54c7",
+      "nominal": "15 динар",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "40007",
+      "sku": "40007"
+    },
+    {
+      "name": "Мадонна Лита (Леонардо да Винчи)",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40005&id=aca7d186-818a-4a91-9560-78961c99fc89",
+      "nominal": "15 динар",
+      "metal": "Серебро",
+      "weight_g": 50.0,
+      "price1": 15000.0,
+      "article": "40005",
+      "sku": "40005"
+    },
+    {
+      "name": "СЛОНЕНОК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=808001&id=b945daa8-0419-42e7-b52b-bf8a65755f26",
+      "nominal": "5 долларов",
+      "metal": "Золото",
+      "weight_g": 1.0,
+      "price1": 12939.0,
+      "article": "808001",
+      "sku": "808001"
+    },
+    {
+      "name": "Жемчужная раковина",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25865-1&id=0573594e-3e22-41dd-839a-d308df69b7f2",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 10421.0,
+      "article": "25865-1",
+      "sku": "25865-1"
+    },
+    {
+      "name": "Денежное дерево",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30052&id=58826833-48fe-4f27-a011-ef064f7d056c",
+      "nominal": "70000 лаосских кип",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.85,
+      "price1": 10155.0,
+      "article": "30052",
+      "sku": "30052"
+    },
+    {
+      "name": "Водолей",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-19&id=4524d05c-8da4-4761-a09a-a2910e9e34ff",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.83,
+      "price1": 10149.0,
+      "article": "77170212-19",
+      "sku": "77170212-19"
+    },
+    {
+      "name": "Козерог",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-17&id=3fd0b46e-cb60-4e26-9ce3-346b6734c089",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.83,
+      "price1": 10149.0,
+      "article": "77170212-17",
+      "sku": "77170212-17"
+    },
+    {
+      "name": "ГОД КОЗЫ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-29&id=9e924862-fcbe-4069-ab35-9fc713c5cd0c",
+      "nominal": "70000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.7,
+      "price1": 10110.0,
+      "article": "77170212-29",
+      "sku": "77170212-29"
+    },
+    {
+      "name": "С праздником",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-33&id=46b75a22-64e6-47e1-8c56-14eb976a1008",
+      "nominal": "70000 лаосских кип",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.65,
+      "price1": 10110.0,
+      "article": "77170212-33",
+      "sku": "77170212-33"
+    },
+    {
+      "name": "Самара",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-40&id=b8e4446d-616c-46af-8492-2992755722bc",
+      "nominal": "50000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.7,
+      "price1": 10110.0,
+      "article": "77170212-40",
+      "sku": "77170212-40"
+    },
+    {
+      "name": "Николай Чудотворец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30016&id=55274723-bf2c-49b5-a468-77b2c16c8ccb",
+      "nominal": "50000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.7,
+      "price1": 10110.0,
+      "article": "30016",
+      "sku": "30016"
+    },
+    {
+      "name": "С праздником",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-32&id=fa0971a4-d658-49d4-a5bc-d9a3e3b07d36",
+      "nominal": "70000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.7,
+      "price1": 10110.0,
+      "article": "77170212-32",
+      "sku": "77170212-32"
+    },
+    {
+      "name": "Год Петуха",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30003&id=34f5d61c-e5d9-46df-80fa-bf799c3a0126",
+      "nominal": "50000 лаосских кип",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.68,
+      "price1": 10104.0,
+      "article": "30003",
+      "sku": "30003"
+    },
+    {
+      "name": "Год Обезьяны",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-37&id=64effaa6-2544-4fcd-a68a-2147d5262ee6",
+      "nominal": "50000 лаосских кип",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.68,
+      "price1": 10104.0,
+      "article": "77170212-37",
+      "sku": "77170212-37"
+    },
+    {
+      "name": "Талисман удачи - Подкова",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30019&id=ffc9a7d4-32e0-484d-90f4-5d1c4d19b6f3",
+      "nominal": "1000 франков",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.1,
+      "price1": 10098.0,
+      "article": "30019",
+      "sku": "30019"
+    },
+    {
+      "name": "Озеро Байкал",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=300191&id=549e0a2d-77cb-4f9d-a4fc-caab960cba93",
+      "nominal": "70000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.65,
+      "price1": 10095.0,
+      "article": "300191",
+      "sku": "300191"
+    },
+    {
+      "name": "Новокузнецк",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30090&id=c54d8c31-2004-4d32-a6f8-8df516709dfd",
+      "nominal": "50000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.65,
+      "price1": 10095.0,
+      "article": "30090",
+      "sku": "30090"
+    },
+    {
+      "name": "Барнаул",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-39&id=b4bf7669-50a5-42c8-945f-fb9a447980aa",
+      "nominal": "50000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.65,
+      "price1": 10095.0,
+      "article": "77170212-39",
+      "sku": "77170212-39"
+    },
+    {
+      "name": "Стрелец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-15&id=837c7169-b0fb-49c0-a858-0e6b1ce985ae",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.66,
+      "price1": 9498.0,
+      "article": "77170212-15",
+      "sku": "77170212-15"
+    },
+    {
+      "name": "ТЕАТР",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0513&id=0285f803-2496-43b3-9879-5ea21b4a1c53",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9441.0,
+      "article": "5111-0513",
+      "sku": "5111-0513"
+    },
+    {
+      "name": "300-летие СПМД",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0512&id=ce605e1f-2dce-4642-be51-3cf8a3a3c48a",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9441.0,
+      "article": "5111-0512",
+      "sku": "5111-0512"
+    },
+    {
+      "name": "Рыбы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-02&id=6d79a9e1-a5c8-46c1-bf2b-d6808e63376c",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.16,
+      "price1": 9348.0,
+      "article": "77170212-02",
+      "sku": "77170212-02"
+    },
+    {
+      "name": "Весы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-10&id=7a7784ca-3101-4926-976d-23a39171c04a",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.16,
+      "price1": 9348.0,
+      "article": "77170212-10",
+      "sku": "77170212-10"
+    },
+    {
+      "name": "Дева",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-09&id=ed0da807-3bea-417d-a396-2e11f45c0929",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.16,
+      "price1": 9348.0,
+      "article": "77170212-09",
+      "sku": "77170212-09"
+    },
+    {
+      "name": "Уолл Стрит - Слон",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=821010&id=69c32f3a-d1c0-4c24-8856-768ef89a4c4c",
+      "nominal": "100 шиллингов",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "821010",
+      "sku": "821010"
+    },
+    {
+      "name": "80 лет Крымской астрофизической обсерватории",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500672&id=36a4d1d2-fe87-4584-8d19-cf13fc7505f8",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "500672",
+      "sku": "500672"
+    },
+    {
+      "name": "Год семьи",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0514&id=1a57fc8e-7497-41e7-8956-e34729ad4190",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0514",
+      "sku": "5111-0514"
+    },
+    {
+      "name": "Уолл Стрит - Шпрингбок",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30061&id=5f175c12-6812-4dc5-8a88-67c4ba1b6034",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "30061",
+      "sku": "30061"
+    },
+    {
+      "name": "Тайны времени",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500767&id=399caf45-84df-4588-8dc6-d534896d2a98",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "500767",
+      "sku": "500767"
+    },
+    {
+      "name": "АРТЕК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0518&id=22adb41b-8892-4ea7-a2d5-3b75f011048a",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0518",
+      "sku": "5111-0518"
+    },
+    {
+      "name": "Белка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0488&id=c89188c0-e7ff-4cc0-9eb5-f18095f3f63e",
+      "nominal": "3 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0488",
+      "sku": "5111-0488"
+    },
+    {
+      "name": "СОЮЗНОЕ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0509&id=961a08ea-87dc-4928-93d8-83f14f5085b1",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0509",
+      "sku": "5111-0509"
+    },
+    {
+      "name": "Змейка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500693&id=c52b88e3-3b25-4fcd-840b-902fc1eb6ef7",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "500693",
+      "sku": "500693"
+    },
+    {
+      "name": "Год Козы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500683&id=851ec139-ab3e-4351-a570-1eee47ea559e",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "500683",
+      "sku": "500683"
+    },
+    {
+      "name": "Рак",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-23&id=c8bf8f81-f3be-47c9-b4fe-1a5353107a26",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "77170212-23",
+      "sku": "77170212-23"
+    },
+    {
+      "name": "Год Козы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500685&id=6fc2186c-8d20-43b7-9dec-341517f6de83",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "500685",
+      "sku": "500685"
+    },
+    {
+      "name": "10 - летие ЕАЭС",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0309&id=56dcbac7-ed55-4e15-b795-5b4c02137c54",
+      "nominal": "3 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0309",
+      "sku": "5111-0309"
+    },
+    {
+      "name": "С Новосельем-КЛЮЧ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=11632602&id=3eb11481-68bc-4e26-8613-40bc9aa5a954",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "11632602",
+      "sku": "11632602"
+    },
+    {
+      "name": "Гайдай Л.И.",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0494&id=8397f029-62c7-4835-9a50-4f0c756205f8",
+      "nominal": "3 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0494",
+      "sku": "5111-0494"
+    },
+    {
+      "name": "Телец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-01&id=d8581500-2dc7-488a-bbf7-935c7f155bdd",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "77170212-01",
+      "sku": "77170212-01"
+    },
+    {
+      "name": "ИЗИСП",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0481&id=07f30843-39e2-4e2f-86e6-28828f7ed8c7",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0481",
+      "sku": "5111-0481"
+    },
+    {
+      "name": "Спас",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40018&id=979032d5-5172-4ee3-a316-b8af953b4644",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "40018",
+      "sku": "40018"
+    },
+    {
+      "name": "Женский день",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25129&id=3a0098ab-3737-44b4-bf51-a26cf568a6a6",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "25129",
+      "sku": "25129"
+    },
+    {
+      "name": "Совет Федерации",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0489&id=77f1501b-b184-494f-84ed-a03c303626f4",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "5111-0489",
+      "sku": "5111-0489"
+    },
+    {
+      "name": "Близнецы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-04&id=214e7424-2f7b-45d4-b944-65697b079b96",
+      "nominal": "5 долларов",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 31.1,
+      "price1": 9330.0,
+      "article": "77170212-04",
+      "sku": "77170212-04"
+    },
+    {
+      "name": "Лошадь на шаре",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=45691&id=66afdbfc-83b6-4bd1-aef7-1ce868385076",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 31.0,
+      "price1": 8505.0,
+      "article": "45691",
+      "sku": "45691"
+    },
+    {
+      "name": "Овен",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40036&id=7433798f-b48a-4284-9033-a88a51a4e5bd",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40036",
+      "sku": "40036"
+    },
+    {
+      "name": "Стрелец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40040&id=a5fb8b63-7b04-4760-81bf-e26d2b14bd31",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40040",
+      "sku": "40040"
+    },
+    {
+      "name": "Рыбы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40038&id=4c337d7e-be13-47ed-b842-8ab5aa4436cc",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40038",
+      "sku": "40038"
+    },
+    {
+      "name": "Малый Иерусалим",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500723&id=95b4187b-2367-4af0-8350-24bda9e36078",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "500723",
+      "sku": "500723"
+    },
+    {
+      "name": "Козерог",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40034&id=9485fe94-ca99-4a61-8bf0-e69b2477c278",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40034",
+      "sku": "40034"
+    },
+    {
+      "name": "Рак",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40037&id=ab5414e2-723b-46f1-8ca9-29f563e0fecd",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40037",
+      "sku": "40037"
+    },
+    {
+      "name": "Близнецы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40030&id=7f3b2b6a-4d78-46a0-93dd-1cb7e94b41f6",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40030",
+      "sku": "40030"
+    },
+    {
+      "name": "Дева",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40033&id=9cbc3b73-c7b4-4cb7-a893-0d8e79d8333f",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40033",
+      "sku": "40033"
+    },
+    {
+      "name": "Исмаил Гаспринский",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500701&id=9beffd0d-c330-4723-862a-43c1499565cb",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "500701",
+      "sku": "500701"
+    },
+    {
+      "name": "Весы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40031&id=169cac1b-8327-4feb-84e8-01f811e7c3d1",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40031",
+      "sku": "40031"
+    },
+    {
+      "name": "Айвазовский 200 лет триумфа",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500673&id=04b8b76f-2054-40cb-b63a-b789705ffa7a",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "500673",
+      "sku": "500673"
+    },
+    {
+      "name": "Водолей",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40032&id=751b2c16-7b28-4188-b430-6b11eaae5360",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40032",
+      "sku": "40032"
+    },
+    {
+      "name": "Телец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40041&id=329f1b3c-aa71-4a5c-9bbf-2887a561593b",
+      "nominal": "20 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "40041",
+      "sku": "40041"
+    },
+    {
+      "name": "Тропические коралловые рыбки",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500780&id=75cbdaf6-d421-433d-b563-e44afb1c6804",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 28.28,
+      "price1": 8484.0,
+      "article": "500780",
+      "sku": "500780"
+    },
+    {
+      "name": "Орден Красной Звезды",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0499&id=2c39cedc-09d1-4bff-bd8b-9254943462ab",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 7815.0,
+      "article": "5111-0499",
+      "sku": "5111-0499"
+    },
+    {
+      "name": "Петр Брандл",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30054&id=57479686-5d60-4686-b9e6-37a586814020",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "30054",
+      "sku": "30054"
+    },
+    {
+      "name": "Святая Валентина",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25928&id=ea35c1d9-8c8d-4837-9ace-c6a11dde96f6",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25928",
+      "sku": "25928"
+    },
+    {
+      "name": "Крест-камень  САНАИН",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25237&id=58d9ca81-d461-4d76-bbeb-373ec7404352",
+      "nominal": "1000 драмов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25237",
+      "sku": "25237"
+    },
+    {
+      "name": "Зебра",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24998&id=fda1426b-4a93-4c2f-ab73-b11bbe3609f6",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24998",
+      "sku": "24998"
+    },
+    {
+      "name": "Святая Анна",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25610&id=35f9200c-6d82-4a6e-9151-dd56326ac222",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25610",
+      "sku": "25610"
+    },
+    {
+      "name": "Слава шахтерскому труду",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30035&id=16002679-c040-4142-8303-7d7f45088609",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "30035",
+      "sku": "30035"
+    },
+    {
+      "name": "С Годом дракона",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25552&id=3cbbd92f-ae93-40b5-8bae-bd525c7f21b4",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25552",
+      "sku": "25552"
+    },
+    {
+      "name": "Рождество богородицы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25865&id=b4999555-23b0-4724-a955-5a5a70d78ff9",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25865",
+      "sku": "25865"
+    },
+    {
+      "name": "Марлен Дитрих",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25708&id=a3ef770e-ef8d-4626-aab1-14e4add3d3f1",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25708",
+      "sku": "25708"
+    },
+    {
+      "name": "Руины Персеполиса",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25187&id=486b7bc0-64d5-4221-be0c-27d3f9bb777c",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25187",
+      "sku": "25187"
+    },
+    {
+      "name": "Жемчужина(красота моря)",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26622&id=331a1e77-5b59-402b-848a-b0fbcd78e040",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26622",
+      "sku": "26622"
+    },
+    {
+      "name": "Святой Константин",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24994&id=40e3faa7-4f26-4866-aed3-d0b9d62d8db7",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24994",
+      "sku": "24994"
+    },
+    {
+      "name": "С Новым годом",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500736&id=711208a4-dabc-4d61-94e2-cec266cb3d28",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "500736",
+      "sku": "500736"
+    },
+    {
+      "name": "Святая Мария Магдалина",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25194&id=80309e16-4ccc-4ed9-a3a9-7522c0ee3fbe",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25194",
+      "sku": "25194"
+    },
+    {
+      "name": "Василий Тропинин",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30001&id=10a6f5ea-f270-4c75-9484-148175504b4e",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "30001",
+      "sku": "30001"
+    },
+    {
+      "name": "Святой Дмитрий",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25929&id=d9964c6b-5c23-4742-b533-ced1da94fe13",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25929",
+      "sku": "25929"
+    },
+    {
+      "name": "Термо Игрушка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500775&id=f776dce0-6270-4a66-85cc-64e3014fbefe",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "500775",
+      "sku": "500775"
+    },
+    {
+      "name": "Морской конек",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24254&id=3b8343f9-f742-478e-8b66-9ea82298279a",
+      "nominal": "1 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24254",
+      "sku": "24254"
+    },
+    {
+      "name": "Святой Петр",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500746&id=c4ebdfd0-6aa4-4543-8871-fb1a935a529f",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "500746",
+      "sku": "500746"
+    },
+    {
+      "name": "Святой Олег",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25195&id=445c9876-c57e-4419-a7b9-97de8afa198b",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25195",
+      "sku": "25195"
+    },
+    {
+      "name": "Крест-камень  КЕЧАРИС",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25037&id=38cbf589-b028-4e7e-9f1c-912cb709adcd",
+      "nominal": "1000 драмов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25037",
+      "sku": "25037"
+    },
+    {
+      "name": "Святой Андрей",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25374&id=d90b892b-43ce-4435-a09e-bdee25dc7485",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25374",
+      "sku": "25374"
+    },
+    {
+      "name": "Святая Татьяна",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25377&id=ea630542-6a36-44f7-bf3f-385924de32fd",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25377",
+      "sku": "25377"
+    },
+    {
+      "name": "Рождество (звезда)",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26093&id=d7f723c1-3a99-4f84-b369-edcb4ae1aef5",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26093",
+      "sku": "26093"
+    },
+    {
+      "name": "Акрополь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24830&id=c6b32a12-34ac-4d68-8989-9b1970cde50c",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24830",
+      "sku": "24830"
+    },
+    {
+      "name": "Стрекоза",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25707&id=768fd8f3-8977-4771-99c2-f28d423e9a00",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25707",
+      "sku": "25707"
+    },
+    {
+      "name": "Тайна моря-защита мор.жизни",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26209&id=df6dc56e-1c75-4f55-bcef-395a89c96c0d",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26209",
+      "sku": "26209"
+    },
+    {
+      "name": "Санкт-Петербург",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25485&id=71fa64e1-05d2-4010-a216-f1d4c20880c7",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25485",
+      "sku": "25485"
+    },
+    {
+      "name": "Крест-камень  НОРАВАНК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25236&id=126af893-6daa-4c9e-8fa9-2a5f2d3e33d9",
+      "nominal": "1000 драмов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25236",
+      "sku": "25236"
+    },
+    {
+      "name": "Святой Михаил",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25375&id=c8cb7324-e53e-4f79-9656-6615cb54a46f",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25375",
+      "sku": "25375"
+    },
+    {
+      "name": "Святая Екатерина",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500740&id=cbf8fe9b-4f40-4157-b1b5-fb5bc697903c",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "500740",
+      "sku": "500740"
+    },
+    {
+      "name": "Святой Владимир",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25196&id=c444829d-c0f7-4747-b8ee-ae24e2d8eced",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25196",
+      "sku": "25196"
+    },
+    {
+      "name": "Альгамбра",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25109&id=b594e699-ac3d-4141-956b-1d7cda7bd448",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25109",
+      "sku": "25109"
+    },
+    {
+      "name": "Дед Мороз",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26074&id=3b7b9488-0042-424e-b0d8-53b46ddc6730",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26074",
+      "sku": "26074"
+    },
+    {
+      "name": "Год змеи",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26054&id=7af2e21e-375c-496d-8044-36262b9f414a",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26054",
+      "sku": "26054"
+    },
+    {
+      "name": "С Новым годом",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25553&id=062d7c65-1f69-4948-a36a-714866ee9b92",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25553",
+      "sku": "25553"
+    },
+    {
+      "name": "Медвежонок",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25127&id=0b4ba35e-8abd-4081-9a82-b58c83282e5a",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25127",
+      "sku": "25127"
+    },
+    {
+      "name": "Святая Евгения",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25926&id=1dd66890-d1bb-4fc3-b90b-b6f695395c93",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25926",
+      "sku": "25926"
+    },
+    {
+      "name": "Летучая лисица",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24646&id=6253f74d-6f44-471e-b64d-745be82cb5a8",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24646",
+      "sku": "24646"
+    },
+    {
+      "name": "Жостовская роспись",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25951&id=1de769a9-fd5d-4449-b9c7-3af4394c9c1f",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25951",
+      "sku": "25951"
+    },
+    {
+      "name": "Рыба-клоун",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25498&id=3f66c7c7-3cf2-41a7-aa34-2178c143c197",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25498",
+      "sku": "25498"
+    },
+    {
+      "name": "Крест-камень  ГОШАВАНК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25235&id=af0723d1-6552-44a5-a3db-811eb3208201",
+      "nominal": "1000 драмов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25235",
+      "sku": "25235"
+    },
+    {
+      "name": "Австралийский опоссум",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24673&id=2aaf5147-4cd8-4f05-b6ce-ef15681157d4",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24673",
+      "sku": "24673"
+    },
+    {
+      "name": "Рождество",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26523&id=e8f57931-f81b-4062-84bf-324ff523363c",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26523",
+      "sku": "26523"
+    },
+    {
+      "name": "Святая Екатерина",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25193&id=34b9e6ba-9981-4bf3-adfc-528b73d7d327",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25193",
+      "sku": "25193"
+    },
+    {
+      "name": "Святой Александр",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25609&id=fd0bf4d8-bd58-42fb-b50e-754b6d3489e4",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25609",
+      "sku": "25609"
+    },
+    {
+      "name": "Хохломская роспись",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25459&id=1697dc6b-c43d-4f5f-a167-31de5f6b92b4",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25459",
+      "sku": "25459"
+    },
+    {
+      "name": "Святая Анастасия",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30022&id=d5d76bfb-9e49-48f2-8c52-d18a75ec5238",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "30022",
+      "sku": "30022"
+    },
+    {
+      "name": "Слон",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24996&id=d0122304-dc47-4bd5-b5b9-76deacb76f94",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24996",
+      "sku": "24996"
+    },
+    {
+      "name": "Святой Илья",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25927&id=0bcde76f-ee79-4390-898f-2acd7fbb8bf2",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25927",
+      "sku": "25927"
+    },
+    {
+      "name": "Ангкор - Ват",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24828&id=3905be65-61a2-4901-ace8-f981f9c131b3",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24828",
+      "sku": "24828"
+    },
+    {
+      "name": "Монгольская сайга",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25457&id=dcfd7c9f-aa80-4027-8486-417d06aaa5b0",
+      "nominal": "500 тугриков",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25457",
+      "sku": "25457"
+    },
+    {
+      "name": "Титаник",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25481&id=ba9c98a4-1ed5-4d34-90a2-898ec7a7468e",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25481",
+      "sku": "25481"
+    },
+    {
+      "name": "Святой Игорь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25611&id=574eacbc-248d-49c3-adf5-4122e0166560",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25611",
+      "sku": "25611"
+    },
+    {
+      "name": "Казань",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25486&id=05bc9e19-0d64-4848-80ff-70087eef3e07",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25486",
+      "sku": "25486"
+    },
+    {
+      "name": "НОВОСИБИРСК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26722&id=ed1f6bf6-1764-4c93-b270-f57c469dc1cc",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "26722",
+      "sku": "26722"
+    },
+    {
+      "name": "Крест-камень ГНДЕВАНК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25234&id=82f55730-8b39-4ca4-a6e8-6161ce9c82bc",
+      "nominal": "1000 драмов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25234",
+      "sku": "25234"
+    },
+    {
+      "name": "Гжельская роспись",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25705&id=dfc96203-4d87-4bf8-8aa2-88d7dd869223",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25705",
+      "sku": "25705"
+    },
+    {
+      "name": "Свадьба",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24776&id=d77161c0-70e7-4ea0-8779-a2f3c49f387f",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24776",
+      "sku": "24776"
+    },
+    {
+      "name": "Стоунхенж",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=24827&id=b70bce49-aa59-447b-9a55-0e9cb69d0b3a",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "24827",
+      "sku": "24827"
+    },
+    {
+      "name": "Синий Кольцевидный Осьминог",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25942&id=7166f9ac-8a17-4330-b0d6-37d39c1a9cb5",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 7500.0,
+      "article": "25942",
+      "sku": "25942"
+    },
+    {
+      "name": "Святая Татьяна",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500743&id=c6b49a8b-4285-4a5e-898c-06cf57e2658d",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 7114.0,
+      "article": "500743",
+      "sku": "500743"
+    },
+    {
+      "name": "Творчество ЦОЯ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0486&id=0b3527ce-c5c5-4e38-852b-64216026b6eb",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 6785.0,
+      "article": "5111-0486",
+      "sku": "5111-0486"
+    },
+    {
+      "name": "КУБАНЬ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500715&id=d0e3636f-a458-4c26-83bf-135b1d66e12c",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 21.65,
+      "price1": 6495.0,
+      "article": "500715",
+      "sku": "500715"
+    },
+    {
+      "name": "Золотая большая пектораль",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500694&id=a612b772-2769-494a-9f72-a87b23ee1302",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 6113.0,
+      "article": "500694",
+      "sku": "500694"
+    },
+    {
+      "name": "Часовня мост",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25444&id=9c47a90b-cd14-4c2d-b91b-e6632c1c5d4b",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25444",
+      "sku": "25444"
+    },
+    {
+      "name": "Год дракона",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25556&id=85c996fa-2854-4006-a806-bf29dc0a9564",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25556",
+      "sku": "25556"
+    },
+    {
+      "name": "Полосатый шакал",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25811&id=19a457c8-ac46-450c-ae8f-82abf573b6fb",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25811",
+      "sku": "25811"
+    },
+    {
+      "name": "Ицукусима",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25450&id=c50b91af-c0ed-4704-93aa-ca6265c567fc",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25450",
+      "sku": "25450"
+    },
+    {
+      "name": "Верность, Любовь, Семья",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26880&id=77a698c8-7155-4193-8ce0-e22ed3cf8da9",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "26880",
+      "sku": "26880"
+    },
+    {
+      "name": "Америго Веспуччи",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25775&id=b9c79cf0-e41b-457a-bee8-74a1de1c73f4",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25775",
+      "sku": "25775"
+    },
+    {
+      "name": "Серебряный слиток \"Леопард\"",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500727&id=d1f63ee7-b020-46e2-8283-4638d18529e1",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "500727",
+      "sku": "500727"
+    },
+    {
+      "name": "Касатка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25692&id=29f575e9-b07b-4e86-9c90-15c0fa1e97bb",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25692",
+      "sku": "25692"
+    },
+    {
+      "name": "Сирень",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26621&id=65e4ff61-2d2f-4dbc-8442-cbfd8aa9dd97",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "26621",
+      "sku": "26621"
+    },
+    {
+      "name": "Мой прекрасный медведь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25937&id=5db76549-25de-46ed-b1fd-52fc54b762eb",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25937",
+      "sku": "25937"
+    },
+    {
+      "name": "Дмитрий Менделеев",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25886&id=d7d402a7-7ed2-489e-97f0-70a8d0c9bd99",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25886",
+      "sku": "25886"
+    },
+    {
+      "name": "С пополнением в семье",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=27001&id=0f147f65-bd88-424e-a740-b6f6dd70d87c",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "27001",
+      "sku": "27001"
+    },
+    {
+      "name": "Всепобеждающая любовь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25777&id=abb1be3a-7e3b-4680-899d-d343241d73e2",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25777",
+      "sku": "25777"
+    },
+    {
+      "name": "Носорог",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26210&id=b0ca347a-b05f-4f7e-94fe-1e44c2ade903",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "26210",
+      "sku": "26210"
+    },
+    {
+      "name": "Яйцо-сосновая шишка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25659&id=c9faf35e-9328-45e5-a274-4308862766d0",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25659",
+      "sku": "25659"
+    },
+    {
+      "name": "Весенний букет",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=27010&id=c8372373-de70-42a6-a33e-83adc681cc00",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "27010",
+      "sku": "27010"
+    },
+    {
+      "name": "Рождество",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25600&id=014b8f81-ee08-4e24-a218-75996bc67c5b",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25600",
+      "sku": "25600"
+    },
+    {
+      "name": "Птицы Андорры-Глухарь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25806&id=535db3b1-08da-4711-bbc7-fc7d7178f054",
+      "nominal": "5 песет",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25806",
+      "sku": "25806"
+    },
+    {
+      "name": "Рамадан Карим",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25925&id=a437be88-f192-4a65-bc23-96137a91849a",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25925",
+      "sku": "25925"
+    },
+    {
+      "name": "Год лошади",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26600&id=2a4e0ff0-1be1-48f0-ae6e-3a8b70600543",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "26600",
+      "sku": "26600"
+    },
+    {
+      "name": "Яйцо красное",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25657&id=a8dc0828-871c-4aec-9632-5c09965311ad",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25657",
+      "sku": "25657"
+    },
+    {
+      "name": "Маяк в Санкт-Петербурге",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25819&id=97af4a34-4fc3-4e53-959b-85cd3c6937cf",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25819",
+      "sku": "25819"
+    },
+    {
+      "name": "Мяч для гольфа PGA TOUR",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30010&id=338ebc6b-78d8-43da-9f00-2bd30038536b",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "30010",
+      "sku": "30010"
+    },
+    {
+      "name": "Священный Коран",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40042&id=a31a9c81-2c0d-4c09-b8e9-5039067b322e",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "40042",
+      "sku": "40042"
+    },
+    {
+      "name": "Маяк Линдау",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25818&id=187c8f44-cfa3-47fd-8548-b927f5d81fae",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25818",
+      "sku": "25818"
+    },
+    {
+      "name": "Год змеи",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26052&id=56cbd572-bde5-4c2f-8843-b2f9192a1937",
+      "nominal": "1000 франков",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "26052",
+      "sku": "26052"
+    },
+    {
+      "name": "Канадская национальная башня",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25445&id=6e032d98-48f9-424b-995c-867437f4d004",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25445",
+      "sku": "25445"
+    },
+    {
+      "name": "Яйцо фиолетовое",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25658&id=29e196e9-5883-4715-a0a0-faea528b6e58",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25658",
+      "sku": "25658"
+    },
+    {
+      "name": "Купальница Европейская",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25865-14&id=dd72b52a-70bf-4327-befe-e13c47b30521",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25865-14",
+      "sku": "25865-14"
+    },
+    {
+      "name": "Серебряный слиток \"Крокодил\"",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500711&id=6384a691-56c3-4320-bd84-8147624acd1d",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "500711",
+      "sku": "500711"
+    },
+    {
+      "name": "Птицы Андорры-Робин",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25804&id=c43e6b56-bb7c-4cc5-8b56-144feb19ca46",
+      "nominal": "5 песет",
+      "metal": "Серебро",
+      "weight_g": 20.0,
+      "price1": 6000.0,
+      "article": "25804",
+      "sku": "25804"
+    },
+    {
+      "name": "Серебряная ложечка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500954&id=6568c041-1623-4a48-a879-dbfda4012b09",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 9.5,
+      "price1": 5728.0,
+      "article": "500954",
+      "sku": "500954"
+    },
+    {
+      "name": "Золотой Грифон",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500697&id=d573eaa6-e7e2-426a-81b5-ca39d7c8339e",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 5497.0,
+      "article": "500697",
+      "sku": "500697"
+    },
+    {
+      "name": "ЗЫНДЖЫРЛЫ МЕДРЕСЕ Бахчисарай",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500699&id=29379d28-d8cc-4d82-8e77-e502f7d580db",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 5250.0,
+      "article": "500699",
+      "sku": "500699"
+    },
+    {
+      "name": "Мечеть Кебир Джами",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500705&id=840474b7-0ad1-4df8-bf89-8f2720ead5b9",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 5250.0,
+      "article": "500705",
+      "sku": "500705"
+    },
+    {
+      "name": "ХАН ДЖАМИ Евпатория",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500790&id=d14084db-591f-478d-89ec-efc3bda7fa0d",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 5250.0,
+      "article": "500790",
+      "sku": "500790"
+    },
+    {
+      "name": "Мечеть. Буюк Хан Джами.Бахчисарай",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500700&id=4f9800d8-4072-4891-beaf-eb3509c272b5",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 5250.0,
+      "article": "500700",
+      "sku": "500700"
+    },
+    {
+      "name": "Узбек Хан Джамиси. Старый Крым",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500714&id=2e959d95-cc09-41b1-8ee3-257c37af2f83",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 5250.0,
+      "article": "500714",
+      "sku": "500714"
+    },
+    {
+      "name": "Талисман удачи-Золотая рыбка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30018&id=8206d1c6-848f-493f-8c37-bca9d39522ca",
+      "nominal": "1000 франков",
+      "metal": "Биметалл (серебро с золотом)",
+      "weight_g": 33.65,
+      "price1": 5048.0,
+      "article": "30018",
+      "sku": "30018"
+    },
+    {
+      "name": "Новосибирск",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=45065&id=38eefae4-7579-47b6-af83-4ca7b0f88b6e",
+      "nominal": "50000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 33.65,
+      "price1": 5048.0,
+      "article": "45065",
+      "sku": "45065"
+    },
+    {
+      "name": "Год Козы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500684&id=3530c4ae-590e-4b84-9e62-377bb091f047",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 16.81,
+      "price1": 5043.0,
+      "article": "500684",
+      "sku": "500684"
+    },
+    {
+      "name": "Каюм Насыри",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0188&id=8bb06902-570b-4aa3-95c2-bd0097b3fe7a",
+      "nominal": "2 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4881.0,
+      "article": "5110-0188",
+      "sku": "5110-0188"
+    },
+    {
+      "name": "Год Козы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500687&id=d29cb3d6-ce91-4cc0-adca-a146fb8fa596",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 15.87,
+      "price1": 4761.0,
+      "article": "500687",
+      "sku": "500687"
+    },
+    {
+      "name": "Год Собаки",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500689&id=dc8b3d5e-d9f4-44fe-80c5-1d73131ffe8b",
+      "nominal": "10 долларов",
+      "metal": "Серебро",
+      "weight_g": 15.87,
+      "price1": 4761.0,
+      "article": "500689",
+      "sku": "500689"
+    },
+    {
+      "name": "Святая Ольга",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25612&id=a8609440-00db-446e-945c-dbc76bc5e7c8",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 25.0,
+      "price1": 4710.0,
+      "article": "25612",
+      "sku": "25612"
+    },
+    {
+      "name": "На рождение ребенка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40065&id=a407ad49-027a-465c-8647-73ba59d9dd2d",
+      "nominal": "50 центов",
+      "metal": "Серебро",
+      "weight_g": 15.59,
+      "price1": 4677.0,
+      "article": "40065",
+      "sku": "40065"
+    },
+    {
+      "name": "СЕТКОНОСКА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0173&id=c10db5d3-914a-488c-8ba4-8102313cf190",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0173",
+      "sku": "5110-0173"
+    },
+    {
+      "name": "А.Ф.Можайский",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0189&id=639bae60-87e6-4564-b739-1a73a1d3f6bf",
+      "nominal": "2 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0189",
+      "sku": "5110-0189"
+    },
+    {
+      "name": "Искренняя любовь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25243&id=1edac128-a4c3-40d4-9a7e-36c21f893889",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25243",
+      "sku": "25243"
+    },
+    {
+      "name": "Козерог",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500708&id=e00f4bab-88d6-4bf4-a0ef-5715be75ba4d",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500708",
+      "sku": "500708"
+    },
+    {
+      "name": "С рождением Девочки",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26331&id=585453cf-e698-44c2-9482-a6ea07198778",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "26331",
+      "sku": "26331"
+    },
+    {
+      "name": "Рождение ребенка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40020&id=19015006-cf85-4571-9dac-805594eeca9b",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "40020",
+      "sku": "40020"
+    },
+    {
+      "name": "Перевязка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0186&id=221d2fb1-1b89-4d4d-b715-02133adef08e",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0186",
+      "sku": "5110-0186"
+    },
+    {
+      "name": "Борис Сафонов",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0182&id=1041a498-61f6-44ac-920a-48d6ab826e82",
+      "nominal": "2 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0182",
+      "sku": "5110-0182"
+    },
+    {
+      "name": "ГОВОРОВ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0190&id=4e1c8569-4beb-4996-aff2-209bca6492e9",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0190",
+      "sku": "5110-0190"
+    },
+    {
+      "name": "Бесконечный рай III",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30005&id=c70f5843-8fa3-4089-acc8-0d03abcaed27",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "30005",
+      "sku": "30005"
+    },
+    {
+      "name": "А.В.Вишневский",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0184&id=7e0917ae-73aa-4277-9678-d07eb394c114",
+      "nominal": "2 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0184",
+      "sku": "5110-0184"
+    },
+    {
+      "name": "Бесконечный рай V",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30008&id=256920a9-88ae-403c-b6c8-5aa3ced06704",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "30008",
+      "sku": "30008"
+    },
+    {
+      "name": "Весы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500678&id=fdbdb057-a145-480f-91c9-0e3402d24546",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500678",
+      "sku": "500678"
+    },
+    {
+      "name": "С рождением Мальчика",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26330&id=264c717a-6761-419e-b499-5ac840504c46",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "26330",
+      "sku": "26330"
+    },
+    {
+      "name": "ДИКУША",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0185&id=6424e7ec-43cc-42fc-acbd-4693b07b941b",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0185",
+      "sku": "5110-0185"
+    },
+    {
+      "name": "Водолей",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500679&id=b29c6f6a-6d7f-41f8-89b6-307d6fbeebb7",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500679",
+      "sku": "500679"
+    },
+    {
+      "name": "Бесконечный рай II",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30009&id=e5b159ae-341d-46a4-a77e-7870c8404f42",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "30009",
+      "sku": "30009"
+    },
+    {
+      "name": "Овен",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500932&id=ba3e0c7a-d35e-463a-98cd-5580b70b8c8a",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500932",
+      "sku": "500932"
+    },
+    {
+      "name": "Материнская любовь",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500724&id=3faf2228-d21f-4cc3-bb7b-d74282412f2d",
+      "nominal": "50 центов",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500724",
+      "sku": "500724"
+    },
+    {
+      "name": "Адам и Ева",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25007&id=030498f3-1bd9-42c9-b22e-14ab41202b99",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25007",
+      "sku": "25007"
+    },
+    {
+      "name": "Гнесина Е.Ф.",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0183&id=f88d9ef5-b31b-433c-a838-b641c54adfb8",
+      "nominal": "2 рубля РФ",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0183",
+      "sku": "5110-0183"
+    },
+    {
+      "name": "Святой Валентин",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40021&id=e86b33e5-330d-4fe0-ba0c-a5dbbe2adbc0",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "40021",
+      "sku": "40021"
+    },
+    {
+      "name": "Год Козы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500682&id=27903860-dbfa-4943-8a6f-75d3df723cf2",
+      "nominal": "50 центов",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500682",
+      "sku": "500682"
+    },
+    {
+      "name": "ЖУЖЕЛИЦА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0187&id=3f0755ba-639e-4a40-bd33-c2149bf2634c",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0187",
+      "sku": "5110-0187"
+    },
+    {
+      "name": "Термо Цыпленок",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500776&id=bf3e8d6d-620f-48dd-92db-35c1011014f2",
+      "nominal": "5 долларов",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500776",
+      "sku": "500776"
+    },
+    {
+      "name": "Коралловая литория",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26243&id=85b0d9bf-6b13-4bde-b9dc-563b5ba9f5db",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "26243",
+      "sku": "26243"
+    },
+    {
+      "name": "Зеленая лягушка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25566&id=629b5754-b0b9-4b47-b628-352e2d299e60",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25566",
+      "sku": "25566"
+    },
+    {
+      "name": "Мексиканский тарантул",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25545&id=6b70f1e4-6cdd-4fd1-ab2d-c413bd0cc4f4",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25545",
+      "sku": "25545"
+    },
+    {
+      "name": "Близнецы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500676&id=2e8d260b-eab3-4d9d-a562-adadee3022c0",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500676",
+      "sku": "500676"
+    },
+    {
+      "name": "ТЕЛОДЕРМА ЛИШАИСТ",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25028&id=bd638d35-4e84-4953-89f6-36843469ba9f",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25028",
+      "sku": "25028"
+    },
+    {
+      "name": "Рыбы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500940&id=9aa1336f-e6ac-4173-9f1a-55fd8691fbd5",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500940",
+      "sku": "500940"
+    },
+    {
+      "name": "Шаляпин",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0178&id=04c074d5-4908-4a4d-835c-85a30a1861d1",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0178",
+      "sku": "5110-0178"
+    },
+    {
+      "name": "Фиолетовая лягушка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25568&id=e6850737-c0ac-4ac9-86eb-a1603fb63c89",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25568",
+      "sku": "25568"
+    },
+    {
+      "name": "Бабочка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=26253&id=20c44813-da8c-4a0a-9fa2-9d465d8aeeef",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "26253",
+      "sku": "26253"
+    },
+    {
+      "name": "225 лет со дня рождения А.С. Пушкина.",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500671&id=a0860752-afb1-483d-8d5c-8b89dce163ff",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500671",
+      "sku": "500671"
+    },
+    {
+      "name": "Оранжевая лягушка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=25567&id=ac03fa25-14a5-481f-a63f-c73375baba0c",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "25567",
+      "sku": "25567"
+    },
+    {
+      "name": "Телец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500771&id=b4079738-60ca-4979-9fef-ab6163c5cfb9",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "500771",
+      "sku": "500771"
+    },
+    {
+      "name": "Бесконечный рай I",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=30007&id=deafd093-ee90-455b-9f75-b21018d3604b",
+      "nominal": "2 доллара",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "30007",
+      "sku": "30007"
+    },
+    {
+      "name": "Островский",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0179&id=afd6d7fd-53f5-4055-af68-0dc76f863789",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0179",
+      "sku": "5110-0179"
+    },
+    {
+      "name": "Рахманинов",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5110-0180&id=71157220-0770-4544-a376-e441531ca6e3",
+      "nominal": "2 рубля",
+      "metal": "Серебро",
+      "weight_g": 15.55,
+      "price1": 4665.0,
+      "article": "5110-0180",
+      "sku": "5110-0180"
+    },
+    {
+      "name": "С днем рождения Мальчик",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=22836&id=6ee94ffe-7d73-4428-91e5-4c5f8e6f9c1b",
+      "nominal": "250 тугриков",
+      "metal": "Серебро",
+      "weight_g": 15.5,
+      "price1": 4650.0,
+      "article": "22836",
+      "sku": "22836"
+    },
+    {
+      "name": "АРТЕК",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500674&id=76c635b1-28fc-4e67-995d-d722911b5be5",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 15.0,
+      "price1": 4500.0,
+      "article": "500674",
+      "sku": "500674"
+    },
+    {
+      "name": "Ласточкино гнездо",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500718&id=f94d5a4e-dc68-42d5-8efe-15259045f40c",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 15.0,
+      "price1": 4500.0,
+      "article": "500718",
+      "sku": "500718"
+    },
+    {
+      "name": "Пектораль",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500695&id=7a76fdb7-2be1-45ca-b586-a9ad60ba7e99",
+      "nominal": "500 франков",
+      "metal": "Серебро",
+      "weight_g": 10.0,
+      "price1": 4313.0,
+      "article": "500695",
+      "sku": "500695"
+    },
+    {
+      "name": "Святой Апостол Андрей Первозванный",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500745&id=eba34c88-db89-420a-be4f-4e9057c851c1",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 17.5,
+      "price1": 4288.0,
+      "article": "500745",
+      "sku": "500745"
+    },
+    {
+      "name": "Настурция",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40028&id=965071f8-86c9-496b-a099-4e6eb7f329e4",
+      "nominal": "10 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 14.14,
+      "price1": 4242.0,
+      "article": "40028",
+      "sku": "40028"
+    },
+    {
+      "name": "Гвоздика",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40025&id=c567a109-b001-47f5-887c-75ab99fcd849",
+      "nominal": "10 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 14.14,
+      "price1": 4242.0,
+      "article": "40025",
+      "sku": "40025"
+    },
+    {
+      "name": "С днем рождения Девочка",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=22837&id=ebb77877-234f-455e-809d-2863f2d37b53",
+      "nominal": "250 тугриков",
+      "metal": "Серебро",
+      "weight_g": 15.5,
+      "price1": 4020.0,
+      "article": "22837",
+      "sku": "22837"
+    },
+    {
+      "name": "Крокодил серебряный слиток",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500710&id=c1d79e6e-155f-4c2a-a7ef-2a06b111f211",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 10.0,
+      "price1": 3000.0,
+      "article": "500710",
+      "sku": "500710"
+    },
+    {
+      "name": "Магический календарь счастья \"Октябрь\"",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500721&id=7c3914da-9f3e-461f-a8cc-8d5351807704",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 10.0,
+      "price1": 3000.0,
+      "article": "500721",
+      "sku": "500721"
+    },
+    {
+      "name": "Серебряный слиток \"СКАТ\"",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500728&id=6331c8c8-341d-49b8-89cf-b745d5f41c26",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 10.0,
+      "price1": 3000.0,
+      "article": "500728",
+      "sku": "500728"
+    },
+    {
+      "name": "Магический календарь счастья \"Февраль\"",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500722&id=8abeebce-9a12-4936-a0ae-d5d4e00316e5",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 10.0,
+      "price1": 3000.0,
+      "article": "500722",
+      "sku": "500722"
+    },
+    {
+      "name": "Серебряный слиток \"Зебра\"",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500726&id=ce28e40c-e7b7-4ba7-8ad8-e5340b1e83f2",
+      "nominal": "1 доллар",
+      "metal": "Серебро",
+      "weight_g": 10.0,
+      "price1": 3000.0,
+      "article": "500726",
+      "sku": "500726"
+    },
+    {
+      "name": "Телец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500770&id=3cb584e9-0c89-4e87-999a-458f8dd553ad",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2761.0,
+      "article": "500770",
+      "sku": "500770"
+    },
+    {
+      "name": "Рак",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500732&id=fcb3fecd-4ab2-44ec-8585-975aff37c552",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2761.0,
+      "article": "500732",
+      "sku": "500732"
+    },
+    {
+      "name": "Лев",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500719&id=bd481fb8-0ae6-4992-8581-3a2a55a8657c",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2761.0,
+      "article": "500719",
+      "sku": "500719"
+    },
+    {
+      "name": "Близнецы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500675&id=62eefee0-e127-404d-8930-af8c0beb016d",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2761.0,
+      "article": "500675",
+      "sku": "500675"
+    },
+    {
+      "name": "Весы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500677&id=f4595479-3740-48af-a084-9ae72228fc9b",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2745.0,
+      "article": "500677",
+      "sku": "500677"
+    },
+    {
+      "name": "Дева",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500690&id=36dd42e1-10a0-4462-9dca-6537bfa6c738",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2745.0,
+      "article": "500690",
+      "sku": "500690"
+    },
+    {
+      "name": "Скорпион",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500754&id=52a62281-b170-46c1-b3c5-f310ea5f5be8",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2745.0,
+      "article": "500754",
+      "sku": "500754"
+    },
+    {
+      "name": "Стрелец",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500766&id=c563d413-695e-4838-84a5-62d8472cae50",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2745.0,
+      "article": "500766",
+      "sku": "500766"
+    },
+    {
+      "name": "Водолей",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500680&id=8817d8ff-25cf-4560-8b94-28275f36ff02",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2734.0,
+      "article": "500680",
+      "sku": "500680"
+    },
+    {
+      "name": "Козерог",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500707&id=48310f1a-5d2f-4b1d-8b53-b3f43337a687",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2734.0,
+      "article": "500707",
+      "sku": "500707"
+    },
+    {
+      "name": "Рыбы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500739&id=7a880cc3-c284-4bb6-b6df-3e5c0f36e683",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2734.0,
+      "article": "500739",
+      "sku": "500739"
+    },
+    {
+      "name": "Овен",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=500731&id=ffd31054-1450-4f7b-b71e-00c4daa71693",
+      "nominal": "100 франков",
+      "metal": "Серебро",
+      "weight_g": 2.2,
+      "price1": 2734.0,
+      "article": "500731",
+      "sku": "500731"
+    },
+    {
+      "name": "Крокус",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=40026&id=b779bb68-4de8-4f1c-86e0-e2ff85ce7b4e",
+      "nominal": "10 белорусских рублей",
+      "metal": "Серебро",
+      "weight_g": 14.14,
+      "price1": 2461.0,
+      "article": "40026",
+      "sku": "40026"
+    },
+    {
+      "name": "Трудовые резервы",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0139&id=b6e161c2-77a8-443c-9a44-0d88a6c068d2",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2353.0,
+      "article": "5109-0139",
+      "sku": "5109-0139"
+    },
+    {
+      "name": "РЭБ КРАСУХА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0135&id=f848f2df-0067-4eb0-9006-57c2b69592ea",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2334.0,
+      "article": "5109-0135",
+      "sku": "5109-0135"
+    },
+    {
+      "name": "Локомотив",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0134&id=023c05b8-d87e-4ddc-979f-408d40981dc5",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2334.0,
+      "article": "5109-0134",
+      "sku": "5109-0134"
+    },
+    {
+      "name": "РЭБ ИНФАУНА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0137&id=6459b478-38c1-47c5-984d-d165b94801e2",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2334.0,
+      "article": "5109-0137",
+      "sku": "5109-0137"
+    },
+    {
+      "name": "Динамо",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0133&id=ab09a5f4-0925-4c61-98b4-3cbdc9671167",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2334.0,
+      "article": "5109-0133",
+      "sku": "5109-0133"
+    },
+    {
+      "name": "РЭБ ЭМБЛЕМА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0136&id=cb65cc61-1ac2-417a-8123-6b4ef4af8c63",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2334.0,
+      "article": "5109-0136",
+      "sku": "5109-0136"
+    },
+    {
+      "name": "ЦСКА",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5109-0132&id=247a2db1-dbcb-4737-b189-0f59491ac965",
+      "nominal": "1 рубль",
+      "metal": "Серебро",
+      "weight_g": 7.78,
+      "price1": 2156.0,
+      "article": "5109-0132",
+      "sku": "5109-0132"
+    },
+    {
+      "name": "Музей Востока",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=5111-0391&id=aa7996c4-9320-4393-8226-6ffc8a671164",
+      "nominal": "3 рубля",
+      "metal": "Серебро",
+      "weight_g": 31.1,
+      "price1": 1950.0,
+      "article": "5111-0391",
+      "sku": "5111-0391"
+    },
+    {
+      "name": "Удача",
+      "url": "https://www.vtb.ru/personal/vklady-i-scheta/monety-iz-dragotsennyih-metallov/?article=77170212-25&id=40e975c6-55f1-4ec4-8ddb-d97a89768f0d",
+      "nominal": "50000 лаосских кип",
+      "metal": "Серебро",
+      "weight_g": 6.0,
+      "price1": 1800.0,
+      "article": "77170212-25",
+      "sku": "77170212-25"
+    }
+  ]
+}
