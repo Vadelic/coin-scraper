@@ -4,7 +4,11 @@
 Источник: https://aurumex.ru/catalog
 
 Данные отдаются через Nuxt dehydrated payload (JSON-массив с индексными
-ссылками). Берём ``/catalog/_payload.json`` и извлекаем список монет.
+ссылками). Скрейпим payload для страниц каталога:
+- ``/catalog/_payload.json`` (страница 1)
+- ``/catalog/page/<N>/_payload.json`` (страницы 2+)
+
+и объединяем монеты (по `url`), пока не перестанут появляться новые.
 """
 from __future__ import annotations
 
@@ -25,6 +29,7 @@ from urllib.request import Request, urlopen
 PUBLIC_URL = "https://aurumex.ru"
 CATALOG_PATH = "/catalog"
 PAYLOAD_URL = f"{PUBLIC_URL}{CATALOG_PATH}/_payload.json"
+PAYLOAD_PAGE_URL_TPL = f"{PUBLIC_URL}{CATALOG_PATH}/page/{{page}}/_payload.json"
 DEFAULT_OUTPUT = Path(__file__).parent / "coins_aurumex_catalog.json"
 DEFAULT_TIMEOUT_MS = 30_000
 DEFAULT_RETRIES = 3
@@ -221,7 +226,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--payload-url",
         default=PAYLOAD_URL,
-        help=f"URL Nuxt payload (по умолчанию {PAYLOAD_URL})",
+        help=f"URL Nuxt payload для страницы 1 (по умолчанию {PAYLOAD_URL})",
+    )
+    p.add_argument("--start-page", type=int, default=1, help="С какой страницы начать (default: 1)")
+    p.add_argument(
+        "--max-pages",
+        type=int,
+        default=5,
+        help="Максимум страниц для обхода (default: 5). Реальная остановка — раньше, если новые монеты не добавляются.",
     )
     p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_MS, help="Таймаут HTTP, мс")
     p.add_argument("--retries", type=int, default=DEFAULT_RETRIES, help="Повторы запроса")
@@ -247,11 +259,53 @@ def main() -> int:
     timeout_s = max(1.0, args.timeout / 1000.0)
     retries = max(1, args.retries)
 
-    log.info("Загрузка payload: %s", args.payload_url)
+    start_page = max(1, args.start_page)
+    max_pages = max(start_page, args.max_pages)
+
+    log.info("Загрузка payload для страниц aurumex catalog")
+    log.info("Page 1 payload: %s", args.payload_url)
 
     try:
-        store = fetch_json(args.payload_url, timeout_s, retries, max(0.0, args.delay), args.insecure)
-        coins, declared_total, items_in_payload = extract_coins(store)
+        all_coins_by_url: dict[str, Coin] = {}
+        declared_total: int | None = None
+        payload_item_count_hint_sum: int = 0
+        pages_scraped: int = 0
+
+        for page in range(start_page, max_pages + 1):
+            if page == 1:
+                url = args.payload_url
+            else:
+                url = PAYLOAD_PAGE_URL_TPL.format(page=page)
+
+            log.info("Загрузка payload: %s", url)
+            store = fetch_json(url, timeout_s, retries, max(0.0, args.delay), args.insecure)
+            coins, declared_total_page, items_in_payload = extract_coins(store)
+
+            if declared_total is None and declared_total_page is not None:
+                declared_total = declared_total_page
+
+            pages_scraped += 1
+            before = len(all_coins_by_url)
+            for coin in coins:
+                all_coins_by_url.setdefault(coin.url, coin)
+
+            after = len(all_coins_by_url)
+            payload_item_count_hint_sum += items_in_payload or 0
+
+            log.info(
+                "Page %s: монет в payload=%s, добавлено=%s, всего=%s",
+                page,
+                len(coins),
+                after - before,
+                after,
+            )
+
+            # Если на следующей странице монеты не добавляются — вероятно, дальше данных нет.
+            if after == before and after > 0:
+                log.info("Остановка: новые монеты на странице %s не добавились.", page)
+                break
+
+        coins = list(all_coins_by_url.values())
     except Exception as exc:
         log.error("%s", exc)
         return 2
@@ -259,18 +313,19 @@ def main() -> int:
     payload = {
         "scraped_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source_catalog": urljoin(PUBLIC_URL, CATALOG_PATH),
-        "payload_url": args.payload_url,
+        "payload_url_page1": args.payload_url,
+        "pages_scraped": pages_scraped,
+        "payload_url_page_template": PAYLOAD_PAGE_URL_TPL,
         "total_coins": len(coins),
         "declared_catalog_total": declared_total,
-        "payload_item_count_hint": items_in_payload,
+        "payload_item_count_hint_sum": payload_item_count_hint_sum,
         "coins": [coin.to_dict() for coin in coins],
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     log.info(
-        "Сохранено монет: %s (в payload: %s, объявлено в каталоге: %s). Файл: %s",
+        "Сохранено монет: %s (объявлено в каталоге: %s). Файл: %s",
         len(coins),
-        items_in_payload,
         declared_total,
         args.output,
     )
