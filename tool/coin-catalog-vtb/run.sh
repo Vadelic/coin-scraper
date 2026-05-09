@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-python3 scrape_vtb_coins.py
+python3 scrape_vtb_coins.py --insecure-ssl

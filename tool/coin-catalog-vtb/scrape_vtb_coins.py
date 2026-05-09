@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
-"""Скрейпер каталога монет ВТБ через BFF API.
+"""Скрейпер каталога монет ВТБ через BFF API (только стандартная библиотека).
 
 POST https://www.vtb.ru/api/bff/api/v1/coin/list?page=N с телом {"filters":[]}.
-В JSON: вес, металл, артикул (article), название, ссылка на витрину,
-номинал и цена (price1).
+
+Логика: сначала POST page=1 (короткая серия повторов), при провале —
+GET витрины для cookies и повтор BFF (--skip-vitrine отключает прогрев).
+
+Если блокировка антибота или некорректный ответ — scrape_vtb_coins_playwright.py.
 
 Запуск: python3 scrape_vtb_coins.py [options]
 Результат: coins_vtb_catalog.json (или путь из --output).
-
-Скрейпер работает через Playwright (без дополнительных HTTP-библиотек).
 """
 from __future__ import annotations
 
 import argparse
-import asyncio
 import json
 import logging
+import ssl
 import sys
+import time
 from datetime import datetime
+from http.cookiejar import CookieJar
 from pathlib import Path
 from typing import Any
-
-try:
-    from playwright.async_api import Error as PlaywrightError, async_playwright
-except ModuleNotFoundError:
-    PlaywrightError = Exception
-    async_playwright = None
+from urllib.error import HTTPError, URLError
+from urllib.request import HTTPCookieProcessor, HTTPSHandler, Request, build_opener
 
 # ============================================================================
 # Constants
@@ -38,16 +37,17 @@ COIN_CATALOG_URL = (
 )
 
 DEFAULT_OUTPUT = Path(__file__).parent / "coins_vtb_catalog.json"
-DEFAULT_TIMEOUT = 30.0
+DEFAULT_TIMEOUT = 45.0
+DEFAULT_VITRINE_TIMEOUT = 18.0
 DEFAULT_RETRIES = 3
 DEFAULT_PAGE_DELAY = 0.35
-DEFAULT_TIMEOUT_MS = 45_000
 
-DEFAULT_HEADERS = {
+DEFAULT_HEADERS_JSON = {
     "Content-Type": "application/json",
     "Accept": "application/json",
     "Origin": BASE_SITE,
-    "Referer": f"{BASE_SITE}/",
+    # Как после page.goto(COIN_CATALOG_URL) в Playwright — fetch с той же витрины.
+    "Referer": COIN_CATALOG_URL,
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -55,30 +55,6 @@ DEFAULT_HEADERS = {
 }
 
 log = logging.getLogger("vtb_scraper")
-
-_FETCH_JS = """
-async (args) => {
-    const r = await fetch(args.url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify(args.body),
-        credentials: 'include',
-    });
-    const ct = r.headers.get('content-type') || '';
-    if (!r.ok) {
-        const text = await r.text();
-        throw new Error('HTTP ' + r.status + ': ' + text.slice(0, 200));
-    }
-    if (!ct.includes('application/json')) {
-        const text = await r.text();
-        throw new Error('Non-JSON (' + ct + '): ' + text.slice(0, 200));
-    }
-    return await r.json();
-}
-"""
 
 
 # ============================================================================
@@ -184,122 +160,230 @@ def coin_to_output(item: dict) -> dict[str, Any] | None:
 
 
 # ============================================================================
-# Fetch
+# HTTP (stdlib)
 # ============================================================================
 
 
-async def fetch_list_page_playwright(
-    page,
+def _build_opener(*, insecure_ssl: bool = False):
+    jar = CookieJar()
+    cookie_handler = HTTPCookieProcessor(jar)
+    if insecure_ssl:
+        https_handler = HTTPSHandler(context=ssl._create_unverified_context())
+        return build_opener(cookie_handler, https_handler)
+    return build_opener(cookie_handler)
+
+
+def _headers_vitrine_get() -> dict[str, str]:
+    return {
+        "User-Agent": DEFAULT_HEADERS_JSON["User-Agent"],
+        "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,*/*;q=0.8"
+        ),
+        "Referer": f"{BASE_SITE}/",
+    }
+
+
+def _headers_list_post() -> dict[str, str]:
+    h = dict(DEFAULT_HEADERS_JSON)
+    h["Accept-Language"] = "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"
+    h["Sec-Fetch-Site"] = "same-origin"
+    h["Sec-Fetch-Mode"] = "cors"
+    h["Sec-Fetch-Dest"] = "empty"
+    return h
+
+
+def _http_request(
+    opener,
+    *,
+    url: str,
+    method: str,
+    headers: dict[str, str],
+    body: bytes | None,
+    timeout_s: float,
+) -> tuple[int, bytes]:
+    req = Request(url, data=body, headers=headers, method=method)
+    try:
+        with opener.open(req, timeout=timeout_s) as resp:
+            return resp.getcode(), resp.read()
+    except HTTPError as e:
+        return e.code, e.read()
+
+
+def _parse_json_body(code: int, raw: bytes, url: str) -> dict:
+    text = raw.decode("utf-8", errors="replace").strip()
+    if code != 200:
+        snippet = text[:300]
+        raise RuntimeError(f"HTTP {code} для {url}: {snippet!r}")
+    low = text.lstrip().lower()
+    if not low.startswith("{"):
+        snippet = text[:300]
+        raise RuntimeError(f"Не JSON объект от {url}: {snippet!r}")
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        snippet = text[:300]
+        raise RuntimeError(f"JSON ошибка для {url}: {e}; начало: {snippet!r}") from e
+    if not isinstance(data, dict):
+        raise RuntimeError("Ответ list: ожидался объект JSON")
+    return data
+
+
+def fetch_list_page_urllib(
+    opener,
     page_num: int,
     *,
-    timeout_ms: int,
+    timeout_s: float,
     retries: int,
 ) -> dict | None:
-    """Загрузка одной страницы списка из контекста браузера с повторами."""
     url = build_list_url(page_num)
-    payload = build_payload()
+    payload = json.dumps(build_payload(), ensure_ascii=False).encode("utf-8")
     for attempt in range(1, retries + 1):
         try:
-            data = await page.evaluate(
-                _FETCH_JS,
-                {"url": url, "body": payload},
+            code, raw = _http_request(
+                opener,
+                url=url,
+                method="POST",
+                headers=_headers_list_post(),
+                body=payload,
+                timeout_s=timeout_s,
             )
-            return data if isinstance(data, dict) else None
-        except (PlaywrightError, Exception) as e:
+            return _parse_json_body(code, raw, url)
+        except (RuntimeError, URLError, OSError) as e:
             log.warning(
-                "Playwright: страница %s, попытка %s/%s — %s",
+                "HTTP: страница %s, попытка %s/%s — %s",
                 page_num,
                 attempt,
                 retries,
                 e,
             )
             if attempt < retries:
-                await asyncio.sleep(2 ** attempt)
+                time.sleep(2**attempt)
     return None
 
 
-
-async def scrape_vtb_via_playwright(
-    args: argparse.Namespace,
-    seen: set[str],
-    merged: list[dict[str, Any]],
-    max_page_seen: int,
-) -> tuple[int, list[dict[str, Any]]]:
-    """Резервный режим: загрузка через браузерный fetch из контекста vtb.ru."""
-    if async_playwright is None:
-        raise RuntimeError(
-            "Не найдены зависимости для сети: установите 'playwright'. "
-            "Быстро: pip install -r requirements.txt && playwright install chromium"
-        )
-    log.info("Перехожу на загрузку через Playwright")
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(
-            headless=not args.headful,
-            args=["--no-sandbox", "--disable-setuid-sandbox"],
-        )
-        context = await browser.new_context(
-            user_agent=DEFAULT_HEADERS["User-Agent"],
-            locale="ru-RU",
-            viewport={"width": 1280, "height": 800},
-            extra_http_headers={
-                "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
-            },
-        )
-        page = await context.new_page()
+def _warmup_vitrine(opener, args: argparse.Namespace) -> None:
+    """GET витрины с отдельным (коротким) таймаутом — для cookies."""
+    vitrine_t = max(float(args.vitrine_timeout), 1.0)
+    log.info(
+        "Прогрев: GET витрины (таймаут %s с, до %s попыток)",
+        vitrine_t,
+        args.retries,
+    )
+    for v_attempt in range(1, args.retries + 1):
         try:
-            log.info("Открываю %s", COIN_CATALOG_URL)
-            await page.goto(
-                COIN_CATALOG_URL,
-                wait_until="domcontentloaded",
-                timeout=args.playwright_timeout,
+            code, raw = _http_request(
+                opener,
+                url=COIN_CATALOG_URL,
+                method="GET",
+                headers=_headers_vitrine_get(),
+                body=None,
+                timeout_s=vitrine_t,
             )
-            page_num = 1
-            while True:
-                if page_num > 1:
-                    await asyncio.sleep(args.delay)
-                log.info("Playwright: запрос списка page=%s", page_num)
-                body = await fetch_list_page_playwright(
-                    page,
-                    page_num,
-                    timeout_ms=args.playwright_timeout,
-                    retries=args.retries,
-                )
-                if not body:
-                    break
-                rows, max_page = parse_list_response(body)
-                max_page_seen = max(max_page_seen, max_page)
-                for row in rows:
-                    flat = coin_to_output(row)
-                    if flat is None:
-                        continue
-                    key = dedupe_key(row, flat)
-                    if not key or key in seen:
-                        continue
-                    seen.add(key)
-                    merged.append(flat)
-                log.info(
-                    "Страница %s/%s: записей %s (всего уникальных %s)",
-                    page_num,
-                    max_page_seen,
-                    len(rows),
-                    len(merged),
-                )
-                if args.max_pages is not None and page_num >= args.max_pages:
-                    break
-                if page_num >= max_page_seen:
-                    break
-                page_num += 1
-        finally:
-            await browser.close()
-    return max_page_seen, merged
+            if code == 200:
+                log.debug("Витрина HTTP 200, ответ %s байт", len(raw))
+                return
+            log.warning(
+                "Витрина HTTP %s (попытка %s/%s)",
+                code,
+                v_attempt,
+                args.retries,
+            )
+        except (URLError, OSError) as e:
+            log.warning(
+                "Витрина недоступна (попытка %s/%s): %s",
+                v_attempt,
+                args.retries,
+                e,
+            )
+        if v_attempt < args.retries:
+            time.sleep(2**v_attempt)
+    log.warning("Прогрев витрины не удался; продолжаем с текущими cookies")
 
 
-async def scrape_vtb(args: argparse.Namespace) -> tuple[int, list[dict[str, Any]]]:
-    """Скачивает все страницы, возвращает (max_page, список словарей для JSON)."""
+def _fetch_first_list_page(
+    opener,
+    args: argparse.Namespace,
+    timeout_s: float,
+) -> dict | None:
+    """POST page=1: короткая серия, при провале — опционально прогрев и полные повторы."""
+    cold_retries = min(2, args.retries)
+    log.info("POST coin/list page=1 (%s быстрых попыток)", cold_retries)
+    body = fetch_list_page_urllib(
+        opener,
+        1,
+        timeout_s=timeout_s,
+        retries=cold_retries,
+    )
+    if body is not None:
+        return body
+    if not args.skip_vitrine:
+        _warmup_vitrine(opener, args)
+    else:
+        log.info("Прогрев витрины пропущен (--skip-vitrine)")
+    log.info("POST coin/list page=1 (%s попыток)", args.retries)
+    return fetch_list_page_urllib(
+        opener,
+        1,
+        timeout_s=timeout_s,
+        retries=args.retries,
+    )
+
+
+def scrape_vtb(args: argparse.Namespace) -> tuple[int, list[dict[str, Any]]]:
+    opener = _build_opener(insecure_ssl=args.insecure_ssl)
+    timeout_s = max(float(args.timeout), 1.0)
     seen: set[str] = set()
     merged: list[dict[str, Any]] = []
     max_page_seen = 1
-    return await scrape_vtb_via_playwright(args, seen, merged, max_page_seen)
+
+    body = _fetch_first_list_page(opener, args, timeout_s)
+    if not body:
+        log.error(
+            "BFF coin/list недоступен после всех попыток; "
+            "попробуйте scrape_vtb_coins_playwright.py"
+        )
+        return 1, merged
+
+    page_num = 1
+    while True:
+        if page_num > 1:
+            time.sleep(args.delay)
+            log.info("Запрос списка page=%s", page_num)
+            body = fetch_list_page_urllib(
+                opener,
+                page_num,
+                timeout_s=timeout_s,
+                retries=args.retries,
+            )
+            if not body:
+                break
+        rows, max_page = parse_list_response(body)
+        max_page_seen = max(max_page_seen, max_page)
+        for row in rows:
+            flat = coin_to_output(row)
+            if flat is None:
+                continue
+            key = dedupe_key(row, flat)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            merged.append(flat)
+        log.info(
+            "Страница %s/%s: записей %s (всего уникальных %s)",
+            page_num,
+            max_page_seen,
+            len(rows),
+            len(merged),
+        )
+        if args.max_pages is not None and page_num >= args.max_pages:
+            break
+        if page_num >= max_page_seen:
+            break
+        page_num += 1
+
+    return max_page_seen, merged
 
 
 # ============================================================================
@@ -308,9 +392,22 @@ async def scrape_vtb(args: argparse.Namespace) -> tuple[int, list[dict[str, Any]
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Скрейпер каталога монет ВТБ (BFF API)")
+    p = argparse.ArgumentParser(
+        description="Скрейпер каталога монет ВТБ (BFF API), только stdlib",
+    )
     p.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="итоговый JSON")
-    p.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="зарезервировано, с")
+    p.add_argument(
+        "--timeout",
+        type=float,
+        default=DEFAULT_TIMEOUT,
+        help="таймаут POST /coin/list, с (default: %(default)s)",
+    )
+    p.add_argument(
+        "--vitrine-timeout",
+        type=float,
+        default=DEFAULT_VITRINE_TIMEOUT,
+        help="таймаут GET витрины при прогреве, с (default: %(default)s)",
+    )
     p.add_argument("--retries", type=int, default=DEFAULT_RETRIES, help="повторов на страницу")
     p.add_argument(
         "--delay",
@@ -325,12 +422,17 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="максимум страниц (для отладки)",
     )
     p.add_argument(
-        "--playwright-timeout",
-        type=int,
-        default=DEFAULT_TIMEOUT_MS,
-        help="таймаут навигации Playwright, мс",
+        "--insecure-ssl",
+        action="store_true",
+        help=(
+            "не проверять TLS (при CERTIFICATE_VERIFY_FAILED; небезопасно)"
+        ),
     )
-    p.add_argument("--headful", action="store_true", help="окно браузера (ветка Playwright)")
+    p.add_argument(
+        "--skip-vitrine",
+        action="store_true",
+        help="не делать GET витрины при провале первого POST (быстрее при блокировке HTML)",
+    )
     p.add_argument(
         "--log-level",
         default="INFO",
@@ -347,16 +449,16 @@ def configure_logging(level: str) -> None:
     )
 
 
-async def main_async(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     configure_logging(args.log_level)
 
     log.info("=" * 60)
-    log.info("  Скрейпер каталога монет ВТБ (BFF)")
+    log.info("  Скрейпер каталога монет ВТБ (BFF), stdlib HTTP")
     log.info("=" * 60)
     started = datetime.now()
 
-    max_page, coins = await scrape_vtb(args)
+    max_page, coins = scrape_vtb(args)
 
     result = {
         "scraped_at": started.isoformat(),
@@ -374,15 +476,11 @@ async def main_async(argv: list[str] | None = None) -> int:
     log.info("  Монет в файле     : %s", len(coins))
     log.info("  Результат         : %s", args.output)
     log.info("=" * 60)
+    if not coins:
+        log.warning(
+            "Каталог пуст или недоступен; для обхода антибота см. scrape_vtb_coins_playwright.py"
+        )
     return 0
-
-
-def main(argv: list[str] | None = None) -> int:
-    try:
-        return asyncio.run(main_async(argv))
-    except RuntimeError as e:
-        log.error(str(e))
-        return 2
 
 
 if __name__ == "__main__":
