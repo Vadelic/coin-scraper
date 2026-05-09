@@ -1,0 +1,8 @@
+{
+  "name": "coin-catalog-zoloto_md",
+  "description": "Получает каталог монет Золотой монетный двор и сохраняет в JSON-файл.",
+  "command": "./run.sh",
+  "args": [],
+  "working_directory": "tool/coin-catalog-zoloto_md",
+  "output_file": "coins_zoloto_md_catalog.json"
+}

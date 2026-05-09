@@ -1,0 +1,8 @@
+{
+  "name": "coin-catalog-vtb",
+  "description": "Получает каталог монет ВТБ и сохраняет в JSON-файл.",
+  "command": "./run.sh",
+  "args": [],
+  "working_directory": "tool/coin-catalog-vtb",
+  "output_file": "coins_vtb_catalog.json"
+}

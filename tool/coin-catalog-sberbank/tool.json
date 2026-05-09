@@ -1,0 +1,8 @@
+{
+  "name": "coin-catalog-sberbank",
+  "description": "Получает каталог монет Сбербанка и сохраняет в JSON-файл.",
+  "command": "./run.sh",
+  "args": [],
+  "working_directory": "tool/coin-catalog-sberbank",
+  "output_file": "coins_sberbank_catalog.json"
+}

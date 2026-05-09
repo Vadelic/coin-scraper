@@ -1,0 +1,8 @@
+{
+  "name": "coin-catalog-aurumex",
+  "description": "Получает каталог монет Aurumex и сохраняет в JSON-файл.",
+  "command": "./run.sh",
+  "args": [],
+  "working_directory": "tool/coin-catalog-aurumex",
+  "output_file": "coins_aurumex_catalog.json"
+}
