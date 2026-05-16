@@ -1,8 +1,21 @@
 {
   "name": "coin-catalog-vtb",
-  "description": "Получает каталог монет ВТБ и сохраняет в JSON-файл.",
-  "command": "./run.sh",
+  "description": "Получает каталог монет ВТБ (vtb.ru) и возвращает JSON в stdout. Опционально — фильтр по названию, артикулу или металлу.",
+  "command": "./run_vtb.sh",
   "args": [],
-  "working_directory": "tools/coin-catalog-vtb",
-  "output_file": "coins_vtb_catalog.json"
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Подстрока для фильтрации: name, catalog_number, metal",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только инвестиционные монеты (BFF-фильтр coinKind=«Инвестиционные»)",
+      "required": false,
+      "cli": ["--investment-only"]
+    }
+  ],
+  "working_directory": "tools/coin-catalog-vtb"
 }

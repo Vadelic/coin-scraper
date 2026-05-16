@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
+# Совместимость: делегирует в run_vtb.sh
 set -euo pipefail
-cd "$(dirname "$0")"
-python3 scrape_vtb_coins.py --insecure-ssl
+exec "$(cd "$(dirname "$0")" && pwd)/run_vtb.sh" "$@"

@@ -9,7 +9,7 @@ playwright install chromium не обязателен.
 
 Итог: JSON в stdout (один объект, без записи файлов).
 Поля монеты: catalog_number (артикул), name, metal, weight_g, buy_price, sell_price.
-Опционально: --query для поля «Найти» на странице каталога.
+Опционально: --query для поля «Найти»; --investment-only — раздел инвестиционных монет.
 """
 from __future__ import annotations
 
@@ -30,6 +30,9 @@ from playwright.async_api import Error as PlaywrightError, Route, async_playwrig
 
 BASE_URL = "https://www.lanta.ru"
 CATALOG_URL = "https://www.lanta.ru/petersburg/metals/coins/"
+INVESTMENT_CATALOG_URL = (
+    "https://www.lanta.ru/petersburg/metals/coins/ivesticyonnie-monety/"
+)
 DEFAULT_DELAY = 0.5
 DEFAULT_TIMEOUT_MS = 60_000
 DEFAULT_RETRIES = 3
@@ -408,9 +411,16 @@ async def fetch_popup_html(page, coin_id: str, form_id: str) -> str:
 # ============================================================================
 
 
+def resolve_catalog_url(args: argparse.Namespace) -> str:
+    if args.investment_only:
+        return INVESTMENT_CATALOG_URL
+    return CATALOG_URL
+
+
 async def scrape(args: argparse.Namespace) -> list[LantaCoin]:
     coins: list[LantaCoin] = []
     seen_keys: set[str] = set()
+    catalog_url = resolve_catalog_url(args)
 
     async with async_playwright() as pw:
         browser = await launch_chromium_browser(
@@ -436,9 +446,9 @@ async def scrape(args: argparse.Namespace) -> list[LantaCoin]:
         try:
             for attempt in range(1, args.retries + 1):
                 try:
-                    log.info("Открываю %s (попытка %s/%s)", CATALOG_URL, attempt, args.retries)
+                    log.info("Открываю %s (попытка %s/%s)", catalog_url, attempt, args.retries)
                     await page.goto(
-                        CATALOG_URL,
+                        catalog_url,
                         wait_until="domcontentloaded",
                         timeout=args.timeout,
                     )
@@ -550,6 +560,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="",
         help="строка для поля «Найти» на странице каталога (пусто — без фильтра)",
     )
+    p.add_argument(
+        "--investment-only",
+        action="store_true",
+        help=f"только инвестиционные монеты (каталог: {INVESTMENT_CATALOG_URL})",
+    )
     p.add_argument("--headful", action="store_true", help="показать окно браузера")
     p.add_argument(
         "--browser-channel",
@@ -626,6 +641,8 @@ async def main(argv: list[str] | None = None) -> int:
     }
     if args.query and args.query.strip():
         result["query"] = args.query.strip()
+    if args.investment_only:
+        result["investment_only"] = True
     if error_message:
         result["error"] = error_message
     sys.stdout.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")

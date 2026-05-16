@@ -1,6 +1,6 @@
 ---
 name: coin-catalog-lanta
-description: Каталог монет банка Ланта (lanta.ru) — полный список, поиск конкретной монеты, сводка и аналитика. Use when user asks about Ланта, lanta.ru, coin price at Lanta, find a coin at Lanta, catalog summary.
+description: Каталог инвестиционных монет Ланта (lanta.ru); по умолчанию investment_only. Полный каталог — только если пользователь явно просит все монеты. Use when user asks about Ланта, lanta.ru, coin price at Lanta, find a coin at Lanta, catalog summary.
 disable-model-invocation: true
 ---
 
@@ -17,8 +17,9 @@ disable-model-invocation: true
 ## Порядок действий
 
 1. Вызвать `coin-catalog-lanta`.
-   - Полный каталог — без параметров.
-   - Поиск на сайте — параметр `query` (поле «Найти» на lanta.ru): ключевые слова из запроса пользователя.
+   - **По умолчанию всегда** передавать `investment_only` (`--investment-only`) — каталог [инвестиционных монет](https://www.lanta.ru/petersburg/metals/coins/ivesticyonnie-monety/).
+   - **Исключение:** пользователь явно просит **весь** каталог, памятные/коллекционные монеты или «все монеты» — тогда `investment_only` **не** передавать (общий каталог `/petersburg/metals/coins/`).
+   - Поиск на сайте — параметр `query` (поле «Найти» на lanta.ru): ключевые слова из запроса (сочетается с `investment_only`, если он включён).
 2. Распарсить единственный JSON из stdout (stderr — логи, не парсить).
 3. Если `scrape_status` ≠ `ok` — сообщить статус и текст `error`, не выдавать цены как актуальные.
 4. Дальше — поиск монеты и/или сводка (см. ниже).
@@ -26,7 +27,7 @@ disable-model-invocation: true
 ## Поиск монеты
 
 1. Сформировать `query` из запроса: название («Георгий Победоносец»), металл («золото»), артикул (`5215-0036`) и т.д.
-2. Вызвать tool с `query`, если поиск узкий; для обзора по всему каталогу — без `query`, затем отфильтровать локально.
+2. Вызвать tool с `investment_only`, если не запрошен полный каталог; с `query`, если поиск узкий; для обзора — без `query`, затем отфильтровать локально.
 3. В `coins[]` оставить записи, подходящие по смыслу: `name`, `catalog_number`, `metal`, `weight_g`, `buy_price`, `sell_price`.
 4. Пользователю: для каждой подходящей монеты — `name`, `catalog_number`, `metal`, `weight_g`, `buy_price`, `sell_price` (₽; `null` → «нет в продаже» для `sell_price`).
 5. Если совпадений нет — «не найдено» + что искали; при необходимости другой `query` или уточнение у пользователя.
@@ -35,7 +36,7 @@ disable-model-invocation: true
 
 При запросе на обзор каталога (не только одна монета):
 
-- банк: Ланта, `scrape_status`, `total_coins`, при наличии — `query`;
+- банк: Ланта, `scrape_status`, `total_coins`, при наличии — `query`, `investment_only`;
 - min/max `buy_price`, min/max и медиана `sell_price` по валидным значениям;
 - топ по `metal`;
 - доля пропусков в `name`, `buy_price`, `sell_price`, `metal`.
@@ -46,6 +47,7 @@ disable-model-invocation: true
 - Числа цен брать из JSON; при обработке строк — убрать ₽ и пробелы.
 - Отсутствующее поле — «нет данных».
 - Пустой `coins` или ошибка сбора — ответ без падения, с объяснением.
+- Не вызывать tool без `investment_only`, если пользователь не просил явно весь каталог.
 
 ## Важные пути
 

@@ -9,6 +9,12 @@
       "description": "Строка для поля «Найти» на странице каталога",
       "required": false,
       "cli": ["--query", "{query}"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только инвестиционные монеты (раздел ivesticyonnie-monety на lanta.ru)",
+      "required": false,
+      "cli": ["--investment-only"]
     }
   ],
   "working_directory": "tools/coin-catalog-lanta"

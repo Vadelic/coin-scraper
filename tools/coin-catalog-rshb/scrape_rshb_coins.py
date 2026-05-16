@@ -3,7 +3,7 @@
 
 Сбор через Playwright. Итог: JSON в stdout (один объект, без записи файлов).
 Поля монеты: catalog_number, name, metal, weight_g, buy_price, sell_price.
-Опционально: --query (?search_text= в URL).
+Опционально: --query (?search_text= в URL), --investment-only (?subjects=5506).
 Без --with-buy-price: один проход по витрине, sell_price с карточек каталога, buy_price=null.
 С --with-buy-price: тот же проход + обогащение buy_price со страницы каждой монеты.
 """
@@ -28,6 +28,7 @@ from playwright.async_api import (
 )
 
 BASE_URL = "https://coins.rshb.ru"
+INVESTMENT_SUBJECTS = "5506"
 DEFAULT_PAGE_SIZE = 99
 DEFAULT_PAGE_DELAY = 5.0
 DEFAULT_TIMEOUT_MS = 30_000
@@ -116,11 +117,19 @@ class RshbCoin:
         }
 
 
-def build_url(page: int, page_size: int, search_text: str = "") -> str:
+def build_url(
+    page: int,
+    page_size: int,
+    search_text: str = "",
+    *,
+    investment_only: bool = False,
+) -> str:
     params: dict[str, str | int] = {"page": page, "page_size": page_size}
     q = (search_text or "").strip()
     if q:
         params["search_text"] = q
+    if investment_only:
+        params["subjects"] = INVESTMENT_SUBJECTS
     return f"{BASE_URL}/?{urlencode(params)}"
 
 
@@ -515,10 +524,13 @@ async def load_page(
     *,
     page_size: int,
     search_text: str,
+    investment_only: bool,
     timeout_ms: int,
     retries: int,
 ) -> bool:
-    url = build_url(page_num, page_size, search_text)
+    url = build_url(page_num, page_size, search_text, investment_only=investment_only)
+    if investment_only:
+        log.info("Фильтр: только инвестиционные монеты (subjects=%s)", INVESTMENT_SUBJECTS)
     if search_text.strip():
         log.info("Поиск search_text=«%s»", search_text.strip())
     for attempt in range(1, retries + 1):
@@ -549,6 +561,7 @@ async def navigate_to_page(
     *,
     page_size: int,
     search_text: str,
+    investment_only: bool,
     timeout_ms: int,
     retries: int,
 ) -> bool:
@@ -559,6 +572,7 @@ async def navigate_to_page(
             1,
             page_size=page_size,
             search_text=search_text,
+            investment_only=investment_only,
             timeout_ms=timeout_ms,
             retries=retries,
         )
@@ -571,7 +585,12 @@ async def navigate_to_page(
                 await page_link.click()
             else:
                 await page.goto(
-                    build_url(page_num, page_size, search_text),
+                    build_url(
+                        page_num,
+                        page_size,
+                        search_text,
+                        investment_only=investment_only,
+                    ),
                     wait_until="domcontentloaded",
                     timeout=timeout_ms,
                 )
@@ -684,6 +703,7 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
     all_coins: list[RshbCoin] = []
     seen_urls: set[str] = set()
     url_query = (args.query or "").strip()
+    investment_only = bool(args.investment_only)
 
     async with async_playwright() as pw:
         browser = await launch_chromium_browser(pw, headless=not args.headful)
@@ -730,6 +750,7 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                     n,
                     page_size=args.page_size,
                     search_text=url_query,
+                    investment_only=investment_only,
                     timeout_ms=args.timeout,
                     retries=args.retries,
                 )
@@ -739,6 +760,7 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                     n,
                     page_size=args.page_size,
                     search_text=url_query,
+                    investment_only=investment_only,
                     timeout_ms=args.timeout,
                     retries=args.retries,
                 )
@@ -831,6 +853,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="",
         help="строка поиска (?search_text= в URL каталога; пусто — без фильтра)",
     )
+    p.add_argument(
+        "--investment-only",
+        action="store_true",
+        help=f"только инвестиционные монеты (?subjects={INVESTMENT_SUBJECTS} в URL каталога)",
+    )
     p.add_argument("--page-size", type=int, default=DEFAULT_PAGE_SIZE)
     p.add_argument("--start-page", type=int, default=1)
     p.add_argument("--max-pages", type=int, default=None)
@@ -895,6 +922,8 @@ async def main(argv: list[str] | None = None) -> int:
     }
     if args.query and args.query.strip():
         result["query"] = args.query.strip()
+    if args.investment_only:
+        result["investment_only"] = True
     if error_message:
         result["error"] = error_message
 

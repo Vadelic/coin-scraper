@@ -22,7 +22,7 @@
     },
     {
       "name": "coin-catalog-vtb",
-      "description": "Получает каталог монет ВТБ и сохраняет в JSON-файл.",
+      "description": "Получает каталог монет ВТБ (vtb.ru) и возвращает JSON в stdout.",
       "tool_json": "tools/coin-catalog-vtb/tool.json"
     },
     {

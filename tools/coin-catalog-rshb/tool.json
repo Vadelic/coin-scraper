@@ -21,6 +21,12 @@
       "description": "Дополнительно открыть страницу каждой монеты и заполнить buy_price (медленно; лучше с query)",
       "required": false,
       "cli": ["--with-buy-price"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только инвестиционные монеты (?subjects=5506 в URL каталога)",
+      "required": false,
+      "cli": ["--investment-only"]
     }
   ],
   "working_directory": "tools/coin-catalog-rshb"
