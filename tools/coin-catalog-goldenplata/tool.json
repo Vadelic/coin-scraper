@@ -1,8 +1,9 @@
 {
   "name": "coin-catalog-goldenplata",
-  "description": "Получает каталог монет GoldenPlata и сохраняет в JSON-файл.",
+  "description": "Каталог монет GoldenPlata. Сохраняет JSON в файл (см. output_file): список монет и цены.",
   "command": "./run.sh",
   "args": [],
+  "recommendations": "docs/coin-catalog-tool-recommendations.md",
   "working_directory": "tools/coin-catalog-goldenplata",
   "output_file": "coins_goldenplata_catalog.json"
 }

@@ -1,21 +1,22 @@
 {
   "name": "coin-catalog-atb",
-  "description": "Получает каталог монет АТБ (atb.su) и возвращает JSON в stdout. Опционально — поиск по названию и фильтр инвестиционных монет.",
+  "description": "Каталог монет банка АТБ (atb.su). Возвращает JSON в stdout: список монет, цены, статус сбора. Поддерживает поиск и фильтр инвестиционных монет.",
   "command": "./run_atb.sh",
   "args": [],
   "parameters": [
     {
       "name": "query",
-      "description": "Строка поиска в каталоге (поле name в AJAX POST)",
+      "description": "Поиск в каталоге: название монеты, металл (золото, серебро), каталожный номер",
       "required": false,
       "cli": ["--query", "{query}"]
     },
     {
       "name": "investment_only",
-      "description": "Только инвестиционные монеты (category=479 на atb.su)",
+      "description": "Только инвестиционные монеты (без памятных и коллекционных)",
       "required": false,
       "cli": ["--investment-only"]
     }
   ],
+  "recommendations": "docs/coin-catalog-tool-recommendations.md",
   "working_directory": "tools/coin-catalog-atb"
 }

@@ -1,27 +1,28 @@
 {
   "name": "coin-catalog-rshb",
-  "description": "Каталог монет Россельхозбанка (coins.rshb.ru): JSON в stdout. sell_price с витрины, buy_price с витрины или product API в одном сеансе (регион Москва по умолчанию); опционально поиск.",
+  "description": "Каталог монет Россельхозбанка (coins.rshb.ru). Возвращает JSON в stdout: sell_price и buy_price с витрины, поиск, фильтр инвестиционных монет, выбор региона для цен продажи.",
   "command": "./run_rshb.sh",
   "args": [],
   "parameters": [
     {
       "name": "query",
-      "description": "Поиск в каталоге (?search_text= в URL): название, металл, артикул",
+      "description": "Поиск в каталоге: название монеты, металл, каталожный номер",
       "required": false,
       "cli": ["--query", "{query}"]
     },
     {
       "name": "region",
-      "description": "Код региона для cookie x-region (по умолчанию 77 — Москва; без региона на сайте нет sell_price на карточках)",
+      "description": "Регион для цен продажи на витрине; по умолчанию Москва (код 77)",
       "required": false,
       "cli": ["--region", "{region}"]
     },
     {
       "name": "investment_only",
-      "description": "Только инвестиционные монеты (?subjects=5506 в URL каталога)",
+      "description": "Только инвестиционные монеты (без памятных и коллекционных)",
       "required": false,
       "cli": ["--investment-only"]
     }
   ],
+  "recommendations": "docs/coin-catalog-tool-recommendations.md",
   "working_directory": "tools/coin-catalog-rshb"
 }

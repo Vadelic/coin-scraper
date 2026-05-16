@@ -1,21 +1,22 @@
 {
   "name": "coin-catalog-sberbank",
-  "description": "Получает каталог монет Сбербанка (sberbank.ru) и возвращает JSON в stdout. Опционально — поиск и фильтр инвестиционных монет.",
+  "description": "Каталог монет Сбербанка (sberbank.ru). Возвращает JSON в stdout: список монет, цены продажи и выкупа, статус сбора. Поддерживает поиск и фильтр инвестиционных монет.",
   "command": "./run_sberbank.sh",
   "args": [],
   "parameters": [
     {
       "name": "query",
-      "description": "Строка поиска в каталоге (поле query в API)",
+      "description": "Поиск в каталоге: название монеты, металл, каталожный номер",
       "required": false,
       "cli": ["--query", "{query}"]
     },
     {
       "name": "investment_only",
-      "description": "Только инвестиционные монеты (sections=«Инвестиционные монеты»)",
+      "description": "Только инвестиционные монеты (без памятных и коллекционных)",
       "required": false,
       "cli": ["--investment-only"]
     }
   ],
+  "recommendations": "docs/coin-catalog-tool-recommendations.md",
   "working_directory": "tools/coin-catalog-sberbank"
 }

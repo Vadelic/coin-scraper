@@ -2,42 +2,42 @@
   "tools": [
     {
       "name": "coin-catalog-atb",
-      "description": "Получает каталог монет АТБ (atb.su) и возвращает JSON в stdout.",
+      "description": "Каталог монет АТБ (atb.su): JSON в stdout, поиск, фильтр инвестиционных монет.",
       "tool_json": "tools/coin-catalog-atb/tool.json"
     },
     {
       "name": "coin-catalog-aurumex",
-      "description": "Получает каталог монет Aurumex и сохраняет в JSON-файл.",
+      "description": "Каталог монет Aurumex: JSON в файл (legacy).",
       "tool_json": "tools/coin-catalog-aurumex/tool.json"
     },
     {
       "name": "coin-catalog-goldenplata",
-      "description": "Получает каталог монет GoldenPlata и сохраняет в JSON-файл.",
+      "description": "Каталог монет GoldenPlata: JSON в файл (legacy).",
       "tool_json": "tools/coin-catalog-goldenplata/tool.json"
     },
     {
       "name": "coin-catalog-zoloto_md",
-      "description": "Получает каталог монет Золотой монетный двор и сохраняет в JSON-файл.",
+      "description": "Каталог монет Золотой монетный двор: JSON в файл (legacy).",
       "tool_json": "tools/coin-catalog-zoloto_md/tool.json"
     },
     {
       "name": "coin-catalog-vtb",
-      "description": "Получает каталог монет ВТБ (vtb.ru) и возвращает JSON в stdout.",
+      "description": "Каталог монет ВТБ (vtb.ru): JSON в stdout, поиск, фильтр инвестиционных монет.",
       "tool_json": "tools/coin-catalog-vtb/tool.json"
     },
     {
       "name": "coin-catalog-sberbank",
-      "description": "Получает каталог монет Сбербанка (sberbank.ru) и возвращает JSON в stdout.",
+      "description": "Каталог монет Сбербанка (sberbank.ru): JSON в stdout, поиск, фильтр инвестиционных монет.",
       "tool_json": "tools/coin-catalog-sberbank/tool.json"
     },
     {
       "name": "coin-catalog-lanta",
-      "description": "Получает каталог монет Ланта (lanta.ru) и возвращает JSON в stdout.",
+      "description": "Каталог монет Ланта (lanta.ru): JSON в stdout, поиск, фильтр инвестиционных монет.",
       "tool_json": "tools/coin-catalog-lanta/tool.json"
     },
     {
       "name": "coin-catalog-rshb",
-      "description": "Каталог монет Россельхозбанка (coins.rshb.ru): JSON в stdout, sell_price и buy_price с витрины (регион Москва по умолчанию), опционально поиск.",
+      "description": "Каталог монет Россельхозбанка (coins.rshb.ru): JSON в stdout, цены с витрины, регион, поиск, фильтр инвестиционных монет.",
       "tool_json": "tools/coin-catalog-rshb/tool.json"
     }
   ]
