@@ -7,7 +7,7 @@
 Зависимости: pip install playwright; системный Google Chrome или Microsoft Edge.
 playwright install chromium не обязателен.
 
-Итог: coins_lanta_catalog.json
+Итог: JSON в stdout (один объект, без записи файлов).
 Поля монеты: catalog_number (артикул), name, metal, weight_g, buy_price, sell_price.
 Опционально: --query для поля «Найти» на странице каталога.
 """
@@ -30,7 +30,6 @@ from playwright.async_api import Error as PlaywrightError, Route, async_playwrig
 
 BASE_URL = "https://www.lanta.ru"
 CATALOG_URL = "https://www.lanta.ru/petersburg/metals/coins/"
-DEFAULT_OUTPUT = "coins_lanta_catalog.json"
 DEFAULT_DELAY = 0.5
 DEFAULT_TIMEOUT_MS = 60_000
 DEFAULT_RETRIES = 3
@@ -536,7 +535,6 @@ async def scrape(args: argparse.Namespace) -> list[LantaCoin]:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Скрейпер каталога монет lanta.ru")
-    p.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="путь к итоговому JSON")
     p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_MS, help="таймаут, мс")
     p.add_argument("--retries", type=int, default=DEFAULT_RETRIES, help="попыток навигации")
     p.add_argument("--delay", type=float, default=DEFAULT_DELAY, help="пауза между действиями, с")
@@ -591,6 +589,7 @@ def configure_logging(level: str) -> None:
         level=getattr(logging, level.upper(), logging.INFO),
         format="%(asctime)s %(levelname)-7s %(message)s",
         datefmt="%H:%M:%S",
+        stream=sys.stderr,
     )
 
 
@@ -629,15 +628,11 @@ async def main(argv: list[str] | None = None) -> int:
         result["query"] = args.query.strip()
     if error_message:
         result["error"] = error_message
-    args.output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    sys.stdout.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
 
     log.info("=" * 60)
     log.info("  Найдено монет : %s", len(coins))
     log.info("  Статус        : %s", scrape_status)
-    log.info("  Результат     : %s", args.output)
     log.info("=" * 60)
     return 0 if scrape_status == "ok" else 2
 
