@@ -1,6 +1,6 @@
 {
   "name": "coin-catalog-rshb",
-  "description": "Каталог монет Россельхозбанка (coins.rshb.ru): JSON в stdout. Цена продажи с витрины (регион по умолчанию — Москва); опционально поиск и цена выкупа со страницы монеты.",
+  "description": "Каталог монет Россельхозбанка (coins.rshb.ru): JSON в stdout. sell_price с витрины, buy_price с витрины или product API в одном сеансе (регион Москва по умолчанию); опционально поиск.",
   "command": "./run_rshb.sh",
   "args": [],
   "parameters": [
@@ -15,12 +15,6 @@
       "description": "Код региона для cookie x-region (по умолчанию 77 — Москва; без региона на сайте нет sell_price на карточках)",
       "required": false,
       "cli": ["--region", "{region}"]
-    },
-    {
-      "name": "with_buy_price",
-      "description": "Дополнительно открыть страницу каждой монеты и заполнить buy_price (медленно; лучше с query)",
-      "required": false,
-      "cli": ["--with-buy-price"]
     },
     {
       "name": "investment_only",

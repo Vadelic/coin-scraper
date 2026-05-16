@@ -3,9 +3,9 @@
 
 Сбор через Playwright. Итог: JSON в stdout (один объект, без записи файлов).
 Поля монеты: catalog_number, name, metal, weight_g, buy_price, sell_price.
+Один проход по витрине: sell_price из .price-box; buy_price — метка «Выкуп» на карточке
+или product/_search API (без открытия страниц товаров).
 Опционально: --query (?search_text= в URL), --investment-only (?subjects=5506).
-Без --with-buy-price: один проход по витрине, sell_price с карточек каталога, buy_price=null.
-С --with-buy-price: тот же проход + обогащение buy_price со страницы каждой монеты.
 """
 from __future__ import annotations
 
@@ -22,12 +22,15 @@ from urllib.parse import urlencode, unquote
 
 from playwright.async_api import (
     Error as PlaywrightError,
-    Response,
     Route,
     async_playwright,
 )
 
 BASE_URL = "https://coins.rshb.ru"
+PRODUCT_SEARCH_URL = (
+    f"{BASE_URL}/api/catalog/vue_storefront_magento_1_product/product/_search"
+)
+BUYOUT_SKU_BATCH_SIZE = 50
 INVESTMENT_SUBJECTS = "5506"
 DEFAULT_PAGE_SIZE = 99
 DEFAULT_PAGE_DELAY = 5.0
@@ -73,11 +76,6 @@ ATTRIBUTE_LABELS = (
     "Цена выкупа",
 )
 BUYOUT_LABELS = ("Выкуп", "Цена выкупа")
-BUYOUT_PAGE_HINTS = (
-    "банк может купить",
-    "купить у вас",
-    "цене выкупа",
-)
 
 BROWSER_CHANNELS = ("chrome", "msedge", "chromium")
 LAUNCH_ARGS = ["--no-sandbox", "--disable-setuid-sandbox"]
@@ -202,71 +200,6 @@ def parse_sku_from_product_href(href: str) -> str | None:
     return decoded or None
 
 
-def _float_or_none(value) -> float | None:
-    if value is None or value == "":
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def buyout_price_from_es_product_dict(d: dict) -> float | None:
-    if not isinstance(d, dict):
-        return None
-    ext = d.get("extension_attributes")
-    if isinstance(ext, dict):
-        bp = buyout_price_from_es_product_dict(ext)
-        if bp is not None:
-            return bp
-    for key in (
-        "buyout_price",
-        "buy_out_price",
-        "rshb_buyout_price",
-        "price_buy",
-        "buyout",
-        "buy_out",
-        "buyback_price",
-        "buy_back_price",
-    ):
-        v = _float_or_none(d.get(key))
-        if v is not None:
-            return v
-    return None
-
-
-def register_buyout_hits_from_es_response(
-    data: dict,
-    registry: dict[str, float],
-    *,
-    log_sample: bool = False,
-) -> int:
-    hits = (data or {}).get("hits", {}).get("hits") or []
-    added = 0
-    for i, hit in enumerate(hits):
-        src = hit.get("_source")
-        if not isinstance(src, dict):
-            continue
-        if log_sample and i == 0:
-            log.debug("ES _source keys (sample): %s", sorted(src.keys()))
-        children = src.get("configurable_children")
-        if isinstance(children, list):
-            for ch in children:
-                if not isinstance(ch, dict):
-                    continue
-                sku = ch.get("sku")
-                bp = buyout_price_from_es_product_dict(ch)
-                if sku is not None and bp is not None:
-                    registry[str(sku)] = bp
-                    added += 1
-        sku = src.get("sku")
-        bp = buyout_price_from_es_product_dict(src)
-        if sku is not None and bp is not None:
-            registry[str(sku)] = bp
-            added += 1
-    return added
-
-
 def buyout_price_from_card_text(raw_text: str) -> float | None:
     for label in BUYOUT_LABELS:
         raw = extract_labeled_value(raw_text, label)
@@ -277,80 +210,81 @@ def buyout_price_from_card_text(raw_text: str) -> float | None:
     return None
 
 
-def buyout_price_from_product_page_text(text: str) -> float | None:
-    """Цена выкупа со страницы товара («Банк может купить… от N»)."""
-    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-    prices: list[float] = []
-    in_section = False
-    for line in lines:
-        low = line.casefold()
-        if any(h in low for h in BUYOUT_PAGE_HINTS):
-            in_section = True
-            continue
-        if not in_section:
-            continue
-        if "подать заявку" in low or "подробнее о том, как вы можете продать" in low:
-            break
-        if "от" in low:
-            p = parse_price(line)
-            if p is not None and p >= 1_000:
-                prices.append(p)
-    if prices:
-        return min(prices)
-    return buyout_price_from_card_text(text)
-
-
-async def fetch_buy_price_from_product_page(
-    page,
-    product_url: str,
-    *,
-    timeout_ms: int,
-) -> float | None:
-    log.info("Открываю карточку: %s", product_url)
-    try:
-        await page.goto(
-            product_url,
-            wait_until="domcontentloaded",
-            timeout=timeout_ms,
-        )
-        text = await page.locator("body").inner_text()
-        return buyout_price_from_product_page_text(text)
-    except PlaywrightError as e:
-        log.warning("Выкуп %s: %s", product_url, e)
+def buyout_price_from_product_source(src: dict) -> float | None:
+    if not isinstance(src, dict):
         return None
+    if int(src.get("can_be_buyouted") or 0) != 1:
+        return None
+    bp = src.get("buyout_price")
+    if bp is None or bp == "":
+        return None
+    try:
+        price = float(bp)
+    except (TypeError, ValueError):
+        return None
+    return price if price > 0 else None
 
 
-async def enrich_buy_prices_from_product_pages(
-    page,
-    coins: list[RshbCoin],
-    *,
-    delay: float,
-    timeout_ms: int,
-) -> None:
-    total = len(coins)
-    log.info("Загрузка цен выкупа: %s монет", total)
-    for i, coin in enumerate(coins, 1):
-        if not coin._url:
-            log.warning("Выкуп %s/%s: нет URL — «%s»", i, total, coin.name)
+async def fetch_buyout_prices_for_skus(api_request, skus: list[str]) -> dict[str, float]:
+    """Цены выкупа из product/_search (тот же сеанс, что и витрина; без goto /p/)."""
+    unique = [s for s in dict.fromkeys(s.strip() for s in skus if s and s.strip())]
+    registry: dict[str, float] = {}
+    if not unique:
+        return registry
+
+    for offset in range(0, len(unique), BUYOUT_SKU_BATCH_SIZE):
+        batch = unique[offset : offset + BUYOUT_SKU_BATCH_SIZE]
+        payload = {"query": {"terms": {"sku": batch}}, "size": len(batch)}
+        try:
+            response = await api_request.post(
+                PRODUCT_SEARCH_URL,
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+            )
+        except PlaywrightError as e:
+            log.warning("product/_search (buyout): %s", e)
             continue
-        log.info(
-            "Выкуп %s/%s: «%s» (артикул %s)",
-            i,
-            total,
-            coin.name,
-            coin.catalog_number,
-        )
-        coin.buy_price = await fetch_buy_price_from_product_page(
-            page, coin._url, timeout_ms=timeout_ms
-        )
-        log.info(
-            "Выкуп %s/%s: buy_price=%s",
-            i,
-            total,
-            coin.buy_price if coin.buy_price is not None else "нет данных",
-        )
-        if i < total:
-            await asyncio.sleep(delay)
+        if not response.ok:
+            log.warning(
+                "product/_search (buyout) HTTP %s для %s sku",
+                response.status,
+                len(batch),
+            )
+            continue
+        try:
+            data = await response.json()
+        except Exception:
+            log.warning("product/_search (buyout): не JSON", exc_info=True)
+            continue
+        for hit in (data or {}).get("hits", {}).get("hits") or []:
+            src = hit.get("_source")
+            if not isinstance(src, dict):
+                continue
+            sku = src.get("sku")
+            bp = buyout_price_from_product_source(src)
+            if sku is not None and bp is not None:
+                registry[str(sku)] = bp
+
+    if registry:
+        log.info("buy_price из product/_search: %s sku", len(registry))
+    return registry
+
+
+def apply_buyout_prices(coins: list[RshbCoin], buyout_by_sku: dict[str, float]) -> None:
+    for coin in coins:
+        if coin.buy_price is not None or not coin.catalog_number:
+            continue
+        bp = buyout_by_sku.get(coin.catalog_number)
+        if bp is not None:
+            coin.buy_price = bp
+
+
+async def enrich_buy_prices_from_product_index(context, coins: list[RshbCoin]) -> None:
+    skus = [c.catalog_number for c in coins if c.catalog_number and c.buy_price is None]
+    if not skus:
+        return
+    buyout_by_sku = await fetch_buyout_prices_for_skus(context.request, skus)
+    apply_buyout_prices(coins, buyout_by_sku)
 
 
 def _is_stock_status_line(line: str) -> bool:
@@ -458,7 +392,7 @@ def parse_card_text(
     link_text: str | None = None,
     price_box_text: str | None = None,
 ) -> RshbCoin | None:
-    """Парсинг карточки с витрины каталога: sell_price и атрибуты; buy_price не заполняется."""
+    """Парсинг карточки с витрины каталога: sell_price, buy_price и атрибуты."""
     lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
     if not lines:
         return None
@@ -477,13 +411,14 @@ def parse_card_text(
     weight_raw = extract_labeled_value(raw_text, "Чистого металла")
     weight_g = parse_weight(weight_raw) if weight_raw else None
     metal_raw = extract_labeled_value(raw_text, "Металл")
+    buy_price = buyout_price_from_card_text(raw_text)
 
     return RshbCoin(
         name=name,
         catalog_number=sku,
         metal=normalize_metal(metal_raw),
         weight_g=weight_g,
-        buy_price=None,
+        buy_price=buy_price,
         sell_price=sell_price,
         _url=url,
     )
@@ -613,33 +548,6 @@ async def navigate_to_page(
     return False
 
 
-async def drain_es_search_responses(
-    buffer: list[Response],
-    buyout_by_sku: dict[str, float],
-) -> int:
-    pending = buffer[:]
-    buffer.clear()
-    added = 0
-    logged_sample = False
-    for response in pending:
-        try:
-            ct = (response.headers.get("content-type") or "").lower()
-            if "json" not in ct:
-                continue
-            data = await response.json()
-        except Exception:
-            log.debug("Не удалось прочитать JSON ответа каталога ES", exc_info=True)
-            continue
-        added += register_buyout_hits_from_es_response(
-            data, buyout_by_sku, log_sample=not logged_sample
-        )
-        if not logged_sample:
-            logged_sample = True
-    if added:
-        log.info("Из ответов Elasticsearch добавлено пар sku→buyout: %s", added)
-    return added
-
-
 async def get_last_page(page) -> int:
     links = await page.query_selector_all(PAGINATION_LINK_SELECTOR)
     hrefs: list[str] = []
@@ -670,7 +578,7 @@ _CARD_TEXT_JS = """el => {
 
 
 async def extract_coins_from_page(page) -> list[RshbCoin]:
-    """Один проход по витрине: цены продажи и атрибуты с карточек каталога."""
+    """Один проход по витрине: sell_price, buy_price и атрибуты с карточек каталога."""
     coins: list[RshbCoin] = []
     for link in await page.query_selector_all(CARD_LINK_SELECTOR):
         href = await link.get_attribute("href") or ""
@@ -781,6 +689,7 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
 
             coins = await extract_coins_from_page(page)
             new_coins: list[RshbCoin] = []
+            await enrich_buy_prices_from_product_index(context, coins)
             for c in coins:
                 key = c._url or ""
                 if key in seen_urls:
@@ -830,18 +739,6 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                 break
             n += 1
 
-        if args.with_buy_price and all_coins:
-            log.info(
-                "Каталог собран (%s монет), обогащение buy_price со страниц товаров",
-                len(all_coins),
-            )
-            await enrich_buy_prices_from_product_pages(
-                page,
-                all_coins,
-                delay=args.delay,
-                timeout_ms=args.timeout,
-            )
-
         await browser.close()
         return processed, all_coins
 
@@ -865,11 +762,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_MS)
     p.add_argument("--retries", type=int, default=DEFAULT_RETRIES)
     p.add_argument("--headful", action="store_true")
-    p.add_argument(
-        "--with-buy-price",
-        action="store_true",
-        help="после витрины открыть каждую монету и дополнить buy_price (медленно; удобно с --query)",
-    )
     p.add_argument(
         "--region",
         default=DEFAULT_REGION_CODE,
