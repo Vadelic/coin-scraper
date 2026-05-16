@@ -3,32 +3,32 @@
     {
       "name": "coin-catalog-atb",
       "description": "Получает каталог монет АТБ и сохраняет в JSON-файл.",
-      "tool_json": "tool/coin-catalog-atb/tool.json"
+      "tool_json": "tools/coin-catalog-atb/tool.json"
     },
     {
       "name": "coin-catalog-aurumex",
       "description": "Получает каталог монет Aurumex и сохраняет в JSON-файл.",
-      "tool_json": "tool/coin-catalog-aurumex/tool.json"
+      "tool_json": "tools/coin-catalog-aurumex/tool.json"
     },
     {
       "name": "coin-catalog-goldenplata",
       "description": "Получает каталог монет GoldenPlata и сохраняет в JSON-файл.",
-      "tool_json": "tool/coin-catalog-goldenplata/tool.json"
+      "tool_json": "tools/coin-catalog-goldenplata/tool.json"
     },
     {
       "name": "coin-catalog-zoloto_md",
       "description": "Получает каталог монет Золотой монетный двор и сохраняет в JSON-файл.",
-      "tool_json": "tool/coin-catalog-zoloto_md/tool.json"
+      "tool_json": "tools/coin-catalog-zoloto_md/tool.json"
     },
     {
       "name": "coin-catalog-vtb",
       "description": "Получает каталог монет ВТБ и сохраняет в JSON-файл.",
-      "tool_json": "tool/coin-catalog-vtb/tool.json"
+      "tool_json": "tools/coin-catalog-vtb/tool.json"
     },
     {
       "name": "coin-catalog-sberbank",
       "description": "Получает каталог монет Сбербанка и сохраняет в JSON-файл.",
-      "tool_json": "tool/coin-catalog-sberbank/tool.json"
+      "tool_json": "tools/coin-catalog-sberbank/tool.json"
     }
   ]
 }

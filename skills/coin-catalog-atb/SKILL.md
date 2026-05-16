@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## Порядок действий
 1. Вызвать инструмент банка: `coin-catalog-atb`.
-2. Убедиться, что JSON-файл существует: `tool/coin-catalog-atb/coins_atb_catalog.json`.
+2. Убедиться, что JSON-файл существует: `tools/coin-catalog-atb/coins_atb_catalog.json`.
 3. Прочитать JSON и посчитать сводку/аналитику.
 
 ## Что возвращать пользователю
@@ -31,4 +31,4 @@ disable-model-invocation: true
 
 ## Важные пути
 - Tool: `coin-catalog-atb`
-- Output JSON: `tool/coin-catalog-atb/coins_atb_catalog.json`
+- Output JSON: `tools/coin-catalog-atb/coins_atb_catalog.json`

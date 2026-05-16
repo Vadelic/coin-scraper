@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## Порядок действий
 1. Вызвать инструмент банка: `coin-catalog-aurumex`.
-2. Убедиться, что JSON-файл существует: `tool/coin-catalog-aurumex/coins_aurumex_catalog.json`.
+2. Убедиться, что JSON-файл существует: `tools/coin-catalog-aurumex/coins_aurumex_catalog.json`.
 3. Прочитать JSON и посчитать сводку/аналитику.
 
 ## Что возвращать пользователю
@@ -31,4 +31,4 @@ disable-model-invocation: true
 
 ## Важные пути
 - Tool: `coin-catalog-aurumex`
-- Output JSON: `tool/coin-catalog-aurumex/coins_aurumex_catalog.json`
+- Output JSON: `tools/coin-catalog-aurumex/coins_aurumex_catalog.json`

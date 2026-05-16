@@ -1,18 +1,18 @@
 ---
 name: coin-catalog-goldenplata
-description: Получает каталог монет банка GoldenPlata, читает JSON и формирует сводку и аналитику. Use when user asks about GoldenPlata coin catalog, summary, analytics.
+description: Получает каталог монет банка Золотая плата, читает JSON и формирует сводку и аналитику. Use when user asks about GoldenPlata coin catalog, summary, analytics.
 disable-model-invocation: true
 ---
 
-# GoldenPlata Coin Catalog
+# Золотая плата Coin Catalog
 
 ## Когда использовать
-- Когда нужно получить каталог монет банка GoldenPlata.
+- Когда нужно получить каталог монет банкаЗолотая плата.
 - Когда нужно прочитать готовый JSON этого банка и вернуть сводку и аналитику.
 
 ## Порядок действий
 1. Вызвать инструмент банка: `coin-catalog-goldenplata`.
-2. Убедиться, что JSON-файл существует: `tool/coin-catalog-goldenplata/coins_goldenplata_catalog.json`.
+2. Убедиться, что JSON-файл существует: `tools/coin-catalog-goldenplata/coins_goldenplata_catalog.json`.
 3. Прочитать JSON и посчитать сводку/аналитику.
 
 ## Что возвращать пользователю
@@ -31,4 +31,4 @@ disable-model-invocation: true
 
 ## Важные пути
 - Tool: `coin-catalog-goldenplata`
-- Output JSON: `tool/coin-catalog-goldenplata/coins_goldenplata_catalog.json`
+- Output JSON: `tools/coin-catalog-goldenplata/coins_goldenplata_catalog.json`

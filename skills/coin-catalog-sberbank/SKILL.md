@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## Порядок действий
 1. Вызвать инструмент банка: `coin-catalog-sberbank`.
-2. Убедиться, что JSON-файл существует: `tool/coin-catalog-sberbank/coins_sberbank_catalog.json`.
+2. Убедиться, что JSON-файл существует: `tools/coin-catalog-sberbank/coins_sberbank_catalog.json`.
 3. Прочитать JSON и посчитать сводку/аналитику.
 
 ## Что возвращать пользователю
@@ -29,4 +29,4 @@ disable-model-invocation: true
 
 ## Важные пути
 - Tool: `coin-catalog-sberbank`
-- Output JSON: `tool/coin-catalog-sberbank/coins_sberbank_catalog.json`
+- Output JSON: `tools/coin-catalog-sberbank/coins_sberbank_catalog.json`

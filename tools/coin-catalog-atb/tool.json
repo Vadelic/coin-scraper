@@ -3,6 +3,6 @@
   "description": "Получает каталог монет АТБ и сохраняет в JSON-файл.",
   "command": "./run.sh",
   "args": [],
-  "working_directory": "tool/coin-catalog-atb",
+  "working_directory": "tools/coin-catalog-atb",
   "output_file": "coins_atb_catalog.json"
 }
