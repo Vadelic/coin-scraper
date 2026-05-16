@@ -1,0 +1,15 @@
+{
+  "name": "coin-catalog-rshb",
+  "description": "Получает каталог монет Россельхозбанка (coins.rshb.ru) и возвращает JSON в stdout. Опционально — поиск по каталогу.",
+  "command": "./run_rshb.sh",
+  "args": [],
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Строка поиска в каталоге coins.rshb.ru",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    }
+  ],
+  "working_directory": "tools/coin-catalog-rshb"
+}
