@@ -1,9 +1,0 @@
-{
-  "name": "coin-catalog-zoloto_md",
-  "description": "Каталог монет Золотой монетный двор. Сохраняет JSON в файл (см. output_file): список монет и цены.",
-  "command": "./run.sh",
-  "args": [],
-  "recommendations": "docs/coin-catalog-tool-recommendations.md",
-  "working_directory": "tools/coin-catalog-zoloto_md",
-  "output_file": "coins_zoloto_md_catalog.json"
-}

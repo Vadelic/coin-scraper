@@ -1,0 +1,22 @@
+{
+  "name": "coin-catalog-zoloto-md",
+  "description": "Каталог монет Золотой монетный двор (spb.zoloto-md.ru). Возвращает JSON в stdout: список монет, цены, статус сбора. Поиск через query; при investment_only — фильтр country=Россия.",
+  "command": "./run_zoloto-md.sh",
+  "args": [],
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Поиск в каталоге: название монеты, металл, каталожный номер",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только монеты эмитента Россия (country=Россия на витрине)",
+      "required": false,
+      "cli": ["--investment-only"]
+    }
+  ],
+  "recommendations": "docs/coin-catalog-tool-recommendations.md",
+  "working_directory": "tools/coin-catalog-zoloto-md"
+}

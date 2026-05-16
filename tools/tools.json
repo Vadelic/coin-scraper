@@ -16,9 +16,9 @@
       "tool_json": "tools/coin-catalog-goldenplata/tool.json"
     },
     {
-      "name": "coin-catalog-zoloto_md",
-      "description": "Каталог монет Золотой монетный двор: JSON в файл (legacy).",
-      "tool_json": "tools/coin-catalog-zoloto_md/tool.json"
+      "name": "coin-catalog-zoloto-md",
+      "description": "Каталог монет Золотой монетный двор (spb.zoloto-md.ru): JSON в stdout, поиск по подстроке.",
+      "tool_json": "tools/coin-catalog-zoloto-md/tool.json"
     },
     {
       "name": "coin-catalog-vtb",
