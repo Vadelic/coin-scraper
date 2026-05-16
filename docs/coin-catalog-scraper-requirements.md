@@ -89,6 +89,7 @@ Legacy-скрипты вне этой структуры (HTTP без Playwright
 
 - `--timeout`, `--retries`, `--delay` — устойчивость и пагинация.
 - `--headful`, `--storage-state`, `--save-storage-state` — антибот/CAPTCHA.
+- `--with-buy-price` — если `buy_price` только на карточке товара: открыть страницу каждой монеты (медленно).
 - `--log-level` — см. раздел 4.
 
 Поведение `--query`:

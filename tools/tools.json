@@ -37,7 +37,7 @@
     },
     {
       "name": "coin-catalog-rshb",
-      "description": "Получает каталог монет Россельхозбанка (coins.rshb.ru) и возвращает JSON в stdout.",
+      "description": "Каталог монет Россельхозбанка (coins.rshb.ru): JSON в stdout, sell_price с витрины (регион Москва по умолчанию), опционально поиск и buy_price.",
       "tool_json": "tools/coin-catalog-rshb/tool.json"
     }
   ]

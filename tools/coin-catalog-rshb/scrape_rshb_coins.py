@@ -3,7 +3,9 @@
 
 Сбор через Playwright. Итог: JSON в stdout (один объект, без записи файлов).
 Поля монеты: catalog_number, name, metal, weight_g, buy_price, sell_price.
-Опционально: --query — поиск через ?search_text= в URL каталога.
+Опционально: --query (?search_text= в URL).
+Без --with-buy-price: один проход по витрине, sell_price с карточек каталога, buy_price=null.
+С --with-buy-price: тот же проход + обогащение buy_price со страницы каждой монеты.
 """
 from __future__ import annotations
 
@@ -30,6 +32,9 @@ DEFAULT_PAGE_SIZE = 99
 DEFAULT_PAGE_DELAY = 5.0
 DEFAULT_TIMEOUT_MS = 30_000
 DEFAULT_RETRIES = 3
+# Без x-region сайт отдаёт region=0 — на карточках нет .price-box с ценой.
+DEFAULT_REGION_CODE = "77"
+REGION_COOKIE_NAME = "x-region"
 
 CARD_LINK_SELECTOR = "a[href^='/p/']"
 PAGINATION_LINK_SELECTOR = "a[href*='page=']"
@@ -41,7 +46,19 @@ STOCK_STATUS_MARKERS = (
     "распродано",
 )
 SELL_PRICE_LINE_RE = re.compile(r"(?:₽|руб\.?)", re.IGNORECASE)
-NOMINAL_VALUE_RE = re.compile(r"^\d+\s*RUB\b", re.IGNORECASE)
+SELL_PRICE_ONLY_RE = re.compile(
+    r"^\d[\d\s.,]*\s*(?:₽|руб\.?)\s*$",
+    re.IGNORECASE,
+)
+NOMINAL_VALUE_RE = re.compile(
+    r"^\d+(?:[.,]\d+)?\s*(?:RUB|RUR|руб\.?)\b",
+    re.IGNORECASE,
+)
+WEIGHT_ONLY_RE = re.compile(
+    r"^\d+(?:[.,]\d+)?\s*г(?:р|рамм)?\.?\s*$",
+    re.IGNORECASE,
+)
+NAME_ATTR_CUT_LABELS = ("Номинал", "Металл", "Проба", "Чистого металла", "Тираж", "Выкуп")
 
 # stylesheet не блокируем — иначе цены на карточках могут не отрендериться.
 BLOCKED_RESOURCE_TYPES = frozenset({"image", "media", "font"})
@@ -55,6 +72,11 @@ ATTRIBUTE_LABELS = (
     "Цена выкупа",
 )
 BUYOUT_LABELS = ("Выкуп", "Цена выкупа")
+BUYOUT_PAGE_HINTS = (
+    "банк может купить",
+    "купить у вас",
+    "цене выкупа",
+)
 
 BROWSER_CHANNELS = ("chrome", "msedge", "chromium")
 LAUNCH_ARGS = ["--no-sandbox", "--disable-setuid-sandbox"]
@@ -246,9 +268,105 @@ def buyout_price_from_card_text(raw_text: str) -> float | None:
     return None
 
 
+def buyout_price_from_product_page_text(text: str) -> float | None:
+    """Цена выкупа со страницы товара («Банк может купить… от N»)."""
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    prices: list[float] = []
+    in_section = False
+    for line in lines:
+        low = line.casefold()
+        if any(h in low for h in BUYOUT_PAGE_HINTS):
+            in_section = True
+            continue
+        if not in_section:
+            continue
+        if "подать заявку" in low or "подробнее о том, как вы можете продать" in low:
+            break
+        if "от" in low:
+            p = parse_price(line)
+            if p is not None and p >= 1_000:
+                prices.append(p)
+    if prices:
+        return min(prices)
+    return buyout_price_from_card_text(text)
+
+
+async def fetch_buy_price_from_product_page(
+    page,
+    product_url: str,
+    *,
+    timeout_ms: int,
+) -> float | None:
+    log.info("Открываю карточку: %s", product_url)
+    try:
+        await page.goto(
+            product_url,
+            wait_until="domcontentloaded",
+            timeout=timeout_ms,
+        )
+        text = await page.locator("body").inner_text()
+        return buyout_price_from_product_page_text(text)
+    except PlaywrightError as e:
+        log.warning("Выкуп %s: %s", product_url, e)
+        return None
+
+
+async def enrich_buy_prices_from_product_pages(
+    page,
+    coins: list[RshbCoin],
+    *,
+    delay: float,
+    timeout_ms: int,
+) -> None:
+    total = len(coins)
+    log.info("Загрузка цен выкупа: %s монет", total)
+    for i, coin in enumerate(coins, 1):
+        if not coin._url:
+            log.warning("Выкуп %s/%s: нет URL — «%s»", i, total, coin.name)
+            continue
+        log.info(
+            "Выкуп %s/%s: «%s» (артикул %s)",
+            i,
+            total,
+            coin.name,
+            coin.catalog_number,
+        )
+        coin.buy_price = await fetch_buy_price_from_product_page(
+            page, coin._url, timeout_ms=timeout_ms
+        )
+        log.info(
+            "Выкуп %s/%s: buy_price=%s",
+            i,
+            total,
+            coin.buy_price if coin.buy_price is not None else "нет данных",
+        )
+        if i < total:
+            await asyncio.sleep(delay)
+
+
 def _is_stock_status_line(line: str) -> bool:
     low = line.casefold()
     return any(marker in low for marker in STOCK_STATUS_MARKERS)
+
+
+def _looks_like_sell_price_line(line: str) -> bool:
+    stripped = line.strip()
+    if "₽" in stripped:
+        if SELL_PRICE_ONLY_RE.match(stripped):
+            return True
+        if stripped.startswith("₽") or stripped.endswith("₽"):
+            return len(stripped) < 30
+    return bool(SELL_PRICE_ONLY_RE.match(stripped))
+
+
+def sell_price_from_price_box(text: str) -> float | None:
+    """Цена продажи с карточки каталога (.price-box), обычно «107 000» без ₽."""
+    if not (text or "").strip():
+        return None
+    price = parse_price(text.strip())
+    if price is not None and price > 10:
+        return price
+    return None
 
 
 def sell_price_from_card_text(raw_text: str) -> float | None:
@@ -256,7 +374,7 @@ def sell_price_from_card_text(raw_text: str) -> float | None:
     for line in lines:
         if _is_stock_status_line(line):
             continue
-        if not SELL_PRICE_LINE_RE.search(line):
+        if "₽" not in line and not SELL_PRICE_ONLY_RE.match(line):
             continue
         price = parse_price(line)
         if price is not None and price > 10:
@@ -264,12 +382,22 @@ def sell_price_from_card_text(raw_text: str) -> float | None:
     return None
 
 
+def _strip_status_prefix(line: str) -> str:
+    low = line.casefold()
+    for marker in STOCK_STATUS_MARKERS:
+        if low.startswith(marker):
+            return line[len(marker) :].strip(" ,—–-")
+    return line.strip()
+
+
 def _is_name_candidate_line(line: str) -> bool:
     if _is_stock_status_line(line):
         return False
-    if SELL_PRICE_LINE_RE.search(line):
+    if _looks_like_sell_price_line(line):
         return False
     if NOMINAL_VALUE_RE.match(line):
+        return False
+    if WEIGHT_ONLY_RE.match(line):
         return False
     if line in ATTRIBUTE_LABELS:
         return False
@@ -282,31 +410,58 @@ def _is_name_candidate_line(line: str) -> bool:
     return True
 
 
+def _name_line_score(line: str) -> int:
+    if not _is_name_candidate_line(line):
+        return -1
+    if re.search(r"[а-яА-ЯёЁa-zA-Z]{4,}", line):
+        return 10 + min(len(line), 80)
+    return len(line)
+
+
+def extract_name_from_listing(text: str) -> str:
+    """Название с витрины: из текста ссылки, без значений атрибутов (вес, номинал)."""
+    if not text:
+        return ""
+    cut = text
+    for label in NAME_ATTR_CUT_LABELS:
+        idx = cut.find(label)
+        if idx > 0:
+            cut = cut[:idx]
+    lines = [ln.strip() for ln in cut.splitlines() if ln.strip()]
+    if not lines and cut.strip():
+        lines = [_strip_status_prefix(cut.strip())]
+    candidates: list[str] = []
+    for line in lines:
+        line = _strip_status_prefix(line)
+        if not line:
+            continue
+        if _is_name_candidate_line(line):
+            candidates.append(line)
+    if not candidates:
+        return ""
+    return max(candidates, key=_name_line_score)
+
+
 def parse_card_text(
     raw_text: str,
     href: str,
     *,
-    buyout_by_sku: dict[str, float] | None = None,
+    link_text: str | None = None,
+    price_box_text: str | None = None,
 ) -> RshbCoin | None:
+    """Парсинг карточки с витрины каталога: sell_price и атрибуты; buy_price не заполняется."""
     lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
     if not lines:
         return None
 
     url = BASE_URL + href
     sku = parse_sku_from_product_href(href)
-    buy_price: float | None = None
-    if sku and buyout_by_sku:
-        buy_price = buyout_by_sku.get(sku)
-    if buy_price is None:
-        buy_price = buyout_price_from_card_text(raw_text)
+    sell_price = sell_price_from_price_box(price_box_text or "")
+    if sell_price is None:
+        sell_price = sell_price_from_card_text(raw_text)
 
-    sell_price = sell_price_from_card_text(raw_text)
-
-    name = ""
-    for line in lines:
-        if _is_name_candidate_line(line):
-            name = line
-            break
+    name_source = (link_text or "").strip() or raw_text
+    name = extract_name_from_listing(name_source)
     if not name:
         name = href.rstrip("/").split("/")[-1]
 
@@ -319,7 +474,7 @@ def parse_card_text(
         catalog_number=sku,
         metal=normalize_metal(metal_raw),
         weight_g=weight_g,
-        buy_price=buy_price,
+        buy_price=None,
         sell_price=sell_price,
         _url=url,
     )
@@ -482,25 +637,39 @@ async def get_last_page(page) -> int:
 
 
 _CARD_TEXT_JS = """el => {
-  const root = el.closest(
+  const wrapper = el.closest('.product-wrapper');
+  const root = wrapper || el.closest(
     'article, li, [class*="product"], [class*="card"], [class*="item"]'
   ) || el.parentElement;
-  return (root || el).innerText || el.innerText;
+  const priceEl = (wrapper || root || el).querySelector('.price-box');
+  return {
+    card: (root || el).innerText || el.innerText || '',
+    link: el.innerText || '',
+    priceBox: (priceEl && priceEl.innerText) ? priceEl.innerText.trim() : '',
+  };
 }"""
 
 
-async def extract_coins_from_page(
-    page,
-    buyout_by_sku: dict[str, float],
-) -> list[RshbCoin]:
+async def extract_coins_from_page(page) -> list[RshbCoin]:
+    """Один проход по витрине: цены продажи и атрибуты с карточек каталога."""
     coins: list[RshbCoin] = []
     for link in await page.query_selector_all(CARD_LINK_SELECTOR):
         href = await link.get_attribute("href") or ""
         try:
-            raw_text = await link.evaluate(_CARD_TEXT_JS)
+            block = await link.evaluate(_CARD_TEXT_JS)
+            raw_text = block.get("card") or block.get("link") or ""
+            link_text = block.get("link") or ""
+            price_box_text = block.get("priceBox") or ""
         except PlaywrightError:
             raw_text = await link.inner_text()
-        coin = parse_card_text(raw_text, href, buyout_by_sku=buyout_by_sku)
+            link_text = raw_text
+            price_box_text = ""
+        coin = parse_card_text(
+            raw_text,
+            href,
+            link_text=link_text,
+            price_box_text=price_box_text,
+        )
         if coin is None:
             log.warning("Пропуск карточки: не удалось распарсить href=%s", href)
             continue
@@ -514,20 +683,11 @@ async def extract_coins_from_page(
 async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin]]:
     all_coins: list[RshbCoin] = []
     seen_urls: set[str] = set()
-    buyout_by_sku: dict[str, float] = {}
-    es_response_buffer: list[Response] = []
     url_query = (args.query or "").strip()
-
-    def on_es_response(response: Response) -> None:
-        if response.request.method != "POST":
-            return
-        url = response.url
-        if "_search" not in url or "coins.rshb.ru" not in url:
-            return
-        es_response_buffer.append(response)
 
     async with async_playwright() as pw:
         browser = await launch_chromium_browser(pw, headless=not args.headful)
+        region = (args.region or DEFAULT_REGION_CODE).strip()
         context = await browser.new_context(
             user_agent=USER_AGENT,
             locale="ru-RU",
@@ -536,9 +696,19 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                 "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
             },
         )
+        await context.add_cookies(
+            [
+                {
+                    "name": REGION_COOKIE_NAME,
+                    "value": region,
+                    "domain": "coins.rshb.ru",
+                    "path": "/",
+                }
+            ]
+        )
+        log.info("Регион каталога: %s=%s", REGION_COOKIE_NAME, region)
         await context.route("**/*", block_assets)
         page = await context.new_page()
-        page.on("response", on_es_response)
 
         last_page: int | None = None
         n = args.start_page
@@ -582,13 +752,12 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                 continue
 
             await asyncio.sleep(0.25)
-            await drain_es_search_responses(es_response_buffer, buyout_by_sku)
 
             if last_page is None:
                 last_page = await get_last_page(page)
                 log.info("Всего страниц: %s (page_size=%s)", last_page, args.page_size)
 
-            coins = await extract_coins_from_page(page, buyout_by_sku)
+            coins = await extract_coins_from_page(page)
             new_coins: list[RshbCoin] = []
             for c in coins:
                 key = c._url or ""
@@ -610,9 +779,9 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                         c.name,
                         c.catalog_number,
                     )
-                if c.buy_price is None and c.sell_price is None:
+                if c.sell_price is None:
                     log.warning(
-                        "Нет цен для '%s' (артикул %s)",
+                        "Нет sell_price для '%s' (артикул %s)",
                         c.name,
                         c.catalog_number,
                     )
@@ -639,6 +808,18 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
                 break
             n += 1
 
+        if args.with_buy_price and all_coins:
+            log.info(
+                "Каталог собран (%s монет), обогащение buy_price со страниц товаров",
+                len(all_coins),
+            )
+            await enrich_buy_prices_from_product_pages(
+                page,
+                all_coins,
+                delay=args.delay,
+                timeout_ms=args.timeout,
+            )
+
         await browser.close()
         return processed, all_coins
 
@@ -658,8 +839,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--retries", type=int, default=DEFAULT_RETRIES)
     p.add_argument("--headful", action="store_true")
     p.add_argument(
+        "--with-buy-price",
+        action="store_true",
+        help="после витрины открыть каждую монету и дополнить buy_price (медленно; удобно с --query)",
+    )
+    p.add_argument(
+        "--region",
+        default=DEFAULT_REGION_CODE,
+        help=f"код региона для cookie {REGION_COOKIE_NAME} (по умолчанию {DEFAULT_REGION_CODE}, Москва)",
+    )
+    p.add_argument(
         "--log-level",
-        default="INFO",
+        default="DEBUG",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
     )
     return p
