@@ -21,7 +21,6 @@ Legacy-скрипты вне этой структуры (HTTP без Playwright
 | `total_coins`   | int               | да             | `len(coins)`                            |
 | `coins`         | array             | да             | Список монет                            |
 | `query`         | string            | нет            | Только если передан непустой `--query`  |
-| `investment_only` | boolean         | нет            | Только если передан `--investment-only` |
 | `error`         | string            | нет            | Текст ошибки при `scrape_status` ≠ `ok` |
 
 

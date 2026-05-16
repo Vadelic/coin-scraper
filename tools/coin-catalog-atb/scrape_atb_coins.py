@@ -282,11 +282,11 @@ async def parse_card(
         log.warning("Пропуск карточки: пустое имя")
         return None
 
-    price_match = re.search(r'class="coins-item__price"\s*>(.*?)</motion.div>', card_html, flags=re.S)
-    if not price_match:
-        price_match = re.search(r'class="coins-item__price"\s*>(.*?)</motion.div>', card_html, flags=re.S)
-    if not price_match:
-        price_match = re.search(r'class="coins-item__price"\s*>(.*?)</div>', card_html, flags=re.S)
+    price_match = re.search(
+        r'class="coins-item__price"\s*>(.*?)</(?:motion\.)?div>',
+        card_html,
+        flags=re.S,
+    )
     sell_price = parse_price(strip_tags(price_match.group(1))) if price_match else None
     if sell_price is None and price_match:
         log.warning("Нет цены на карточке: %s", name)
@@ -351,16 +351,17 @@ async def parse_coins_from_fragment(
 
 
 async def launch_browser(pw, *, headless: bool):
+    launch_kwargs = {"headless": headless, "args": LAUNCH_ARGS}
     for channel in BROWSER_CHANNELS:
         try:
-            return await pw.chromium.launch(
-                channel=channel if channel != "chromium" else None,
-                headless=headless,
-                args=LAUNCH_ARGS,
-            )
+            browser = await pw.chromium.launch(channel=channel, **launch_kwargs)
+            log.info("Браузер: %s", channel)
+            return browser
         except PlaywrightError:
             continue
-    return await pw.chromium.launch(headless=headless, args=LAUNCH_ARGS)
+    browser = await pw.chromium.launch(**launch_kwargs)
+    log.info("Браузер: playwright bundled chromium")
+    return browser
 
 
 async def scrape(args: argparse.Namespace) -> list[AtbCoin]:
@@ -401,7 +402,10 @@ async def scrape(args: argparse.Namespace) -> list[AtbCoin]:
                 timeout_ms=timeout_ms,
             )
             if not coins:
-                raise RuntimeError("Не удалось распарсить монеты из ответа")
+                if "coins-select__no-result" in fragment or "ничего не найдено" in fragment.casefold():
+                    log.info("По запросу монет не найдено")
+                else:
+                    raise RuntimeError("Не удалось распарсить монеты из ответа")
             return coins
         finally:
             await browser.close()

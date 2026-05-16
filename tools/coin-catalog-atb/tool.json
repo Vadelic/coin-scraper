@@ -1,8 +1,21 @@
 {
   "name": "coin-catalog-atb",
-  "description": "Получает каталог монет АТБ и сохраняет в JSON-файл.",
-  "command": "./run.sh",
+  "description": "Получает каталог монет АТБ (atb.su) и возвращает JSON в stdout. Опционально — поиск по названию и фильтр инвестиционных монет.",
+  "command": "./run_atb.sh",
   "args": [],
-  "working_directory": "tools/coin-catalog-atb",
-  "output_file": "coins_atb_catalog.json"
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Строка поиска в каталоге (поле name в AJAX POST)",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только инвестиционные монеты (category=479 на atb.su)",
+      "required": false,
+      "cli": ["--investment-only"]
+    }
+  ],
+  "working_directory": "tools/coin-catalog-atb"
 }
