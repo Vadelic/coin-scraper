@@ -30,8 +30,7 @@ from playwright.async_api import Error as PlaywrightError, Route, async_playwrig
 
 BASE_URL = "https://www.lanta.ru"
 CATALOG_URL = "https://www.lanta.ru/petersburg/metals/coins/"
-DEFAULT_OUTPUT = Path(__file__).parent / "coins_lanta_catalog.json"
-
+DEFAULT_OUTPUT = "coins_lanta_catalog.json"
 DEFAULT_DELAY = 0.5
 DEFAULT_TIMEOUT_MS = 60_000
 DEFAULT_RETRIES = 3

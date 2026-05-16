@@ -2,11 +2,11 @@
 # Обёртка для scrape_lanta_coins.py — проверяет зависимости и запускает скрапер.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")" && pwd)"
-cd "$ROOT"
+TOOL_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$TOOL_DIR"
 
 PYTHON="${PYTHON:-python3}"
-SCRIPT="$ROOT/scrape_lanta_coins.py"
+SCRIPT="$TOOL_DIR/scrape_lanta_coins.py"
 
 if [[ ! -f "$SCRIPT" ]]; then
   echo "error: не найден $SCRIPT" >&2

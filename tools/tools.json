@@ -29,6 +29,16 @@
       "name": "coin-catalog-sberbank",
       "description": "Получает каталог монет Сбербанка и сохраняет в JSON-файл.",
       "tool_json": "tools/coin-catalog-sberbank/tool.json"
+    },
+    {
+      "name": "coin-catalog-lanta",
+      "description": "Получает каталог монет Ланта (lanta.ru) и сохраняет в JSON-файл.",
+      "tool_json": "tools/coin-catalog-lanta/tool.json"
+    },
+    {
+      "name": "coin-catalog-rshb",
+      "description": "Получает каталог монет Россельхозбанка (coins.rshb.ru) и сохраняет в JSON-файл.",
+      "tool_json": "tools/coin-catalog-rshb/tool.json"
     }
   ]
 }

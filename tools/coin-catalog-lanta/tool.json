@@ -1,0 +1,16 @@
+{
+  "name": "coin-catalog-lanta",
+  "description": "Получает каталог монет Ланта (lanta.ru) и сохраняет в JSON-файл. Опционально — фильтр по полю «Найти» на сайте.",
+  "command": "./run_lanta.sh",
+  "args": [],
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Строка для поля «Найти» на странице каталога",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    }
+  ],
+  "working_directory": "tools/coin-catalog-lanta",
+  "output_file": "coins_lanta_catalog.json"
+}
