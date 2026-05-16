@@ -32,6 +32,11 @@
       "minLength": 1,
       "description": "Присутствует только при непустом --query"
     },
+    "investment_only": {
+      "type": "boolean",
+      "const": true,
+      "description": "Присутствует только при --investment-only"
+    },
     "error": {
       "type": "string",
       "description": "Текст ошибки при scrape_status != ok"
@@ -61,7 +66,6 @@
         "name",
         "metal",
         "weight_g",
-        "buy_price",
         "sell_price"
       ],
       "additionalProperties": false,

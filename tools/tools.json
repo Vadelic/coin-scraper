@@ -27,7 +27,7 @@
     },
     {
       "name": "coin-catalog-sberbank",
-      "description": "Получает каталог монет Сбербанка и сохраняет в JSON-файл.",
+      "description": "Получает каталог монет Сбербанка (sberbank.ru) и возвращает JSON в stdout.",
       "tool_json": "tools/coin-catalog-sberbank/tool.json"
     },
     {

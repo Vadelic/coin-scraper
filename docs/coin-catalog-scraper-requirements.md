@@ -21,6 +21,7 @@ Legacy-скрипты вне этой структуры (HTTP без Playwright
 | `total_coins`   | int               | да             | `len(coins)`                            |
 | `coins`         | array             | да             | Список монет                            |
 | `query`         | string            | нет            | Только если передан непустой `--query`  |
+| `investment_only` | boolean         | нет            | Только если передан `--investment-only` |
 | `error`         | string            | нет            | Текст ошибки при `scrape_status` ≠ `ok` |
 
 
@@ -75,6 +76,15 @@ Legacy-скрипты вне этой структуры (HTTP без Playwright
 - Зависимость: `pip install playwright`; браузер: системный Chrome/Edge, fallback — bundled Chromium.
 - Обёртка `run_{slug}.sh`: проверка `import playwright`, при отсутствии — `pip install playwright`.
 
+### Исключение: Сбербанк (`coin-catalog-sberbank`)
+
+Для [tools/coin-catalog-sberbank](tools/coin-catalog-sberbank) основной путь — **HTTP (stdlib)**: GET витрины `sberbank.ru/ru/person/mon` для cookies, затем POST/GET к `/proxy/services/coin-catalog/…` с заголовками `Origin`/`Referer`. Playwright на витрине Сбера часто даёт ложный `captcha_blocked` (WAF), прямой HTTP стабильнее.
+
+- Скрипт: `scrape_sberbank_coins.py` (синхронный `main`, без `playwright`).
+- `run_sberbank.sh` **не** ставит Playwright.
+- TLS: по умолчанию проверка сертификата **отключена** (`--secure-ssl` — включить проверку).
+- Запасной вариант: `scrape_sberbank_coins_playwright.py`.
+
 ---
 
 ## 3. CLI
@@ -87,10 +97,26 @@ Legacy-скрипты вне этой структуры (HTTP без Playwright
 
 Рекомендуемые флаги (по необходимости сайта):
 
+- `--investment-only` — только инвестиционные монеты (реализация зависит от банка, см. ниже).
 - `--timeout`, `--retries`, `--delay` — устойчивость и пагинация.
 - `--headful`, `--storage-state`, `--save-storage-state` — антибот/CAPTCHA.
 - `--with-buy-price` — если `buy_price` только на карточке товара: открыть страницу каждой монеты (медленно).
 - `--log-level` — см. раздел 4.
+
+### `--investment-only`
+
+Флаг включает на витрине фильтр «инвестиционные» (без памятных/коллекционных). В JSON добавляется `"investment_only": true`; при пустом флаге поле не пишется.
+
+Примеры реализации по банкам:
+
+| Банк | Механизм |
+| ---- | -------- |
+| ВТБ | BFF POST `coin/list`: `{"filters":[{"id":"coinKind","values":["Инвестиционные"]}]}` |
+| Сбербанк | POST `coin-catalog/coins`: `"sections":["Инвестиционные монеты"]` |
+| Ланта | URL раздела `…/ivesticyonnie-monety/` |
+| РСХБ | GET каталога: `?subjects=5506` |
+
+Сочетается с `--query` и (если есть) фильтрами по металлу.
 
 Поведение `--query`:
 
@@ -176,6 +202,12 @@ flowchart TD
       "description": "Строка поиска в каталоге",
       "required": false,
       "cli": ["--query", "{query}"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только инвестиционные монеты (механизм — по банку, см. --investment-only)",
+      "required": false,
+      "cli": ["--investment-only"]
     }
   ],
   "working_directory": "tools/coin-catalog-{slug}"
@@ -219,8 +251,9 @@ disable-model-invocation: true
 ### Порядок действий (тело скилла)
 
 1. Вызвать tool `coin-catalog-{slug}`.
-   - Полный каталог — без параметров.
-   - Поиск на витрине — передать `query` (CLI `--query "…"`): ключевые слова из запроса пользователя (название, «золото», артикул и т.д.).
+   - **По умолчанию** передавать `investment_only` (`--investment-only`), если скилл банка это предписывает — только инвестиционные монеты.
+   - **Исключение:** пользователь явно просит **весь** каталог, памятные/коллекционные монеты или «все монеты» — тогда `investment_only` **не** передавать.
+   - Поиск на витрине — передать `query` (CLI `--query "…"`): ключевые слова из запроса пользователя (название, «золото», артикул и т.д.); сочетается с `investment_only`.
 2. Распарсить **единственный** JSON-объект из stdout (логи в stderr игнорировать).
 3. Если `scrape_status` ≠ `ok` — сообщить статус и `error`, не строить аналитику как по успешным данным.
 4. Для **поиска монеты**: отфильтровать `coins[]` по смыслу запроса (`name`, `catalog_number`, `metal`, `weight_g`, цены); при пустом результате с `query` — при необходимости повторить с другой формулировкой `query` или уточнить у пользователя.
@@ -232,7 +265,7 @@ disable-model-invocation: true
 
 **Сводка/аналитика** (при запросе на обзор каталога):
 
-- банк, `scrape_status`, `total_coins`, при наличии — `query`;
+- банк, `scrape_status`, `total_coins`, при наличии — `query`, `investment_only`;
 - min/max `buy_price`, min/max и медиана `sell_price` (по валидным значениям);
 - топ по `metal`;
 - доля пропусков в `name`, `buy_price`, `sell_price`, `metal`.
@@ -261,3 +294,4 @@ disable-model-invocation: true
 - `tool.json`, `run_*.sh`, запись в `tools/tools.json`.
 - Скилл `skills/coin-catalog-{slug}/SKILL.md` по п.7 (в т.ч. сценарий поиска монеты).
 - Прогон без аргументов и с `--query "…"` даёт валидный JSON в stdout.
+- При наличии фильтра на сайте: `--investment-only` сужает выдачу; в корне JSON — `investment_only: true`.

@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
-"""Скрейпер каталога монет ATB без внешних библиотек.
+"""Скрейпер каталога монет ATB (atb.su).
 
-Источник:
-https://www.atb.su/vklady-i-scheta/monety/
+Источник: https://www.atb.su/vklady-i-scheta/monety/
+Сбор через Playwright (сессия) + AJAX POST / detail GET через APIRequestContext.
 
-Получает HTML-фрагмент каталога через AJAX POST (параметр ajax=true),
-парсит карточки монет и сохраняет JSON.
+Итог: JSON в stdout (один объект, без записи файлов).
+Поля монеты: catalog_number, name, metal, weight_g, buy_price, sell_price.
+Опционально: --query (поле name в AJAX), --investment-only (category=479).
 """
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import logging
 import re
-import ssl
 import sys
-import time
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Iterable
-from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
-from urllib.request import Request, urlopen
+from dataclasses import dataclass
+from datetime import datetime
+from urllib.parse import quote, urljoin
+
+from playwright.async_api import APIRequestContext, Error as PlaywrightError, async_playwright
 
 CATALOG_URL = "https://www.atb.su/vklady-i-scheta/monety/"
 BASE_URL = "https://www.atb.su"
-DEFAULT_OUTPUT = Path(__file__).parent / "coins_atb_catalog.json"
+INVESTMENT_CATEGORY = "479"
 DEFAULT_TIMEOUT_MS = 30_000
 DEFAULT_RETRIES = 3
 DEFAULT_DELAY = 0.5
@@ -37,20 +35,60 @@ USER_AGENT = (
     "Chrome/124.0.0.0 Safari/537.36"
 )
 
+AJAX_HEADERS = {
+    "Accept": "text/html, */*;q=0.1",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": BASE_URL,
+    "Referer": CATALOG_URL,
+    "X-Requested-With": "XMLHttpRequest",
+}
+
+DETAIL_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Referer": CATALOG_URL,
+}
+
+METAL_LINE_RE = re.compile(
+    r"^(золото|серебро|платина|палладий|медно-никелевый сплав)\b",
+    re.IGNORECASE,
+)
+
+CAPTCHA_BODY_HINTS = (
+    "не робот",
+    "not a robot",
+    "captcha",
+    "ползунк",
+)
+
+BROWSER_CHANNELS = ("chrome", "msedge", "chromium")
+LAUNCH_ARGS = ["--no-sandbox", "--disable-setuid-sandbox"]
+
 log = logging.getLogger("atb_scraper")
+
+
+class CaptchaBlockedError(RuntimeError):
+    """Сайт отдал CAPTCHA вместо каталога."""
 
 
 @dataclass
 class AtbCoin:
     name: str
-    article: str | None
-    url: str
-    metal: str | None
-    weight: float | None
-    price: float | None = None
+    catalog_number: str | None = None
+    metal: str | None = None
+    weight_g: float | None = None
+    buy_price: float | None = None
+    sell_price: float | None = None
+    _url: str | None = None
 
     def to_dict(self) -> dict:
-        return {k: v for k, v in asdict(self).items() if v is not None}
+        return {
+            "catalog_number": self.catalog_number,
+            "name": self.name,
+            "metal": self.metal,
+            "weight_g": self.weight_g,
+            "buy_price": self.buy_price,
+            "sell_price": self.sell_price,
+        }
 
 
 def parse_price(text: str) -> float | None:
@@ -67,7 +105,7 @@ def parse_price(text: str) -> float | None:
         return None
 
 
-def parse_weight(text: str) -> float | None:
+def parse_weight_g(text: str) -> float | None:
     if not text:
         return None
     m = re.search(r"\d+(?:[.,]\d+)?", text)
@@ -82,21 +120,11 @@ def parse_weight(text: str) -> float | None:
 def normalize_metal(text: str | None) -> str | None:
     if not text:
         return None
-    s = text.strip().casefold()
-    known = (
-        "золото",
-        "серебро",
-        "платина",
-        "палладий",
-        "медно-никелевый сплав",
-    )
-    for metal in known:
-        if metal in s:
-            return metal
-    m = re.match(r"[A-Za-zА-Яа-яЁё\- ]+", s)
-    if not m:
-        return None
-    return m.group(0).strip() or None
+    m = METAL_LINE_RE.match(text.strip())
+    if m:
+        name = m.group(1)
+        return name[0].upper() + name[1:].lower()
+    return None
 
 
 def strip_tags(html: str) -> str:
@@ -112,17 +140,12 @@ def strip_tags(html: str) -> str:
     return text.strip()
 
 
-def extract_field(block: str, label: str) -> str | None:
-    pattern = rf"{re.escape(label)}\s*</span>\s*<span[^>]*>(.*?)</span>"
-    m = re.search(pattern, block, flags=re.I | re.S)
-    if not m:
-        return None
-    value = strip_tags(m.group(1))
-    return value or None
-
-
 def parse_detail_fields(detail_html: str) -> tuple[str | None, str | None, float | None]:
-    rows = re.findall(r"<tr>\s*<td>(.*?)</td>\s*<td>(.*?)</td>\s*</tr>", detail_html, flags=re.I | re.S)
+    rows = re.findall(
+        r"<tr>\s*<td>(.*?)</td>\s*<td>(.*?)</td>\s*</tr>",
+        detail_html,
+        flags=re.I | re.S,
+    )
     kv: dict[str, str] = {}
     for key_html, value_html in rows:
         key = strip_tags(key_html)
@@ -130,122 +153,18 @@ def parse_detail_fields(detail_html: str) -> tuple[str | None, str | None, float
         if key and value:
             kv[key.casefold()] = value
 
-    article = kv.get("каталожный номер")
+    catalog_number = kv.get("каталожный номер")
     metal = normalize_metal(kv.get("металл, проба") or kv.get("металл"))
     weight_raw = kv.get("масса общая, г") or kv.get("масса, г") or kv.get("масса")
-    weight = parse_weight(weight_raw or "")
-    return article, metal, weight
+    weight_g = parse_weight_g(weight_raw or "")
+    return catalog_number, metal, weight_g
 
 
-def fetch_detail_html(
-    url: str,
-    timeout_s: float,
-    retries: int,
-    insecure: bool,
-    delay: float,
-) -> str:
-    headers = {
-        "User-Agent": USER_AGENT,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Referer": CATALOG_URL,
-    }
-    context = ssl._create_unverified_context() if insecure else None
-
-    last_error: Exception | None = None
-    for attempt in range(1, retries + 1):
-        req = Request(url, headers=headers, method="GET")
-        try:
-            with urlopen(req, timeout=timeout_s, context=context) as resp:
-                body = resp.read().decode("utf-8", "ignore")
-                if not body.strip():
-                    raise RuntimeError(f"Пустая detail-страница: {url}")
-                return body
-        except (HTTPError, URLError, TimeoutError, RuntimeError) as exc:
-            last_error = exc
-            if attempt < retries:
-                time.sleep(delay * (2 ** (attempt - 1)))
-
-    raise RuntimeError(f"Не удалось получить detail-страницу {url}: {last_error}")
-
-
-def parse_card(
-    card_html: str,
-    href: str,
-    timeout_s: float,
-    retries: int,
-    insecure: bool,
-    delay: float,
-) -> AtbCoin | None:
-    name_match = re.search(r'class="coins-item__name"\s*>(.*?)</div>', card_html, flags=re.S)
-    if not name_match:
-        return None
-    name = strip_tags(name_match.group(1))
-    if not name:
-        return None
-
-    price_match = re.search(r'class="coins-item__price"\s*>(.*?)</div>', card_html, flags=re.S)
-    price = parse_price(strip_tags(price_match.group(1))) if price_match else None
-
-    url = urljoin(BASE_URL, href)
-    detail_html = fetch_detail_html(
-        url=url,
-        timeout_s=timeout_s,
-        retries=retries,
-        insecure=insecure,
-        delay=delay,
-    )
-    article, metal, weight = parse_detail_fields(detail_html)
-
-    return AtbCoin(
-        name=name,
-        article=article,
-        url=url,
-        metal=metal,
-        weight=weight,
-        price=price,
-    )
-
-
-def parse_coins(
-    fragment_html: str,
-    timeout_s: float,
-    retries: int,
-    insecure: bool,
-    delay: float,
-) -> list[AtbCoin]:
-    cards = re.findall(
-        r'<a\s+class="coins-item[^"]*"\s+href="(/vklady-i-scheta/monety/[^"]+/?)"[^>]*>(.*?)</a>',
-        fragment_html,
-        flags=re.S | re.I,
-    )
-
-    coins: list[AtbCoin] = []
-    seen_urls: set[str] = set()
-    for index, (href, card_html) in enumerate(cards, start=1):
-        coin = parse_card(
-            card_html,
-            href,
-            timeout_s=timeout_s,
-            retries=retries,
-            insecure=insecure,
-            delay=delay,
-        )
-        if not coin:
-            continue
-        if coin.url in seen_urls:
-            continue
-        seen_urls.add(coin.url)
-        coins.append(coin)
-        if index % 20 == 0:
-            log.info("Обработано карточек: %s/%s", index, len(cards))
-    return coins
-
-
-def build_request_payload() -> bytes:
-    # count=99999 запрашивает "Все" из селектора "Показывать".
-    form_data = (
+def build_request_body(*, category: str, query: str) -> str:
+    name_param = quote(query.strip(), safe="") if query.strip() else ""
+    return (
         "ajax=true&"
-        "category=&"
+        f"category={category}&"
         "type=js-coins&"
         "country=&"
         "metall=&"
@@ -253,138 +172,350 @@ def build_request_payload() -> bytes:
         "denomination=&"
         "year=&"
         "count=99999&"
-        "name=&"
+        f"name={name_param}&"
         "page=1"
     )
-    return form_data.encode("utf-8")
 
 
-def fetch_ajax_fragment(
-    timeout_s: float,
+def detect_captcha(html: str) -> bool:
+    lower = html.casefold()
+    return any(hint in lower for hint in CAPTCHA_BODY_HINTS)
+
+
+async def request_with_retry(
+    request: APIRequestContext,
+    method: str,
+    url: str,
+    *,
     retries: int,
-    insecure: bool,
     delay: float,
+    timeout_ms: int,
+    headers: dict[str, str] | None = None,
+    data: str | None = None,
 ) -> str:
-    payload = build_request_payload()
-    headers = {
-        "User-Agent": USER_AGENT,
-        "Accept": "text/html, */*;q=0.1",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Origin": BASE_URL,
-        "Referer": CATALOG_URL,
-        "X-Requested-With": "XMLHttpRequest",
-    }
-    context = ssl._create_unverified_context() if insecure else None
-
     last_error: Exception | None = None
     for attempt in range(1, retries + 1):
-        req = Request(CATALOG_URL, data=payload, headers=headers, method="POST")
         try:
-            with urlopen(req, timeout=timeout_s, context=context) as resp:
-                body = resp.read().decode("utf-8", "ignore")
-                if not body.strip():
-                    raise RuntimeError("Пустой ответ от ATB AJAX endpoint")
-                return body
-        except (HTTPError, URLError, TimeoutError, RuntimeError) as exc:
+            if method == "POST":
+                resp = await request.post(
+                    url,
+                    data=data,
+                    headers=headers,
+                    timeout=timeout_ms,
+                )
+            else:
+                resp = await request.get(
+                    url,
+                    headers=headers,
+                    timeout=timeout_ms,
+                )
+            if not resp.ok:
+                raise RuntimeError(f"HTTP {resp.status} для {url}")
+            body = await resp.text()
+            if not body.strip():
+                raise RuntimeError(f"Пустой ответ: {url}")
+            return body
+        except (PlaywrightError, RuntimeError) as exc:
             last_error = exc
             log.warning("Попытка %s/%s: %s", attempt, retries, exc)
             if attempt < retries:
-                time.sleep(delay * (2 ** (attempt - 1)))
-
-    raise RuntimeError(f"Не удалось получить данные ATB: {last_error}")
-
-
-def save_json(output: Path, coins: Iterable[AtbCoin]) -> None:
-    payload = {
-        "scraped_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "source": CATALOG_URL,
-        "total_coins": 0,
-        "coins": [],
-    }
-    items = [coin.to_dict() for coin in coins]
-    payload["coins"] = items
-    payload["total_coins"] = len(items)
-    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                await asyncio.sleep(delay * (2 ** (attempt - 1)))
+    raise RuntimeError(f"Не удалось получить {url}: {last_error}")
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Скрейпер монет ATB (без внешних библиотек)")
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=DEFAULT_OUTPUT,
-        help=f"Путь к JSON-файлу результата (по умолчанию: {DEFAULT_OUTPUT})",
+async def fetch_ajax_fragment(
+    request: APIRequestContext,
+    *,
+    category: str,
+    query: str,
+    retries: int,
+    delay: float,
+    timeout_ms: int,
+) -> str:
+    body = build_request_body(category=category, query=query)
+    return await request_with_retry(
+        request,
+        "POST",
+        CATALOG_URL,
+        retries=retries,
+        delay=delay,
+        timeout_ms=timeout_ms,
+        headers=AJAX_HEADERS,
+        data=body,
     )
-    parser.add_argument(
+
+
+async def fetch_detail_html(
+    request: APIRequestContext,
+    url: str,
+    *,
+    retries: int,
+    delay: float,
+    timeout_ms: int,
+) -> str:
+    return await request_with_retry(
+        request,
+        "GET",
+        url,
+        retries=retries,
+        delay=delay,
+        timeout_ms=timeout_ms,
+        headers=DETAIL_HEADERS,
+    )
+
+
+async def parse_card(
+    request: APIRequestContext,
+    card_html: str,
+    href: str,
+    *,
+    retries: int,
+    delay: float,
+    timeout_ms: int,
+) -> AtbCoin | None:
+    name_match = re.search(r'class="coins-item__name"\s*>(.*?)</div>', card_html, flags=re.S)
+    if not name_match:
+        log.warning("Пропуск карточки: пустое имя")
+        return None
+    name = strip_tags(name_match.group(1))
+    if not name:
+        log.warning("Пропуск карточки: пустое имя")
+        return None
+
+    price_match = re.search(r'class="coins-item__price"\s*>(.*?)</motion.div>', card_html, flags=re.S)
+    if not price_match:
+        price_match = re.search(r'class="coins-item__price"\s*>(.*?)</motion.div>', card_html, flags=re.S)
+    if not price_match:
+        price_match = re.search(r'class="coins-item__price"\s*>(.*?)</div>', card_html, flags=re.S)
+    sell_price = parse_price(strip_tags(price_match.group(1))) if price_match else None
+    if sell_price is None and price_match:
+        log.warning("Нет цены на карточке: %s", name)
+
+    coin_url = urljoin(BASE_URL, href)
+    detail_html = await fetch_detail_html(
+        request,
+        coin_url,
+        retries=retries,
+        delay=delay,
+        timeout_ms=timeout_ms,
+    )
+    catalog_number, metal, weight_g = parse_detail_fields(detail_html)
+
+    return AtbCoin(
+        name=name,
+        catalog_number=catalog_number,
+        metal=metal,
+        weight_g=weight_g,
+        buy_price=None,
+        sell_price=sell_price,
+        _url=coin_url,
+    )
+
+
+async def parse_coins_from_fragment(
+    request: APIRequestContext,
+    fragment_html: str,
+    *,
+    retries: int,
+    delay: float,
+    timeout_ms: int,
+) -> list[AtbCoin]:
+    cards = re.findall(
+        r'<a\s+class="coins-item[^"]*"\s+href="(/vklady-i-scheta/monety/[^"]+/?)"[^>]*>(.*?)</a>',
+        fragment_html,
+        flags=re.S | re.I,
+    )
+    log.info("Карточек в ответе: %s", len(cards))
+
+    coins: list[AtbCoin] = []
+    seen_urls: set[str] = set()
+    for index, (href, card_html) in enumerate(cards, start=1):
+        coin = await parse_card(
+            request,
+            card_html,
+            href,
+            retries=retries,
+            delay=delay,
+            timeout_ms=timeout_ms,
+        )
+        if not coin:
+            continue
+        if coin._url in seen_urls:
+            log.warning("Пропуск дубликата: %s", coin._url)
+            continue
+        seen_urls.add(coin._url)
+        coins.append(coin)
+        if index % 20 == 0:
+            log.info("Обработано карточек: %s/%s", index, len(cards))
+    return coins
+
+
+async def launch_browser(pw, *, headless: bool):
+    for channel in BROWSER_CHANNELS:
+        try:
+            return await pw.chromium.launch(
+                channel=channel if channel != "chromium" else None,
+                headless=headless,
+                args=LAUNCH_ARGS,
+            )
+        except PlaywrightError:
+            continue
+    return await pw.chromium.launch(headless=headless, args=LAUNCH_ARGS)
+
+
+async def scrape(args: argparse.Namespace) -> list[AtbCoin]:
+    category = INVESTMENT_CATEGORY if args.investment_only else ""
+    query = (args.query or "").strip()
+    retries = max(1, args.retries)
+    delay = max(0.0, args.delay)
+    timeout_ms = max(1000, args.timeout)
+
+    async with async_playwright() as pw:
+        browser = await launch_browser(pw, headless=not args.headful)
+        try:
+            context = await browser.new_context(
+                user_agent=USER_AGENT,
+                ignore_https_errors=not args.secure_ssl,
+            )
+            page = await context.new_page()
+            log.info("Открываю каталог: %s", CATALOG_URL)
+            await page.goto(CATALOG_URL, wait_until="domcontentloaded", timeout=timeout_ms)
+            main_html = await page.content()
+            if detect_captcha(main_html):
+                raise CaptchaBlockedError("CAPTCHA на странице каталога ATB")
+
+            request = context.request
+            fragment = await fetch_ajax_fragment(
+                request,
+                category=category,
+                query=query,
+                retries=retries,
+                delay=delay,
+                timeout_ms=timeout_ms,
+            )
+            coins = await parse_coins_from_fragment(
+                request,
+                fragment,
+                retries=retries,
+                delay=delay,
+                timeout_ms=timeout_ms,
+            )
+            if not coins:
+                raise RuntimeError("Не удалось распарсить монеты из ответа")
+            return coins
+        finally:
+            await browser.close()
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="Скрейпер монет ATB (atb.su)")
+    p.add_argument(
+        "--query",
+        default="",
+        help="строка поиска (поле name в AJAX POST; пусто — без фильтра)",
+    )
+    p.add_argument(
+        "--investment-only",
+        action="store_true",
+        help="только инвестиционные монеты (category=479)",
+    )
+    p.add_argument(
         "--timeout",
         type=int,
         default=DEFAULT_TIMEOUT_MS,
-        help=f"Таймаут HTTP-запроса в мс (по умолчанию: {DEFAULT_TIMEOUT_MS})",
+        help=f"таймаут запросов в мс (по умолчанию: {DEFAULT_TIMEOUT_MS})",
     )
-    parser.add_argument(
+    p.add_argument(
         "--retries",
         type=int,
         default=DEFAULT_RETRIES,
-        help=f"Число попыток запроса (по умолчанию: {DEFAULT_RETRIES})",
+        help=f"число попыток (по умолчанию: {DEFAULT_RETRIES})",
     )
-    parser.add_argument(
+    p.add_argument(
         "--delay",
         type=float,
         default=DEFAULT_DELAY,
-        help=f"Базовая задержка между retry в секундах (по умолчанию: {DEFAULT_DELAY})",
+        help=f"базовая задержка между retry, с (по умолчанию: {DEFAULT_DELAY})",
     )
-    parser.add_argument(
-        "--insecure",
+    p.add_argument("--headful", action="store_true", help="показать окно браузера")
+    p.add_argument(
+        "--secure-ssl",
         action="store_true",
-        help="Отключить SSL-валидацию (fallback для окружений с проблемным trust store)",
+        help="включить проверку TLS (по умолчанию отключена)",
     )
-    parser.add_argument(
+    p.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        help="Уровень логирования",
+        help="уровень логирования",
     )
-    return parser.parse_args()
+    return p
 
 
-def main() -> int:
-    args = parse_args()
+def configure_logging(level: str) -> None:
     logging.basicConfig(
-        level=getattr(logging, args.log_level),
+        level=getattr(logging, level.upper(), logging.INFO),
         format="%(asctime)s %(levelname)-7s %(message)s",
         datefmt="%H:%M:%S",
+        stream=sys.stderr,
     )
 
-    timeout_s = max(1.0, args.timeout / 1000.0)
-    log.info("Старт скрейпера ATB")
-    log.info("Источник: %s", CATALOG_URL)
+
+async def main(argv: list[str] | None = None) -> int:
+    args = build_arg_parser().parse_args(argv)
+    configure_logging(args.log_level)
+
+    log.info("=" * 60)
+    log.info("  Скрейпер каталога монет ATB")
+    log.info("=" * 60)
+    log.info("URL каталога: %s", CATALOG_URL)
+    if args.investment_only:
+        log.info("Фильтр: только инвестиционные (category=%s)", INVESTMENT_CATEGORY)
+    if args.query and args.query.strip():
+        log.info("Поиск: %s", args.query.strip())
+
+    started_at = datetime.now()
+    scrape_status = "ok"
+    error_message: str | None = None
+    coins: list[AtbCoin] = []
 
     try:
-        fragment = fetch_ajax_fragment(
-            timeout_s=timeout_s,
-            retries=max(1, args.retries),
-            insecure=args.insecure,
-            delay=max(0.0, args.delay),
-        )
-        coins = parse_coins(
-            fragment,
-            timeout_s=timeout_s,
-            retries=max(1, args.retries),
-            insecure=args.insecure,
-            delay=max(0.0, args.delay),
-        )
-        if not coins:
-            raise RuntimeError("Не удалось распарсить монеты из ответа")
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        save_json(args.output, coins)
-    except Exception as exc:  # noqa: BLE001
-        log.error("%s", exc)
-        return 2
+        coins = await scrape(args)
+    except CaptchaBlockedError as e:
+        scrape_status = "captcha_blocked"
+        error_message = str(e)
+        log.error("%s", e)
+    except PlaywrightError as e:
+        scrape_status = "error"
+        error_message = str(e)
+        log.error("Ошибка Playwright: %s", e)
+    except RuntimeError as e:
+        scrape_status = "error"
+        error_message = str(e)
+        log.error("%s", e)
 
-    log.info("Собрано монет: %s", len(coins))
-    log.info("Результат: %s", args.output)
-    return 0
+    result: dict = {
+        "scraped_at": started_at.isoformat(),
+        "scrape_status": scrape_status,
+        "total_pages": 1,
+        "total_coins": len(coins),
+        "coins": [c.to_dict() for c in coins],
+    }
+    if args.query and args.query.strip():
+        result["query"] = args.query.strip()
+    if args.investment_only:
+        result["investment_only"] = True
+    if error_message:
+        result["error"] = error_message
+
+    sys.stdout.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+
+    log.info("=" * 60)
+    log.info("  Найдено монет : %s", len(coins))
+    log.info("  Статус        : %s", scrape_status)
+    log.info("=" * 60)
+    return 0 if scrape_status == "ok" else 2
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(asyncio.run(main(sys.argv[1:])))

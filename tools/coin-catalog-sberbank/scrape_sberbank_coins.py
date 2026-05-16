@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
-"""Скрейпер каталога монет sberbank.ru (только стандартная библиотека Python).
+"""Скрейпер каталога монет sberbank.ru (HTTP, stdlib).
 
-Получает каталог через POST /proxy/services/coin-catalog/coins (по умолчанию
-четыре запроса с фильтром metals: Золото, Серебро, Платина, Палладий), объединяет
-выдачу по id с полем metal, затем дополняет ценами выкупа из GET
-/proxy/services/coin-catalog/coins/buyout. HTTP: GET витрины для cookies, затем
-POST/GET к API с заголовками Origin/Referer.
+Исключение из общего стандарта: для Сбера надёжнее прямой HTTP (GET витрины +
+POST/GET API), чем Playwright — меньше ложных срабатываний WAF.
 
-При блокировках, капче или HTML вместо JSON используйте
-scrape_sberbank_coins_playwright.py (Playwright).
+POST /proxy/services/coin-catalog/coins; по умолчанию четыре запроса по металлам,
+merge по id, GET buyout для buy_price.
 
-При ошибке SSL CERTIFICATE_VERIFY_FAILED (нет корней в системе) можно передать флаг
---insecure-ssl (небезопасно) или установить системные сертификаты для Python.
+Итог: JSON в stdout. Поля монеты: catalog_number, name, metal, weight_g, buy_price,
+sell_price. --investment-only → sections=«Инвестиционные монеты».
 
-Запуск: python3 scrape_sberbank_coins.py [options]
-Результат: coins_sberbank_catalog.json (или путь из --output); у каждой монеты
-в JSON есть metal (из фильтра запроса), catalog_number, buyout_price при наличии.
+Запасной вариант при необходимости браузера: scrape_sberbank_coins_playwright.py.
 """
 from __future__ import annotations
 
@@ -26,10 +21,9 @@ import ssl
 import sys
 import time
 from collections.abc import Iterable, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from http.cookiejar import CookieJar
-from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from typing import Any
@@ -37,22 +31,24 @@ from urllib.request import HTTPCookieProcessor, HTTPSHandler, Request, build_ope
 
 
 @dataclass
-class Coin:
-    url: str
+class SberCoin:
     name: str
     catalog_number: str | None = None
-    sku: str | None = None
-    price: float | None = None
-    buyout_price: float | None = None
-    nominal: str | None = None
     metal: str | None = None
-    purity: str | None = None
     weight_g: float | None = None
-    mintage: str | None = None
+    buy_price: float | None = None
+    sell_price: float | None = None
+    _id: str | None = None
 
-    def to_dict(self) -> dict:
-        # Совместимо с предыдущим форматом: ключи с None опускаем.
-        return {k: v for k, v in asdict(self).items() if v is not None}
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "catalog_number": self.catalog_number,
+            "name": self.name,
+            "metal": self.metal,
+            "weight_g": self.weight_g,
+            "buy_price": self.buy_price,
+            "sell_price": self.sell_price,
+        }
 
 # ============================================================================
 # Constants
@@ -60,16 +56,16 @@ class Coin:
 
 CATALOG_URL = "https://www.sberbank.ru/ru/person/mon"
 ORIGIN = "https://www.sberbank.ru"
-COIN_URL_TEMPLATE = "https://www.sberbank.ru/ru/person/mon#/coin/{coin_id}"
 API_PATH = "/proxy/services/coin-catalog/coins"
 API_BUYOUT_PATH = "/proxy/services/coin-catalog/coins/buyout"
 
-DEFAULT_OUTPUT = Path(__file__).parent / "coins_sberbank_catalog.json"
 DEFAULT_PAGE_SIZE = 4000
 DEFAULT_CITY = "Москва"
 DEFAULT_CONDITION = 1
 DEFAULT_TIMEOUT_MS = 60_000
 DEFAULT_RETRIES = 3
+
+INVESTMENT_SECTION = "Инвестиционные монеты"
 
 # Значения filters.metals как на витрине mon (один элемент в массиве на запрос).
 DEFAULT_METAL_FILTERS: tuple[str, ...] = ("Золото", "Серебро", "Платина", "Палладий")
@@ -95,6 +91,8 @@ def build_payload(
     condition: int = DEFAULT_CONDITION,
     query: str = "",
     metals: Sequence[str] | None = None,
+    sections: Sequence[str] | None = None,
+    categories: Sequence[str] | None = None,
 ) -> dict:
     """Собирает тело POST-запроса к /proxy/services/coin-catalog/coins.
 
@@ -111,8 +109,8 @@ def build_payload(
         "massMin": 0,
         "massMax": 0,
         "metals": metals_list,
-        "sections": [],
-        "categories": [],
+        "sections": list(sections) if sections else [],
+        "categories": list(categories) if categories else [],
         "condition": condition,
         "vspCode": None,
         "inDiscount": False,
@@ -120,6 +118,12 @@ def build_payload(
         "pageSize": page_size,
         "city": city,
     }
+
+
+def resolve_sections(args: argparse.Namespace) -> list[str]:
+    if args.investment_only:
+        return [INVESTMENT_SECTION]
+    return []
 
 
 def build_buyout_fetch_path(
@@ -211,12 +215,7 @@ def merge_buyout_into_catalog(catalog: list[dict], buyout_rows: list[dict]) -> N
             row["priceBuy"] = prices[sid]
 
 
-def build_coin_url(coin_id: str) -> str:
-    """Формирует ссылку на карточку монеты в SPA."""
-    return COIN_URL_TEMPLATE.format(coin_id=coin_id)
-
-
-def _to_float(value) -> float | None:
+def _to_float(value: Any) -> float | None:
     if value is None:
         return None
     try:
@@ -225,8 +224,7 @@ def _to_float(value) -> float | None:
         return None
 
 
-def _entity_catalog_number(entity: dict, coin_id: str) -> str:
-    """Каталожный номер из ответа API либо id монеты (артикул витрины Сбера)."""
+def _entity_catalog_number(entity: dict, coin_id: str) -> str | None:
     for key in (
         "catalogNumber",
         "catalogNum",
@@ -238,7 +236,8 @@ def _entity_catalog_number(entity: dict, coin_id: str) -> str:
         raw = entity.get(key)
         if raw is not None and str(raw).strip():
             return str(raw).strip()
-    return str(coin_id).strip()
+    stripped = str(coin_id).strip()
+    return stripped or None
 
 
 def _metal_label_from_entity(entity: dict) -> str | None:
@@ -250,27 +249,39 @@ def _metal_label_from_entity(entity: dict) -> str | None:
     return s or None
 
 
-def parse_entity(entity: dict) -> Coin | None:
-    """Приводит entity из API к унифицированному Coin.
-
-    Возвращает None, если у объекта нет id (без него не построить url).
-    Поля nominal/purity/mintage в ответе каталога обычно отсутствуют.
-    metal — подставляется скрейпером при запросах с фильтром ``metals``.
-    catalog_number — номер по каталогу/артикул из API или то же значение, что id.
-    buyout_price — из поля priceBuy (после слияния с GET /coins/buyout при наличии).
-    """
+def row_to_coin(entity: dict) -> SberCoin | None:
     coin_id = entity.get("id")
     if not coin_id:
         return None
-    return Coin(
-        url=build_coin_url(coin_id),
-        name=(entity.get("name") or "").strip() or coin_id,
-        catalog_number=_entity_catalog_number(entity, str(coin_id)),
-        price=_to_float(entity.get("price")),
-        buyout_price=_to_float(entity.get("priceBuy")),
+    sid = str(coin_id).strip()
+    name = (entity.get("name") or "").strip() or sid
+    return SberCoin(
+        name=name,
+        catalog_number=_entity_catalog_number(entity, sid),
         metal=_metal_label_from_entity(entity),
         weight_g=_to_float(entity.get("mass1")),
+        buy_price=_to_float(entity.get("priceBuy")),
+        sell_price=_to_float(entity.get("price")),
+        _id=sid,
     )
+
+
+def coin_matches_query(coin: SberCoin, query: str) -> bool:
+    q = query.casefold().strip()
+    if not q:
+        return True
+    hay = " ".join(
+        x
+        for x in (coin.name, coin.catalog_number or "", coin.metal or "")
+        if x
+    ).casefold()
+    return q in hay
+
+
+def dedupe_key(_entity: dict, coin: SberCoin) -> str:
+    if coin._id:
+        return coin._id
+    return coin.catalog_number or coin.name
 
 
 # ============================================================================
@@ -365,9 +376,11 @@ def _parse_json_body(code: int, raw: bytes, url: str) -> Any:
         raise RuntimeError(f"JSON ошибка для {url}: {e}; начало: {snippet!r}") from e
 
 
-def fetch_catalog(args: argparse.Namespace) -> list[dict]:
-    """GET витрины (cookies), POST каталог, GET buyout; возвращает entities."""
-    opener = _build_opener(insecure_ssl=args.insecure_ssl)
+def fetch_catalog(args: argparse.Namespace) -> tuple[list[dict], int]:
+    """GET витрины (cookies), POST каталог, GET buyout; возвращает (entities, число POST)."""
+    sections = resolve_sections(args)
+    pages_processed = 0
+    opener = _build_opener(insecure_ssl=not args.secure_ssl)
     timeout_s = _timeout_seconds(args.timeout)
 
     for attempt in range(1, args.retries + 1):
@@ -391,20 +404,27 @@ def fetch_catalog(args: argparse.Namespace) -> list[dict]:
                 )
             catalog_url_absolute = ORIGIN + API_PATH
 
+            if args.investment_only:
+                log.info("Фильтр sections=%s", sections)
+
+            payload_common = dict(
+                page_size=args.page_size,
+                city=args.city,
+                condition=args.condition,
+                query=args.query,
+                sections=sections,
+            )
+
             if args.no_metal_filters:
                 log.info(
-                    "Каталог: один POST %s (metals=[], pageSize=%s, city=%s)",
+                    "Каталог: один POST %s (metals=[], sections=%s, pageSize=%s, city=%s)",
                     API_PATH,
+                    sections,
                     args.page_size,
                     args.city,
                 )
-                payload = build_payload(
-                    page=0,
-                    page_size=args.page_size,
-                    city=args.city,
-                    condition=args.condition,
-                    query=args.query,
-                )
+                payload = build_payload(page=0, metals=[], **payload_common)
+                log.debug("POST payload: %s", payload)
                 body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
                 p_code, p_raw = _http_request(
                     opener,
@@ -418,25 +438,21 @@ def fetch_catalog(args: argparse.Namespace) -> list[dict]:
                 if not isinstance(data, dict):
                     raise RuntimeError("Ответ каталога: ожидался объект JSON")
                 entities = data.get("entities") or []
+                pages_processed = 1
                 log.info("Получено entities: %s", len(entities))
             else:
                 log.info(
-                    "Каталог: серия POST по металлам %s (pageSize=%s, city=%s)",
+                    "Каталог: серия POST по металлам %s (sections=%s, pageSize=%s, city=%s)",
                     DEFAULT_METAL_FILTERS,
+                    sections,
                     args.page_size,
                     args.city,
                 )
                 per_metal: list[tuple[str, list[dict]]] = []
                 for metal in DEFAULT_METAL_FILTERS:
                     log.info("POST metals=%s", [metal])
-                    payload = build_payload(
-                        page=0,
-                        page_size=args.page_size,
-                        city=args.city,
-                        condition=args.condition,
-                        query=args.query,
-                        metals=[metal],
-                    )
+                    payload = build_payload(page=0, metals=[metal], **payload_common)
+                    log.debug("POST payload: %s", payload)
                     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
                     p_code, p_raw = _http_request(
                         opener,
@@ -450,6 +466,7 @@ def fetch_catalog(args: argparse.Namespace) -> list[dict]:
                     if not isinstance(data, dict):
                         raise RuntimeError("Ответ каталога: ожидался объект JSON")
                     rows = data.get("entities") or []
+                    pages_processed += 1
                     log.info("Металл «%s»: строк в ответе %s", metal, len(rows))
                     per_metal.append((metal, rows))
                 entities, raw_row_count = merge_entities_with_metal_filters(
@@ -489,7 +506,7 @@ def fetch_catalog(args: argparse.Namespace) -> list[dict]:
                     e,
                 )
 
-            return entities
+            return entities, pages_processed
         except (RuntimeError, URLError, OSError) as e:
             log.warning(
                 "Попытка %s/%s — ошибка: %s",
@@ -501,25 +518,52 @@ def fetch_catalog(args: argparse.Namespace) -> list[dict]:
                 time.sleep(2**attempt)
 
     log.error("Все попытки исчерпаны")
-    return []
+    return [], 0
 
 
 # ============================================================================
 # Orchestration
 # ============================================================================
 
-def scrape(args: argparse.Namespace) -> list[Coin]:
-    """Скачивает каталог через ``fetch_catalog``, парсит в ``Coin``, дедуп по url."""
-    entities = fetch_catalog(args)
-    coins: list[Coin] = []
+def scrape(args: argparse.Namespace) -> tuple[int, list[SberCoin]]:
+    """Скачивает каталог, парсит в SberCoin, дедуп по id."""
+    entities, pages_processed = fetch_catalog(args)
+    coins: list[SberCoin] = []
     seen: set[str] = set()
+    url_query = (args.query or "").strip()
+
     for entity in entities:
-        coin = parse_entity(entity)
-        if coin is None or coin.url in seen:
+        coin = row_to_coin(entity)
+        if coin is None:
+            log.warning("Пропуск записи: нет id")
             continue
-        seen.add(coin.url)
+        if not coin.name:
+            log.warning(
+                "Пропуск записи: пустое name, catalog_number=%s",
+                coin.catalog_number,
+            )
+            continue
+        if url_query and not coin_matches_query(coin, url_query):
+            continue
+        key = dedupe_key(entity, coin)
+        if key in seen:
+            log.warning(
+                "Дубликат (id %s): «%s», артикул=%s",
+                key,
+                coin.name,
+                coin.catalog_number,
+            )
+            continue
+        seen.add(key)
         coins.append(coin)
-    return coins
+        if coin.sell_price is None:
+            log.warning(
+                "Нет sell_price для «%s» (артикул %s)",
+                coin.name,
+                coin.catalog_number,
+            )
+
+    return pages_processed, coins
 
 
 # ============================================================================
@@ -528,13 +572,7 @@ def scrape(args: argparse.Namespace) -> list[Coin]:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Скрейпер каталога монет sberbank.ru",
-    )
-    p.add_argument(
-        "--output",
-        type=Path,
-        default=DEFAULT_OUTPUT,
-        help="путь к итоговому JSON (default: %(default)s)",
+        description="Скрейпер каталога монет sberbank.ru (HTTP)",
     )
     p.add_argument(
         "--page-size",
@@ -553,6 +591,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--query", default="",
                    help="строка поиска (default: пусто)")
     p.add_argument(
+        "--investment-only",
+        action="store_true",
+        help=f"только инвестиционные монеты (sections=«{INVESTMENT_SECTION}»)",
+    )
+    p.add_argument(
         "--timeout",
         type=int,
         default=DEFAULT_TIMEOUT_MS,
@@ -561,11 +604,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--retries", type=int, default=DEFAULT_RETRIES,
                    help="попыток на запрос (default: %(default)s)")
     p.add_argument(
-        "--insecure-ssl",
+        "--secure-ssl",
         action="store_true",
         help=(
-            "не проверять TLS-сертификат сервера (если ошибка CERTIFICATE_VERIFY_FAILED; "
-            "небезопасно, только при отсутствии корневых сертификатов в системе)"
+            "проверять TLS-сертификат сервера (по умолчанию проверка отключена — "
+            "типично для Python на macOS без корневых сертификатов)"
         ),
     )
     p.add_argument(
@@ -590,6 +633,7 @@ def configure_logging(level: str) -> None:
         level=getattr(logging, level.upper(), logging.INFO),
         format="%(asctime)s %(levelname)-7s %(message)s",
         datefmt="%H:%M:%S",
+        stream=sys.stderr,
     )
 
 
@@ -598,28 +642,47 @@ def main(argv: list[str] | None = None) -> int:
     configure_logging(args.log_level)
 
     log.info("=" * 60)
-    log.info("  Скрейпер каталога монет sberbank.ru")
+    log.info("  Скрейпер каталога монет sberbank.ru (HTTP)")
     log.info("=" * 60)
     started_at = datetime.now()
 
-    coins = scrape(args)
+    scrape_status = "ok"
+    error_message: str | None = None
+    total_pages = 0
+    coins: list[SberCoin] = []
 
-    result = {
+    try:
+        total_pages, coins = scrape(args)
+        if total_pages == 0 and not coins:
+            scrape_status = "error"
+            error_message = "Не удалось загрузить каталог (0 запросов к API)"
+    except (RuntimeError, URLError, OSError) as e:
+        scrape_status = "error"
+        error_message = str(e)
+        log.error("Ошибка HTTP: %s", e)
+
+    result: dict[str, Any] = {
         "scraped_at": started_at.isoformat(),
-        "total_pages": 1,
+        "scrape_status": scrape_status,
+        "total_pages": total_pages,
         "total_coins": len(coins),
         "coins": [c.to_dict() for c in coins],
     }
-    args.output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    if args.query and args.query.strip():
+        result["query"] = args.query.strip()
+    if args.investment_only:
+        result["investment_only"] = True
+    if error_message:
+        result["error"] = error_message
+
+    sys.stdout.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
 
     log.info("=" * 60)
-    log.info("  Найдено монет : %s", len(coins))
-    log.info("  Результат     : %s", args.output)
+    log.info("  Запросов POST  : %s", total_pages)
+    log.info("  Найдено монет  : %s", len(coins))
+    log.info("  Статус         : %s", scrape_status)
     log.info("=" * 60)
-    return 0
+    return 0 if scrape_status == "ok" else 2
 
 
 if __name__ == "__main__":
