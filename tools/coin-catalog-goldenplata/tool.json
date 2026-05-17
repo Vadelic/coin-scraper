@@ -1,9 +1,22 @@
 {
   "name": "coin-catalog-goldenplata",
-  "description": "Каталог монет GoldenPlata. Сохраняет JSON в файл (см. output_file): список монет и цены.",
-  "command": "./run.sh",
+  "description": "Каталог монет Золотая плата (goldenplata.ru). Возвращает JSON в stdout: список монет, цены, статус сбора. Поддерживает поиск (q=) и фильтр инвестиционных монет.",
+  "command": "./run_goldenplata.sh",
   "args": [],
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Поиск на витрине: название монеты, металл, артикул",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    },
+    {
+      "name": "investment_only",
+      "description": "Только российские инвестиционные монеты (раздел rossiyskiye)",
+      "required": false,
+      "cli": ["--investment-only"]
+    }
+  ],
   "recommendations": "docs/coin-catalog-tool-recommendations.md",
-  "working_directory": "tools/coin-catalog-goldenplata",
-  "output_file": "coins_goldenplata_catalog.json"
+  "working_directory": "tools/coin-catalog-goldenplata"
 }

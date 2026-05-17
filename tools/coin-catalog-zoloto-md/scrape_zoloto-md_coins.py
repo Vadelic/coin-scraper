@@ -177,6 +177,9 @@ def parse_coins_from_page(html: str) -> list[Coin]:
         href_match = re.search(r'<a[^>]+class="pi-link-dark"[^>]+href="([^"]+)"', block, flags=re.I)
         name_match = re.search(r'<a[^>]+class="pi-link-dark"[^>]*>.*?<p>(.*?)</p>', block, flags=re.I | re.S)
         price_match = re.search(r'<span class="js-price">\s*([^<]+)\s*</span>', block, flags=re.I)
+        buyout_match = re.search(
+            r'<span class="js-price-buyout">\s*([^<]+)\s*</span>', block, flags=re.I
+        )
 
         if not href_match or not name_match:
             continue
@@ -193,13 +196,14 @@ def parse_coins_from_page(html: str) -> list[Coin]:
             continue
 
         sell_price = parse_price(price_match.group(1)) if price_match else None
+        buy_price = parse_price(buyout_match.group(1)) if buyout_match else None
 
         coin = Coin(
             name=name,
             catalog_number=id_match.group(1) if id_match else None,
             metal=normalize_metal(name),
             weight_g=parse_weight_g(name),
-            buy_price=None,
+            buy_price=buy_price,
             sell_price=sell_price,
             _url=url,
         )
@@ -256,6 +260,9 @@ def scrape_catalog(args: argparse.Namespace) -> tuple[int, list[Coin]]:
             all_coins.append(coin)
             added += 1
         log.info("Страница %s: найдено %s, добавлено %s", page, len(page_coins), added)
+
+    with_buy = sum(1 for c in all_coins if c.buy_price is not None)
+    log.info("Цена выкупа: %s из %s монет", with_buy, len(all_coins))
 
     return pages_count, all_coins
 

@@ -114,6 +114,7 @@ Legacy-скрипты вне этой структуры (HTTP без Playwright
 | Сбербанк | POST `coin-catalog/coins`: `"sections":["Инвестиционные монеты"]` |
 | Ланта | URL раздела `…/ivesticyonnie-monety/` |
 | РСХБ | GET каталога: `?subjects=5506` |
+| Золотая плата | URL `…/investitsionnye-monety/rossiyskiye/`; поиск `?q=` |
 
 Сочетается с `--query` и (если есть) фильтрами по металлу.
 
