@@ -1,9 +1,16 @@
 {
   "name": "coin-catalog-aurumex",
-  "description": "Каталог монет Aurumex. Сохраняет JSON в файл (см. output_file): список монет и цены.",
-  "command": "./run.sh",
+  "description": "Каталог монет Aurumex (aurumex.ru): JSON в stdout, только монеты в наличии, цены за единицу. Поддерживает пост-поиск (--query).",
+  "command": "./run_aurumex.sh",
   "args": [],
+  "parameters": [
+    {
+      "name": "query",
+      "description": "Пост-фильтр по названию или артикулу (на сайте поиска нет)",
+      "required": false,
+      "cli": ["--query", "{query}"]
+    }
+  ],
   "recommendations": "docs/coin-catalog-tool-recommendations.md",
-  "working_directory": "tools/coin-catalog-aurumex",
-  "output_file": "coins_aurumex_catalog.json"
+  "working_directory": "tools/coin-catalog-aurumex"
 }

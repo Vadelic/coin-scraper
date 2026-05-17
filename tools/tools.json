@@ -7,7 +7,7 @@
     },
     {
       "name": "coin-catalog-aurumex",
-      "description": "Каталог монет Aurumex: JSON в файл (legacy).",
+      "description": "Каталог монет Aurumex (aurumex.ru): JSON в stdout, в наличии, пост-поиск (--query).",
       "tool_json": "tools/coin-catalog-aurumex/tool.json"
     },
     {
