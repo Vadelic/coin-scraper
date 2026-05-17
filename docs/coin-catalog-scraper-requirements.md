@@ -256,19 +256,15 @@ disable-model-invocation: true
    - Поиск на витрине — передать `query` (CLI `--query "…"`): ключевые слова из запроса пользователя (название, «золото», артикул и т.д.); сочетается с `investment_only`.
 2. Распарсить **единственный** JSON-объект из stdout (логи в stderr игнорировать).
 3. Если `scrape_status` ≠ `ok` — сообщить статус и `error`, не строить аналитику как по успешным данным.
-4. Для **поиска монеты**: отфильтровать `coins[]` по смыслу запроса (`name`, `catalog_number`, `metal`, `weight_g`, цены); при пустом результате с `query` — при необходимости повторить с другой формулировкой `query` или уточнить у пользователя.
-5. Вернуть пользователю найденные позиции и/или сводку (см. шаблон ниже).
+4. Отфильтровать `coins[]` по смыслу запроса (если нужен узкий поиск).
+5. **Сгруппировать** по названию и **отсортировать** (металл → вес).
+6. Вывести таблицами с ценами продажи и выкупа (см. [coin-catalog-skill-requirements.md](coin-catalog-skill-requirements.md)).
 
 ### Что возвращать пользователю
 
-**Поиск монеты:** список подходящих записей с `name`, `catalog_number`, `metal`, `weight_g`, `buy_price`, `sell_price`; если одна — краткая карточка; если нет — явно «не найдено» и что искали.
+Полный стандарт вывода (группировка, сортировка, таблицы, блок «неоднозначные») — в [coin-catalog-skill-requirements.md](coin-catalog-skill-requirements.md). Эталон: [skills/coin-catalog-sberbank/SKILL.md](../skills/coin-catalog-sberbank/SKILL.md).
 
-**Сводка/аналитика** (при запросе на обзор каталога):
-
-- банк, `scrape_status`, `total_coins`, при наличии — `query`, `investment_only`;
-- min/max `buy_price`, min/max и медиана `sell_price` (по валидным значениям);
-- топ по `metal`;
-- доля пропусков в `name`, `buy_price`, `sell_price`, `metal`.
+Кратко: сгруппированные таблицы по монетам; `catalog_number` в таблице не показывать; при сводке — перед таблицами `scrape_status`, `total_coins` и при наличии `query`, `investment_only`; при ошибке сбора — без таблиц цен.
 
 ### Правила устойчивости (в каждом скилле)
 
@@ -279,7 +275,7 @@ disable-model-invocation: true
 
 ### Шаблон `SKILL.md`
 
-Секции: «Когда использовать», «Порядок действий», «Поиск монеты», «Сводка и аналитика», «Правила устойчивости», «Важные пути» (tool name, без путей к файлам-артефактам).
+Секции: «Когда использовать», «Порядок действий», «Группировка по названию», «Сортировка и формат вывода», «Поиск монеты», «Правила устойчивости», «Важные пути». Подробности — [coin-catalog-skill-requirements.md](coin-catalog-skill-requirements.md).
 
 ---
 
@@ -292,6 +288,6 @@ disable-model-invocation: true
 - `total_coins == len(coins)`; при поиске — поле `query` в корне.
 - Логирование по п.4 (`--log-level`) в stderr; stdout — только JSON.
 - `tool.json`, `run_*.sh`, запись в `tools/tools.json`.
-- Скилл `skills/coin-catalog-{slug}/SKILL.md` по п.7 (в т.ч. сценарий поиска монеты).
+- Скилл `skills/coin-catalog-{slug}/SKILL.md` по п.7 и [coin-catalog-skill-requirements.md](coin-catalog-skill-requirements.md).
 - Прогон без аргументов и с `--query "…"` даёт валидный JSON в stdout.
 - При наличии фильтра на сайте: `--investment-only` сужает выдачу; в корне JSON — `investment_only: true`.
