@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scraper/coins_catalog.schema.json",
+  "title": "Coin catalog scrape result",
+  "description": "Выходной JSON скрейперов каталогов монет (эталон: coin-catalog-lanta)",
+  "type": "object",
+  "required": ["scraped_at", "scrape_status", "total_pages", "total_coins", "coins"],
+  "additionalProperties": false,
+  "properties": {
+    "scraped_at": {
+      "type": "string",
+      "description": "Время начала сбора (ISO 8601)"
+    },
+    "scrape_status": {
+      "type": "string",
+      "enum": ["ok", "captcha_blocked", "error"]
+    },
+    "total_pages": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "total_coins": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "coins": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coin" }
+    },
+    "query": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Присутствует только при непустом --query"
+    },
+    "investment_only": {
+      "type": "boolean",
+      "const": true,
+      "description": "Присутствует только при --investment-only"
+    },
+    "error": {
+      "type": "string",
+      "description": "Текст ошибки при scrape_status != ok"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "scrape_status": { "const": "ok" } },
+        "required": ["scrape_status"]
+      },
+      "then": {}
+    },
+    {
+      "if": {
+        "properties": { "scrape_status": { "enum": ["captcha_blocked", "error"] } },
+        "required": ["scrape_status"]
+      },
+      "then": { "required": ["error"] }
+    }
+  ],
+  "$defs": {
+    "coin": {
+      "type": "object",
+      "required": [
+        "catalog_number",
+        "name",
+        "metal",
+        "weight_g",
+        "sell_price"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "catalog_number": {
+          "type": ["string", "null"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metal": {
+          "type": ["string", "null"],
+          "description": "Только название металла, без пробы"
+        },
+        "weight_g": {
+          "type": ["number", "null"]
+        },
+        "buy_price": {
+          "type": ["number", "null"]
+        },
+        "sell_price": {
+          "type": ["number", "null"]
+        }
+      }
+    }
+  }
+}

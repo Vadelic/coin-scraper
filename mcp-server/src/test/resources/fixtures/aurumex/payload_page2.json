@@ -1,0 +1,26 @@
+[
+  null,
+  {
+    "coins": 2,
+    "totalCoins": 1,
+    "categories": []
+  },
+  [3, 4],
+  {
+    "isAvailable": true,
+    "id": "5216-0060",
+    "title": "Монета «Георгий Победоносец»",
+    "category": "gold",
+    "weight": "7,78 г",
+    "price": 99700,
+    "pricePurchase": 89500
+  },
+  {
+    "isAvailable": true,
+    "id": "PT-001",
+    "title": "Платиновая монета",
+    "category": "gold",
+    "weight": 15.55,
+    "price": 120000
+  }
+]

@@ -1,0 +1,21 @@
+spring:
+  main:
+    banner-mode: off
+    web-application-type: none
+  application:
+    name: coin-catalog-mcp
+  ai:
+    mcp:
+      server:
+        name: coin-catalog-mcp
+        version: 0.1.0
+        type: SYNC
+        stdio: true
+        annotation-scanner:
+          enabled: true
+
+logging:
+  pattern:
+    console:
+  file:
+    name: logs/coin-catalog-mcp.log

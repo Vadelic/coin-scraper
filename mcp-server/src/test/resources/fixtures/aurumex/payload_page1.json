@@ -1,0 +1,37 @@
+[
+  null,
+  {
+    "coins": 2,
+    "totalCoins": 2,
+    "categories": []
+  },
+  [3, 4],
+  {
+    "isAvailable": true,
+    "id": "5216-0060",
+    "title": "Монета «Георгий Победоносец»",
+    "category": "gold",
+    "weight": "7,78 г",
+    "price": 99700,
+    "pricePerOunce": null,
+    "pricePurchase": 89500
+  },
+  {
+    "isAvailable": true,
+    "id": "5111-0008",
+    "title": "Серебряная монета тест",
+    "category": "silver",
+    "weight": 31.1,
+    "price": 45000,
+    "pricePerOunce": null,
+    "pricePurchase": null
+  },
+  {
+    "isAvailable": false,
+    "id": "unavailable",
+    "title": "Недоступная монета",
+    "category": "gold",
+    "weight": 1,
+    "price": 1000
+  }
+]
