@@ -1,0 +1,11 @@
+server:
+  port: 8042
+
+spring:
+  ai:
+    mcp:
+      server:
+        protocol: STREAMABLE
+        stdio: false
+        streamable-http:
+          mcp-endpoint: /mcp

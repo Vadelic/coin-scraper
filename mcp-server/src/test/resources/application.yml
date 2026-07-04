@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: http
+
+server:
+  port: 0

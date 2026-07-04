@@ -1,7 +1,8 @@
 package ru.scraper.coincatalog.scraper.support;
 
-import tools.jackson.databind.ObjectMapper;
 import com.networknt.schema.Error;
+import ru.scraper.coincatalog.json.CoinCatalogJsonMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
@@ -18,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public final class ScraperTestSupport {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = CoinCatalogJsonMapper.create();
     private static final Schema SCHEMA = loadSchema();
 
     private ScraperTestSupport() {}
@@ -38,12 +39,12 @@ public final class ScraperTestSupport {
 
     public static void assertLiveResult(ScrapeResult result, String slug) throws Exception {
         assertThat(result.scrapeStatus())
-                .as("%s scrape_status", slug)
+                .as("%s scrapeStatus", slug)
                 .isIn(ScrapeStatus.OK, ScrapeStatus.CAPTCHA_BLOCKED);
         assertThat(validateSchema(result)).isEmpty();
         if (result.scrapeStatus() == ScrapeStatus.OK) {
             assertThat(result.totalCoins())
-                    .as("%s total_coins", slug)
+                    .as("%s totalCoins", slug)
                     .isGreaterThan(0);
             assertThat(result.coins().get(0).name()).isNotBlank();
         }

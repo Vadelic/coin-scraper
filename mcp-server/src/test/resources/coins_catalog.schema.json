@@ -4,22 +4,22 @@
   "title": "Coin catalog scrape result",
   "description": "Выходной JSON скрейперов каталогов монет (эталон: coin-catalog-lanta)",
   "type": "object",
-  "required": ["scraped_at", "scrape_status", "total_pages", "total_coins", "coins"],
+  "required": ["scrapedAt", "scrapeStatus", "totalPages", "totalCoins", "coins"],
   "additionalProperties": false,
   "properties": {
-    "scraped_at": {
+    "scrapedAt": {
       "type": "string",
       "description": "Время начала сбора (ISO 8601)"
     },
-    "scrape_status": {
+    "scrapeStatus": {
       "type": "string",
       "enum": ["ok", "captcha_blocked", "error"]
     },
-    "total_pages": {
+    "totalPages": {
       "type": "integer",
       "minimum": 0
     },
-    "total_coins": {
+    "totalCoins": {
       "type": "integer",
       "minimum": 0
     },
@@ -32,28 +32,28 @@
       "minLength": 1,
       "description": "Присутствует только при непустом --query"
     },
-    "investment_only": {
+    "investmentOnly": {
       "type": "boolean",
       "const": true,
       "description": "Присутствует только при --investment-only"
     },
     "error": {
       "type": "string",
-      "description": "Текст ошибки при scrape_status != ok"
+      "description": "Текст ошибки при scrapeStatus != ok"
     }
   },
   "allOf": [
     {
       "if": {
-        "properties": { "scrape_status": { "const": "ok" } },
-        "required": ["scrape_status"]
+        "properties": { "scrapeStatus": { "const": "ok" } },
+        "required": ["scrapeStatus"]
       },
       "then": {}
     },
     {
       "if": {
-        "properties": { "scrape_status": { "enum": ["captcha_blocked", "error"] } },
-        "required": ["scrape_status"]
+        "properties": { "scrapeStatus": { "enum": ["captcha_blocked", "error"] } },
+        "required": ["scrapeStatus"]
       },
       "then": { "required": ["error"] }
     }
@@ -62,15 +62,15 @@
     "coin": {
       "type": "object",
       "required": [
-        "catalog_number",
+        "catalogNumber",
         "name",
         "metal",
-        "weight_g",
-        "sell_price"
+        "weightG",
+        "sellPrice"
       ],
       "additionalProperties": false,
       "properties": {
-        "catalog_number": {
+        "catalogNumber": {
           "type": ["string", "null"]
         },
         "name": {
@@ -81,13 +81,13 @@
           "type": ["string", "null"],
           "description": "Только название металла, без пробы"
         },
-        "weight_g": {
+        "weightG": {
           "type": ["number", "null"]
         },
-        "buy_price": {
+        "buyPrice": {
           "type": ["number", "null"]
         },
-        "sell_price": {
+        "sellPrice": {
           "type": ["number", "null"]
         }
       }

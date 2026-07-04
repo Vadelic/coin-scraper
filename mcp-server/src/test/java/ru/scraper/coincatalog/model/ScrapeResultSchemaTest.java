@@ -5,6 +5,7 @@ import io.modelcontextprotocol.json.schema.jackson3.DefaultJsonSchemaValidator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import tools.jackson.core.type.TypeReference;
+import ru.scraper.coincatalog.json.CoinCatalogJsonMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.InputStream;
@@ -23,7 +24,7 @@ class ScrapeResultSchemaTest {
 
     @BeforeAll
     static void setUp() throws Exception {
-        objectMapper = JsonMapper.builder().build();
+        objectMapper = CoinCatalogJsonMapper.create();
         validator = new DefaultJsonSchemaValidator(objectMapper);
         try (InputStream in =
                 ScrapeResultSchemaTest.class.getResourceAsStream("/coins_catalog.schema.json")) {
@@ -64,6 +65,20 @@ class ScrapeResultSchemaTest {
         var result = ScrapeResult.notImplemented(request);
 
         assertValid(result);
+    }
+
+    @Test
+    void coinSerializesWithCamelCaseKeys() throws Exception {
+        var coin = new Coin("5216-0060", "Георгий Победоносец", "Золото", 7.78, 89500.0, 99700.0);
+        String json = objectMapper.writeValueAsString(coin);
+
+        assertThat(json)
+                .contains("\"catalogNumber\"")
+                .contains("\"weightG\"")
+                .contains("\"buyPrice\"")
+                .contains("\"sellPrice\"")
+                .doesNotContain("catalog_number")
+                .doesNotContain("weight_g");
     }
 
     private void assertValid(ScrapeResult result) {
