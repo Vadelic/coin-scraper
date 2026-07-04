@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.goldenplata;
 
+import lombok.experimental.UtilityClass;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import ru.scraper.coincatalog.model.Coin;
@@ -15,7 +16,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class GoldenplataPageParser {
+@UtilityClass
+public class GoldenplataPageParser {
 
     public static final String BASE_URL = "https://goldenplata.ru";
     public static final String CATALOG_URL = BASE_URL + "/catalog/";
@@ -37,8 +39,6 @@ public final class GoldenplataPageParser {
             "палладий", "Палладий");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private GoldenplataPageParser() {}
 
     public static String resolveCatalogBase(boolean investmentOnly) {
         return investmentOnly ? INVESTMENT_CATALOG_URL : CATALOG_URL;

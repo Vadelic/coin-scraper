@@ -1,11 +1,11 @@
 package ru.scraper.coincatalog.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.modelcontextprotocol.json.schema.JsonSchemaValidator;
 import io.modelcontextprotocol.json.schema.jackson3.DefaultJsonSchemaValidator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import tools.jackson.core.type.TypeReference;
-import ru.scraper.coincatalog.json.CoinCatalogJsonMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.InputStream;
@@ -24,7 +24,9 @@ class ScrapeResultSchemaTest {
 
     @BeforeAll
     static void setUp() throws Exception {
-        objectMapper = CoinCatalogJsonMapper.create();
+        objectMapper = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .build();
         validator = new DefaultJsonSchemaValidator(objectMapper);
         try (InputStream in =
                 ScrapeResultSchemaTest.class.getResourceAsStream("/coins_catalog.schema.json")) {
@@ -81,7 +83,7 @@ class ScrapeResultSchemaTest {
                 .doesNotContain("weight_g");
     }
 
-    private void assertValid(ScrapeResult result) {
+    private void assertValid(ScrapeResult<?> result) {
         Map<String, Object> instance = objectMapper.convertValue(result, new TypeReference<>() {});
         JsonSchemaValidator.ValidationResponse response = validator.validate(schema, instance);
         assertThat(response.valid())

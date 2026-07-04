@@ -2,16 +2,19 @@ package ru.scraper.coincatalog.mcp.tools;
 
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.scraper.coincatalog.application.ScrapeRegistry;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeResult;
+import ru.scraper.coincatalog.model.ScrapeSource;
 import ru.scraper.coincatalog.model.ScrapeStatus;
-import ru.scraper.coincatalog.scraper.ScraperRegistry;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CoinCatalogTools {
 
     private static final String COMMON_RETURN = """
@@ -33,11 +36,7 @@ public class CoinCatalogTools {
             false или omit — весь каталог, включая памятные и коллекционные. Передавайте true, \
             если пользователь не просил «все монеты».""";
 
-    private final ScraperRegistry registry;
-
-    public CoinCatalogTools(ScraperRegistry registry) {
-        this.registry = registry;
-    }
+    private final ScrapeRegistry scrapeRegistry;
 
     @McpTool(
             name = "coin-catalog-atb",
@@ -64,7 +63,7 @@ public class CoinCatalogTools {
     public List<Coin> scrapeAtb(
             @McpToolParam(description = QUERY_PARAM, required = false) String query,
             @McpToolParam(description = INVESTMENT_ONLY_PARAM, required = false) Boolean investmentOnly) {
-        return invoke("atb", ScrapeRequest.of(query, investmentOnly, null));
+        return invoke(ScrapeSource.ATB, ScrapeRequest.of(query, investmentOnly, null));
     }
 
     @McpTool(
@@ -97,7 +96,7 @@ public class CoinCatalogTools {
                                     (на сайте нет поля поиска). Пусто — все монеты в наличии.""",
                             required = false)
                     String query) {
-        return invoke("aurumex", ScrapeRequest.of(query, null, null));
+        return invoke(ScrapeSource.AURUMEX, ScrapeRequest.of(query, null, null));
     }
 
     @McpTool(
@@ -132,7 +131,7 @@ public class CoinCatalogTools {
                                     false или omit — весь каталог. Передавайте true, если пользователь не просил «все монеты».""",
                             required = false)
                     Boolean investmentOnly) {
-        return invoke("goldenplata", ScrapeRequest.of(query, investmentOnly, null));
+        return invoke(ScrapeSource.GOLDENPLATA, ScrapeRequest.of(query, investmentOnly, null));
     }
 
     @McpTool(
@@ -161,7 +160,7 @@ public class CoinCatalogTools {
     public List<Coin> scrapeLanta(
             @McpToolParam(description = QUERY_PARAM, required = false) String query,
             @McpToolParam(description = INVESTMENT_ONLY_PARAM, required = false) Boolean investmentOnly) {
-        return invoke("lanta", ScrapeRequest.of(query, investmentOnly, null));
+        return invoke(ScrapeSource.LANTA, ScrapeRequest.of(query, investmentOnly, null));
     }
 
     @McpTool(
@@ -198,7 +197,7 @@ public class CoinCatalogTools {
                             required = false)
                     String region) {
         String effectiveRegion = (region == null || region.isBlank()) ? "77" : region;
-        return invoke("rshb", ScrapeRequest.of(query, investmentOnly, effectiveRegion));
+        return invoke(ScrapeSource.RSHB, ScrapeRequest.of(query, investmentOnly, effectiveRegion));
     }
 
     @McpTool(
@@ -228,7 +227,7 @@ public class CoinCatalogTools {
     public List<Coin> scrapeSberbank(
             @McpToolParam(description = QUERY_PARAM, required = false) String query,
             @McpToolParam(description = INVESTMENT_ONLY_PARAM, required = false) Boolean investmentOnly) {
-        return invoke("sberbank", ScrapeRequest.of(query, investmentOnly, null));
+        return invoke(ScrapeSource.SBERBANK, ScrapeRequest.of(query, investmentOnly, null));
     }
 
     @McpTool(
@@ -257,7 +256,7 @@ public class CoinCatalogTools {
     public List<Coin> scrapeVtb(
             @McpToolParam(description = QUERY_PARAM, required = false) String query,
             @McpToolParam(description = INVESTMENT_ONLY_PARAM, required = false) Boolean investmentOnly) {
-        return invoke("vtb", ScrapeRequest.of(query, investmentOnly, null));
+        return invoke(ScrapeSource.VTB, ScrapeRequest.of(query, investmentOnly, null));
     }
 
     @McpTool(
@@ -292,11 +291,11 @@ public class CoinCatalogTools {
                                     false или omit — весь каталог. Передавайте true, если пользователь не просил «все монеты».""",
                             required = false)
                     Boolean investmentOnly) {
-        return invoke("zoloto-md", ScrapeRequest.of(query, investmentOnly, null));
+        return invoke(ScrapeSource.ZOLOTO_MD, ScrapeRequest.of(query, investmentOnly, null));
     }
 
-    private List<Coin> invoke(String slug, ScrapeRequest request) {
-        ScrapeResult result = registry.get(slug).scrape(request);
+    private List<Coin> invoke(ScrapeSource source, ScrapeRequest request) {
+        ScrapeResult<Coin> result = scrapeRegistry.run(source, request);
         if (result.scrapeStatus() != ScrapeStatus.OK) {
             throw new IllegalStateException(result.error() != null ? result.error() : result.scrapeStatus().value());
         }

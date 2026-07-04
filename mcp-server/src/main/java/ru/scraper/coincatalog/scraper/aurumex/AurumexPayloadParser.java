@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.aurumex;
 
+import lombok.experimental.UtilityClass;
 import tools.jackson.databind.JsonNode;
 import ru.scraper.coincatalog.model.Coin;
 
@@ -11,7 +12,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class AurumexPayloadParser {
+@UtilityClass
+public class AurumexPayloadParser {
 
     public static final String PUBLIC_URL = "https://aurumex.ru";
     public static final String CATALOG_PATH = "/catalog";
@@ -28,8 +30,6 @@ public final class AurumexPayloadParser {
     private static final Map<String, String> METAL_MAP = Map.of(
             "gold", "Золото",
             "silver", "Серебро");
-
-    private AurumexPayloadParser() {}
 
     public static String payloadUrlForPage(int page) {
         if (page <= 1) {

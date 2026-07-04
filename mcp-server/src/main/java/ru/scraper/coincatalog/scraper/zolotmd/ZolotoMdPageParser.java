@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.zolotmd;
 
+import lombok.experimental.UtilityClass;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.common.PriceParser;
 
@@ -12,7 +13,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ZolotoMdPageParser {
+@UtilityClass
+public class ZolotoMdPageParser {
 
     public static final String BASE_URL = "https://spb.zoloto-md.ru";
 
@@ -34,8 +36,6 @@ public final class ZolotoMdPageParser {
     private static final Pattern BUYOUT_PATTERN =
             Pattern.compile("<span class=\"js-price-buyout\">\\s*([^<]+)\\s*</span>", Pattern.CASE_INSENSITIVE);
     private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]+>");
-
-    private ZolotoMdPageParser() {}
 
     public static int parseTotalPages(String html, int fallback) {
         Matcher matcher = PAGE_PATTERN.matcher(html);

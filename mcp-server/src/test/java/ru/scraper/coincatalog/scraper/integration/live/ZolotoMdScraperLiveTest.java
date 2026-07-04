@@ -4,23 +4,23 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import ru.scraper.coincatalog.scraper.common.HttpFetcher;
-import ru.scraper.coincatalog.scraper.zolotmd.ZolotoMdCatalogFetcher;
 import ru.scraper.coincatalog.scraper.zolotmd.ZolotoMdPageParser;
+import ru.scraper.coincatalog.scraper.zolotmd.ZolotoMdScraper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("live")
 @EnabledIfEnvironmentVariable(named = "RUN_LIVE_TESTS", matches = "true")
-class ZolotoMdFetcherLiveTest {
+class ZolotoMdScraperLiveTest {
 
     @Test
     void fetchAndParseInvestmentCatalog() {
-        var fetcher = new ZolotoMdCatalogFetcher(HttpFetcher.defaults());
-        var result = fetcher.fetchAllPages("", true);
+        var scraper = new ZolotoMdScraper(HttpFetcher.defaults());
+        var result = scraper.scrape("", true, null);
 
-        assertThat(result.totalPages()).isGreaterThan(0);
+        assertThat(result.pagesProcessed()).isGreaterThan(0);
         assertThat(result.coins()).isNotEmpty();
-        assertThat(result.coins().get(0).coin().name()).isNotBlank();
+        assertThat(result.coins().get(0).name()).isNotBlank();
     }
 
     @Test

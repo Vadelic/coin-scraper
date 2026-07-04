@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.sberbank;
 
+import lombok.experimental.UtilityClass;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -15,7 +16,8 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.Optional;
 
-public final class SberbankResponseParser {
+@UtilityClass
+public class SberbankResponseParser {
 
     public static final String CATALOG_URL = "https://www.sberbank.ru/ru/person/mon";
     public static final String ORIGIN = "https://www.sberbank.ru";
@@ -31,8 +33,6 @@ public final class SberbankResponseParser {
             List.of("Золото", "Серебро", "Платина", "Палладий");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private SberbankResponseParser() {}
 
     public static ObjectNode buildPayload(
             int page,

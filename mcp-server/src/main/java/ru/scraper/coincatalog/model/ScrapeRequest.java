@@ -2,11 +2,13 @@ package ru.scraper.coincatalog.model;
 
 import java.util.Optional;
 
+/**
+ * Параметры запроса на сбор каталога монет.
+ */
 public record ScrapeRequest(
-                Optional<String> query,
-                Optional<Boolean> investmentOnly,
-                Optional<String> region) {
+        Optional<String> query, Optional<Boolean> investmentOnly, Optional<String> region) {
 
+    /** Создаёт запрос; пустые строки query/region превращаются в {@link Optional#empty()}. */
     public static ScrapeRequest of(String query, Boolean investmentOnly, String region) {
         return new ScrapeRequest(
                 optionalNonBlank(query),

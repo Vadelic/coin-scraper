@@ -2,6 +2,7 @@ package ru.scraper.coincatalog.scraper.integration.live;
 
 import org.junit.jupiter.api.Test;
 import ru.scraper.coincatalog.model.ScrapeRequest;
+import ru.scraper.coincatalog.model.ScrapeSource;
 
 /**
  * Live smoke test for {@code vtb} (Playwright + HTTP).
@@ -11,6 +12,6 @@ class VtbLiveTest extends AbstractLiveScraperTest {
 
     @Test
     void pobedonosetsInvestmentCatalog() throws Exception {
-        scrapeAndAssert("vtb", ScrapeRequest.of("победоносец", true, null));
+        scrapeAndAssert(ScrapeSource.VTB, ScrapeRequest.of("победоносец", true, null));
     }
 }

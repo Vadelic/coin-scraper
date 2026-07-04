@@ -5,13 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.scraper.coincatalog.model.Coin;
-import ru.scraper.coincatalog.scraper.aurumex.AurumexPlaywrightFetcher;
-import ru.scraper.coincatalog.scraper.lanta.LantaPlaywrightFetcher;
-import ru.scraper.coincatalog.scraper.rshb.RshbPlaywrightFetcher;
+import ru.scraper.coincatalog.scraper.aurumex.AurumexScraper;
+import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.lanta.LantaScraper;
+import ru.scraper.coincatalog.scraper.rshb.RshbScraper;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -23,18 +22,18 @@ class CoinCatalogToolsTest {
     private CoinCatalogTools tools;
 
     @MockitoBean
-    private AurumexPlaywrightFetcher aurumexPlaywrightFetcher;
+    private AurumexScraper aurumexScraper;
 
     @MockitoBean
-    private LantaPlaywrightFetcher lantaPlaywrightFetcher;
+    private LantaScraper lantaScraper;
 
     @MockitoBean
-    private RshbPlaywrightFetcher rshbPlaywrightFetcher;
+    private RshbScraper rshbScraper;
 
     @Test
     void rshbToolReturnsCoins() {
-        when(rshbPlaywrightFetcher.fetchCatalog("золото", true, "77"))
-                .thenReturn(new RshbPlaywrightFetcher.FetchResult(
+        when(rshbScraper.scrape("золото", true, "77"))
+                .thenReturn(new ScrapePayload(
                         1,
                         List.of(new Coin("5216-0060", "Георгий Победоносец", "Золото", 7.78, 85000.0, 107000.0))));
 
@@ -47,8 +46,8 @@ class CoinCatalogToolsTest {
 
     @Test
     void lantaToolReturnsCoins() {
-        when(lantaPlaywrightFetcher.fetchCatalog("победоносец", true))
-                .thenReturn(new LantaPlaywrightFetcher.FetchResult(
+        when(lantaScraper.scrape("победоносец", true, null))
+                .thenReturn(new ScrapePayload(
                         1,
                         List.of(new Coin("5216-0060", "Георгий Победоносец", "Золото", 7.78, null, 99700.0))));
 
@@ -60,21 +59,15 @@ class CoinCatalogToolsTest {
     }
 
     @Test
-    void aurumexToolReturnsFilteredCoins() throws Exception {
-        when(aurumexPlaywrightFetcher.fetchAllPages())
-                .thenReturn(new AurumexPlaywrightFetcher.FetchResult(
-                        1, List.of(loadAurumexFixture("payload_page1.json"))));
+    void aurumexToolReturnsFilteredCoins() {
+        when(aurumexScraper.scrape("победоносец", false, null))
+                .thenReturn(new ScrapePayload(
+                        1,
+                        List.of(new Coin("5216-0060", "Георгий Победоносец", "Золото", 7.78, null, 99700.0))));
 
         List<Coin> coins = tools.scrapeAurumex("победоносец");
 
         assertThat(coins).hasSize(1);
         assertThat(coins.get(0).catalogNumber()).isEqualTo("5216-0060");
-    }
-
-    private static tools.jackson.databind.JsonNode loadAurumexFixture(String name) throws Exception {
-        try (var in = CoinCatalogToolsTest.class.getResourceAsStream("/fixtures/aurumex/" + name)) {
-            String text = new String(Objects.requireNonNull(in).readAllBytes(), StandardCharsets.UTF_8);
-            return new tools.jackson.databind.ObjectMapper().readTree(text);
-        }
     }
 }

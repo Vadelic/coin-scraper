@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.rshb;
 
+import lombok.experimental.UtilityClass;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.common.PriceParser;
 
@@ -14,7 +15,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class RshbPageParser {
+@UtilityClass
+public class RshbPageParser {
 
     public static final String BASE_URL = "https://coins.rshb.ru";
     public static final String PRODUCT_SEARCH_URL =
@@ -51,8 +53,6 @@ public final class RshbPageParser {
     private static final List<String> BUYOUT_LABELS = List.of("Выкуп", "Цена выкупа");
     private static final List<String> NAME_ATTR_CUT_LABELS = List.of(
             "Номинал", "Металл", "Проба", "Чистого металла", "Тираж", "Выкуп");
-
-    private RshbPageParser() {}
 
     public record CardInput(String rawText, String href, String linkText, String priceBoxText) {}
 

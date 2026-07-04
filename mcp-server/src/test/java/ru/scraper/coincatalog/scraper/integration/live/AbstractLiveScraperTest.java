@@ -4,8 +4,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.scraper.coincatalog.application.ScrapeRegistry;
 import ru.scraper.coincatalog.model.ScrapeRequest;
-import ru.scraper.coincatalog.scraper.ScraperRegistry;
+import ru.scraper.coincatalog.model.ScrapeSource;
 import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 @SpringBootTest
@@ -14,9 +15,9 @@ import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 abstract class AbstractLiveScraperTest {
 
     @Autowired
-    protected ScraperRegistry registry;
+    protected ScrapeRegistry scrapeRegistry;
 
-    protected void scrapeAndAssert(String slug, ScrapeRequest request) throws Exception {
-        ScraperTestSupport.assertLiveResult(registry.get(slug).scrape(request), slug);
+    protected void scrapeAndAssert(ScrapeSource source, ScrapeRequest request) throws Exception {
+        ScraperTestSupport.assertLiveResult(scrapeRegistry.run(source, request), source);
     }
 }

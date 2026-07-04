@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.vtb;
 
+import lombok.experimental.UtilityClass;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -12,7 +13,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class VtbBffResponseParser {
+@UtilityClass
+public class VtbBffResponseParser {
 
     public static final String BASE_SITE = "https://www.vtb.ru";
     public static final String LIST_PATH = "/api/bff/api/v1/coin/list";
@@ -26,8 +28,6 @@ public final class VtbBffResponseParser {
             "^(золото|серебро|платина|палладий)", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private VtbBffResponseParser() {}
 
     public static String buildListUrl(int page) {
         return BASE_SITE + LIST_PATH + "?page=" + page;

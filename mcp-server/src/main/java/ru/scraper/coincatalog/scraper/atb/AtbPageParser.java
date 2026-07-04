@@ -1,5 +1,6 @@
 package ru.scraper.coincatalog.scraper.atb;
 
+import lombok.experimental.UtilityClass;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.common.PriceParser;
 
@@ -14,7 +15,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class AtbPageParser {
+@UtilityClass
+public class AtbPageParser {
 
     public static final String CATALOG_URL = "https://www.atb.su/vklady-i-scheta/monety/";
     public static final String BASE_URL = "https://www.atb.su";
@@ -40,8 +42,6 @@ public final class AtbPageParser {
 
     private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]+>");
     private static final Pattern WEIGHT_PATTERN = Pattern.compile("\\d+(?:[.,]\\d+)?");
-
-    private AtbPageParser() {}
 
     public static String resolveCategory(boolean investmentOnly) {
         return investmentOnly ? INVESTMENT_CATEGORY : "";

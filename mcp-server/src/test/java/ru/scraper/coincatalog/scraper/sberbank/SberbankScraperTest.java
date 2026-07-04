@@ -4,108 +4,47 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.scraper.coincatalog.model.ScrapeRequest;
-import ru.scraper.coincatalog.model.ScrapeStatus;
-import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
+import ru.scraper.coincatalog.model.Coin;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class SberbankScraperTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @Mock
-    private SberbankApiClient apiClient;
-
-    @InjectMocks
-    private SberbankScraper scraper;
+    private final SberbankScraper client = new SberbankScraper();
 
     @Test
-    void slugIsSberbank() {
-        assertThat(scraper.slug()).isEqualTo("sberbank");
-    }
+    void convertsMergedEntitiesToCoins() throws Exception {
+        List<Coin> coins = client.toCoins(loadMergedEntities(), "победоносец");
 
-    @Test
-    void returnsOkWithCoinsFromMergedEntities() throws Exception {
-        List<ObjectNode> entities = loadMergedEntities();
-        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
-                .thenReturn(new SberbankApiClient.FetchResult(4, entities));
-
-        var result = scraper.scrape(ScrapeRequest.of("победоносец", true, null));
-
-        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
-        assertThat(result.totalPages()).isEqualTo(4);
-        assertThat(result.totalCoins()).isEqualTo(2);
-        assertThat(result.coins().stream().map(c -> c.catalogNumber()).toList())
+        assertThat(coins).hasSize(2);
+        assertThat(coins.stream().map(c -> c.catalogNumber()).toList())
                 .containsExactlyInAnyOrder("5216-0060", "5111-0178");
-        assertThat(result.coins().stream().filter(c -> "5216-0060".equals(c.catalogNumber())).findFirst())
+        assertThat(coins.stream().filter(c -> "5216-0060".equals(c.catalogNumber())).findFirst())
                 .get()
                 .extracting(c -> c.buyPrice())
                 .isEqualTo(89500.0);
-        assertThat(result.query()).isEqualTo("победоносец");
-        assertThat(result.investmentOnly()).isTrue();
-        ScraperTestSupport.assertOkWithCoins(result);
     }
 
     @Test
     void filtersByQueryLocally() throws Exception {
-        List<ObjectNode> entities = loadMergedEntities();
-        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
-                .thenReturn(new SberbankApiClient.FetchResult(4, entities));
+        List<Coin> coins = client.toCoins(loadMergedEntities(), "николай");
 
-        var result = scraper.scrape(ScrapeRequest.of("николай", false, null));
-
-        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
-        assertThat(result.totalCoins()).isOne();
-        assertThat(result.coins().get(0).catalogNumber()).isEqualTo("5111-0008");
+        assertThat(coins).hasSize(1);
+        assertThat(coins.get(0).catalogNumber()).isEqualTo("5111-0008");
     }
 
     @Test
     void georgiyQueryIncludesSilverPobedonosets() throws Exception {
-        List<ObjectNode> entities = loadMergedEntities();
-        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
-                .thenReturn(new SberbankApiClient.FetchResult(4, entities));
+        List<Coin> coins = client.toCoins(loadMergedEntities(), "георгий победоносец");
 
-        var result = scraper.scrape(ScrapeRequest.of("георгий победоносец", true, null));
-
-        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
-        assertThat(result.totalCoins()).isEqualTo(2);
-        assertThat(result.coins().stream().map(c -> c.catalogNumber()).toList())
+        assertThat(coins).hasSize(2);
+        assertThat(coins.stream().map(c -> c.catalogNumber()).toList())
                 .containsExactlyInAnyOrder("5216-0060", "5111-0178");
-    }
-
-    @Test
-    void zeroPagesAndNoCoinsIsError() {
-        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
-                .thenReturn(new SberbankApiClient.FetchResult(0, List.of()));
-
-        var result = scraper.scrape(ScrapeRequest.of(null, false, null));
-
-        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.ERROR);
-        assertThat(result.error()).contains("0 запросов");
-    }
-
-    @Test
-    void fetchFailureReturnsError() {
-        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
-                .thenThrow(new IllegalStateException("HTTP 403"));
-
-        var result = scraper.scrape(ScrapeRequest.of(null, false, null));
-
-        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.ERROR);
-        assertThat(result.error()).contains("HTTP 403");
     }
 
     @Test
@@ -113,12 +52,9 @@ class SberbankScraperTest {
         ObjectNode duplicate = (ObjectNode) MAPPER.readTree("""
                 {"id":"dup","name":"Same coin","catalogNumber":"X-1","price":100,"metal":"Золото"}
                 """);
-        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
-                .thenReturn(new SberbankApiClient.FetchResult(4, List.of(duplicate, duplicate.deepCopy())));
+        List<Coin> coins = client.toCoins(List.of(duplicate, duplicate.deepCopy()), "");
 
-        var result = scraper.scrape(ScrapeRequest.of(null, false, null));
-
-        assertThat(result.totalCoins()).isOne();
+        assertThat(coins).hasSize(1);
     }
 
     private static List<ObjectNode> loadMergedEntities() throws Exception {

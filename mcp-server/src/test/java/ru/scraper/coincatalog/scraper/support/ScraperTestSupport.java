@@ -1,13 +1,17 @@
 package ru.scraper.coincatalog.scraper.support;
 
+import lombok.experimental.UtilityClass;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.networknt.schema.Error;
-import ru.scraper.coincatalog.json.CoinCatalogJsonMapper;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.networknt.schema.InputFormat;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SpecificationVersion;
+import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.ScrapeResult;
+import ru.scraper.coincatalog.model.ScrapeSource;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 
 import java.io.InputStream;
@@ -17,19 +21,20 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public final class ScraperTestSupport {
+@UtilityClass
+public class ScraperTestSupport {
 
-    private static final ObjectMapper MAPPER = CoinCatalogJsonMapper.create();
+    private static final ObjectMapper MAPPER = JsonMapper.builder()
+            .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+            .build();
     private static final Schema SCHEMA = loadSchema();
 
-    private ScraperTestSupport() {}
-
-    public static List<Error> validateSchema(ScrapeResult result) throws Exception {
+    public static List<Error> validateSchema(ScrapeResult<Coin> result) throws Exception {
         String json = MAPPER.writeValueAsString(result);
         return SCHEMA.validate(json, InputFormat.JSON);
     }
 
-    public static void assertOkWithCoins(ScrapeResult result) throws Exception {
+    public static void assertOkWithCoins(ScrapeResult<Coin> result) throws Exception {
         assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
         assertThat(result.totalCoins()).isGreaterThan(0);
         assertThat(result.coins()).isNotEmpty();
@@ -37,14 +42,14 @@ public final class ScraperTestSupport {
         assertThat(result.coins().get(0).name()).isNotBlank();
     }
 
-    public static void assertLiveResult(ScrapeResult result, String slug) throws Exception {
+    public static void assertLiveResult(ScrapeResult<Coin> result, ScrapeSource source) throws Exception {
         assertThat(result.scrapeStatus())
-                .as("%s scrapeStatus", slug)
+                .as("%s scrapeStatus", source.name())
                 .isIn(ScrapeStatus.OK, ScrapeStatus.CAPTCHA_BLOCKED);
         assertThat(validateSchema(result)).isEmpty();
         if (result.scrapeStatus() == ScrapeStatus.OK) {
             assertThat(result.totalCoins())
-                    .as("%s totalCoins", slug)
+                    .as("%s totalCoins", source.name())
                     .isGreaterThan(0);
             assertThat(result.coins().get(0).name()).isNotBlank();
         }

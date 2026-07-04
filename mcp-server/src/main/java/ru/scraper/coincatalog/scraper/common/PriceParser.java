@@ -1,13 +1,14 @@
 package ru.scraper.coincatalog.scraper.common;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class PriceParser {
+@UtilityClass
+public class PriceParser {
 
     private static final Pattern PRICE_PATTERN = Pattern.compile("([\\d\\s]+(?:[.,]\\d+)?)");
-
-    private PriceParser() {}
 
     /**
      * Parses price from Russian storefront strings like "99 700 ₽" or "99 700,50".

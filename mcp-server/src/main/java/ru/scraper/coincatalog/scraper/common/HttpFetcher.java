@@ -1,7 +1,6 @@
 package ru.scraper.coincatalog.scraper.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.net.ssl.SSLContext;
@@ -20,13 +19,12 @@ import java.time.Duration;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class HttpFetcher {
 
     private static final String USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-
-    private static final Logger log = LoggerFactory.getLogger(HttpFetcher.class);
 
     private final HttpClient client;
     private final Duration timeout;
