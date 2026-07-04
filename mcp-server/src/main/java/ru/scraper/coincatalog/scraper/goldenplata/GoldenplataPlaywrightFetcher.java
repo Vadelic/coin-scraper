@@ -9,6 +9,7 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
 
 import java.time.Duration;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+@Service
 public class GoldenplataPlaywrightFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(GoldenplataPlaywrightFetcher.class);

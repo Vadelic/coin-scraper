@@ -9,6 +9,7 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
 
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+@Service
 public class LantaPlaywrightFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(LantaPlaywrightFetcher.class);

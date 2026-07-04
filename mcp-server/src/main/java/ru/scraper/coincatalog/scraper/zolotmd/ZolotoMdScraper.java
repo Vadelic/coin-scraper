@@ -2,6 +2,7 @@ package ru.scraper.coincatalog.scraper.zolotmd;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeResult;
@@ -9,6 +10,7 @@ import ru.scraper.coincatalog.scraper.CoinScraper;
 
 import java.util.List;
 
+@Service
 public class ZolotoMdScraper implements CoinScraper {
 
     private static final Logger log = LoggerFactory.getLogger(ZolotoMdScraper.class);

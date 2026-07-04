@@ -1,10 +1,11 @@
 package ru.scraper.coincatalog.scraper.sberbank;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -21,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class SberbankApiClient {
 
     private static final Logger log = LoggerFactory.getLogger(SberbankApiClient.class);
@@ -54,7 +56,6 @@ public class SberbankApiClient {
     }
 
     public FetchResult fetchCatalog(String query, boolean investmentOnly) {
-        String normalizedQuery = query != null ? query : "";
         List<String> sections = SberbankResponseParser.resolveSections(investmentOnly);
 
         Exception lastError = null;
@@ -85,7 +86,7 @@ public class SberbankApiClient {
                             SberbankResponseParser.DEFAULT_PAGE_SIZE,
                             SberbankResponseParser.DEFAULT_CITY,
                             SberbankResponseParser.DEFAULT_CONDITION,
-                            normalizedQuery,
+                            "",
                             List.of(metal),
                             sections,
                             List.of());
@@ -102,7 +103,7 @@ public class SberbankApiClient {
                         entities.size(),
                         mergeResult.rawRowCount());
 
-                fetchAndMergeBuyout(entities, normalizedQuery);
+                fetchAndMergeBuyout(entities, "");
                 return new FetchResult(pagesProcessed, entities);
             } catch (Exception e) {
                 lastError = e;

@@ -1,10 +1,13 @@
 package ru.scraper.coincatalog.scraper;
 
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Service
 public class ScraperRegistry {
 
     private final Map<String, CoinScraper> scrapers;
@@ -17,7 +20,7 @@ public class ScraperRegistry {
     public CoinScraper get(String slug) {
         CoinScraper scraper = scrapers.get(slug);
         if (scraper == null) {
-            throw new IllegalArgumentException("Unknown scraper slug: " + slug);
+            return new NotImplementedScraper(slug);
         }
         return scraper;
     }

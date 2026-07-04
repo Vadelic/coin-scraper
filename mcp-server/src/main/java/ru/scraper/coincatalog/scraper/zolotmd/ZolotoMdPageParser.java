@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public final class ZolotoMdPageParser {
 
-    private static final String BASE_URL = "https://spb.zoloto-md.ru";
+    public static final String BASE_URL = "https://spb.zoloto-md.ru";
 
     private static final Map<String, String> METAL_LABELS = Map.of(
             "золото", "Золото",

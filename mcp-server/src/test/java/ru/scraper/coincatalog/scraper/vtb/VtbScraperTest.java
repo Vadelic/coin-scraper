@@ -1,7 +1,7 @@
 package ru.scraper.coincatalog.scraper.vtb;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -32,6 +33,11 @@ class VtbScraperTest {
     private VtbScraper scraper;
 
     @Test
+    void slugIsVtb() {
+        assertThat(scraper.slug()).isEqualTo("vtb");
+    }
+
+    @Test
     void returnsOkWithCoinsFromFetcher() throws Exception {
         when(fetcher.fetchAllPages(anyBoolean()))
                 .thenReturn(new VtbPlaywrightFetcher.FetchResult(1, loadAllRows()));
@@ -43,6 +49,7 @@ class VtbScraperTest {
         assertThat(result.totalCoins()).isOne();
         assertThat(result.coins().get(0).catalogNumber()).isEqualTo("5216-0060");
         assertThat(result.investmentOnly()).isTrue();
+        ScraperTestSupport.assertOkWithCoins(result);
     }
 
     @Test

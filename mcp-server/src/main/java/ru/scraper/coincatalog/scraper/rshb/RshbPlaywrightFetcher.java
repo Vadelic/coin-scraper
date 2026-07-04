@@ -1,7 +1,7 @@
 package ru.scraper.coincatalog.scraper.rshb;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Browser;
@@ -14,6 +14,7 @@ import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.RequestOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 
 import java.time.Duration;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+@Service
 public class RshbPlaywrightFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(RshbPlaywrightFetcher.class);

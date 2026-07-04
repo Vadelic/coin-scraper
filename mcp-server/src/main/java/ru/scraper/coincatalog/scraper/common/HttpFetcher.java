@@ -2,11 +2,14 @@ package ru.scraper.coincatalog.scraper.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,6 +19,7 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Objects;
 
+@Service
 public class HttpFetcher {
 
     private static final String USER_AGENT =
@@ -29,11 +33,18 @@ public class HttpFetcher {
     private final int retries;
     private final Duration baseDelay;
 
+    public HttpFetcher() {
+        this(Duration.ofSeconds(30), 3, Duration.ofMillis(400), false);
+    }
+
     public HttpFetcher(Duration timeout, int retries, Duration baseDelay, boolean secureSsl) {
         this.timeout = Objects.requireNonNull(timeout);
         this.retries = Math.max(1, retries);
         this.baseDelay = Objects.requireNonNull(baseDelay);
-        HttpClient.Builder builder = HttpClient.newBuilder().connectTimeout(timeout);
+        HttpClient.Builder builder = HttpClient.newBuilder()
+                .connectTimeout(timeout)
+                .version(HttpClient.Version.HTTP_1_1)
+                .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
         if (!secureSsl) {
             builder.sslContext(insecureSslContext());
         }
@@ -52,7 +63,8 @@ public class HttpFetcher {
                         .uri(URI.create(url))
                         .timeout(timeout)
                         .header("User-Agent", USER_AGENT)
-                        .header("Accept", "text/html,application/xhtml+xml,*/*;q=0.8")
+                        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                        .header("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
                         .GET()
                         .build();
                 HttpResponse<String> response =

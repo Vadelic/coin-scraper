@@ -1,8 +1,8 @@
 package ru.scraper.coincatalog.scraper.sberbank;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -66,10 +66,10 @@ class SberbankResponseParserTest {
                 new SberbankResponseParser.MetalBatch("Золото", gold),
                 new SberbankResponseParser.MetalBatch("Серебро", silver)));
 
-        assertThat(merged.entities()).hasSize(2);
+        assertThat(merged.entities()).hasSize(3);
         assertThat(merged.entities().get(0).get("metal").asText()).isEqualTo("Золото");
         assertThat(merged.entities().get(1).get("metal").asText()).isEqualTo("Серебро");
-        assertThat(merged.rawRowCount()).isEqualTo(2);
+        assertThat(merged.rawRowCount()).isEqualTo(3);
     }
 
     @Test
@@ -129,6 +129,29 @@ class SberbankResponseParserTest {
         assertThat(SberbankResponseParser.coinMatchesQuery(coin, "ПОБЕД")).isTrue();
         assertThat(SberbankResponseParser.coinMatchesQuery(coin, "платина")).isFalse();
         assertThat(SberbankResponseParser.coinMatchesQuery(coin, "")).isTrue();
+    }
+
+    @Test
+    void coinMatchesGeorgiyQueryForShortPobedonosetsName() {
+        var silver = new ru.scraper.coincatalog.model.Coin(
+                "5111-0178", "Победоносец", "Серебро", 31.1, null, 45000.0);
+
+        assertThat(SberbankResponseParser.coinMatchesQuery(silver, "георгий")).isTrue();
+        assertThat(SberbankResponseParser.coinMatchesQuery(silver, "георгий победоносец")).isTrue();
+        assertThat(SberbankResponseParser.coinMatchesQuery(silver, "победоносец")).isTrue();
+        assertThat(SberbankResponseParser.coinMatchesQuery(silver, "николай")).isFalse();
+    }
+
+    @Test
+    void coinMatchesQueryRequiresAllTokensForMetalAndName() {
+        var gold = new ru.scraper.coincatalog.model.Coin(
+                "5216-0060", "Победоносец", "Золото", 7.78, null, 99700.0);
+        var silver = new ru.scraper.coincatalog.model.Coin(
+                "5111-0178", "Победоносец", "Серебро", 31.1, null, 45000.0);
+
+        assertThat(SberbankResponseParser.coinMatchesQuery(gold, "золото победоносец")).isTrue();
+        assertThat(SberbankResponseParser.coinMatchesQuery(silver, "золото победоносец")).isFalse();
+        assertThat(SberbankResponseParser.coinMatchesQuery(silver, "серебро победоносец")).isTrue();
     }
 
     @Test

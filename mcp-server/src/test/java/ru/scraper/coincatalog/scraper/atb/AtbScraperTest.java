@@ -9,6 +9,7 @@ import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -29,6 +30,11 @@ class AtbScraperTest {
     private AtbScraper scraper;
 
     @Test
+    void slugIsAtb() {
+        assertThat(scraper.slug()).isEqualTo("atb");
+    }
+
+    @Test
     void returnsOkWithCoins() throws Exception {
         when(fetcher.fetchCatalog(anyString(), anyBoolean()))
                 .thenReturn(new AtbPlaywrightFetcher.FetchResult(1, sampleCoins(), loadFixture("ajax_fragment.html")));
@@ -39,6 +45,7 @@ class AtbScraperTest {
         assertThat(result.totalPages()).isEqualTo(1);
         assertThat(result.totalCoins()).isEqualTo(2);
         assertThat(result.investmentOnly()).isTrue();
+        ScraperTestSupport.assertOkWithCoins(result);
     }
 
     @Test

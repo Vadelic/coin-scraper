@@ -11,6 +11,7 @@ import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.RequestOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+@Service
 public class AtbPlaywrightFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(AtbPlaywrightFetcher.class);

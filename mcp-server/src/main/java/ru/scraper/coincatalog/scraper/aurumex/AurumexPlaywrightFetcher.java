@@ -1,7 +1,7 @@
 package ru.scraper.coincatalog.scraper.aurumex;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Browser;
@@ -13,6 +13,7 @@ import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.RequestOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
 
 import java.time.Duration;
@@ -21,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class AurumexPlaywrightFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(AurumexPlaywrightFetcher.class);

@@ -2,6 +2,7 @@ package ru.scraper.coincatalog.scraper.goldenplata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeResult;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Service
 public class GoldenplataScraper implements CoinScraper {
 
     private static final Logger log = LoggerFactory.getLogger(GoldenplataScraper.class);

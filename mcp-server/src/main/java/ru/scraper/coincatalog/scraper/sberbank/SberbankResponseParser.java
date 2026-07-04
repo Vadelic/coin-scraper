@@ -1,9 +1,9 @@
 package ru.scraper.coincatalog.scraper.sberbank;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import ru.scraper.coincatalog.model.Coin;
 
 import java.net.URLEncoder;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class SberbankResponseParser {
@@ -207,13 +208,48 @@ public final class SberbankResponseParser {
         if (q.isEmpty()) {
             return true;
         }
-        String hay = String.join(
+        String hay = coinHaystack(coin);
+        String qLower = q.toLowerCase(Locale.ROOT);
+        if (hay.contains(qLower)) {
+            return true;
+        }
+        String[] tokens = qLower.split("\\s+");
+        if (tokens.length == 1) {
+            return tokenMatches(tokens[0], hay);
+        }
+        for (String token : tokens) {
+            if (token.isEmpty()) {
+                continue;
+            }
+            if (!tokenMatches(token, hay)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String coinHaystack(Coin coin) {
+        return String.join(
                         " ",
                         coin.name(),
                         coin.catalogNumber() != null ? coin.catalogNumber() : "",
                         coin.metal() != null ? coin.metal() : "")
-                .toLowerCase();
-        return hay.contains(q.toLowerCase());
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean tokenMatches(String token, String hay) {
+        if (hay.contains(token)) {
+            return true;
+        }
+        // На витрине Сбера серебряный «Георгий Победоносец» часто называется просто «Победоносец».
+        if (isGeorgiyToken(token) && hay.contains("победоносец")) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isGeorgiyToken(String token) {
+        return token.startsWith("георг") || token.startsWith("georg");
     }
 
     public static String dedupeKey(Coin coin) {

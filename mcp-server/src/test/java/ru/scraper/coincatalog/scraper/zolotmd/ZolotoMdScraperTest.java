@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.util.List;
 
@@ -25,7 +26,12 @@ class ZolotoMdScraperTest {
     private ZolotoMdScraper scraper;
 
     @Test
-    void returnsOkWithCoins() {
+    void slugIsZolotoMd() {
+        assertThat(scraper.slug()).isEqualTo("zoloto-md");
+    }
+
+    @Test
+    void returnsOkWithCoins() throws Exception {
         var coin = new ru.scraper.coincatalog.model.Coin(
                 "5216-0060", "Георгий Победоносец", "Золото", 7.78, 89500.0, 99700.0);
         when(fetcher.fetchAllPages(anyString(), anyBoolean()))
@@ -38,6 +44,7 @@ class ZolotoMdScraperTest {
         assertThat(result.totalCoins()).isOne();
         assertThat(result.query()).isEqualTo("победоносец");
         assertThat(result.investmentOnly()).isTrue();
+        ScraperTestSupport.assertOkWithCoins(result);
     }
 
     @Test

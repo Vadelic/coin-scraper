@@ -9,6 +9,7 @@ import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.util.List;
 
@@ -27,7 +28,12 @@ class LantaScraperTest {
     private LantaScraper scraper;
 
     @Test
-    void returnsOkWithCoins() {
+    void slugIsLanta() {
+        assertThat(scraper.slug()).isEqualTo("lanta");
+    }
+
+    @Test
+    void returnsOkWithCoins() throws Exception {
         when(fetcher.fetchCatalog(anyString(), anyBoolean()))
                 .thenReturn(new LantaPlaywrightFetcher.FetchResult(
                         1,
@@ -42,6 +48,18 @@ class LantaScraperTest {
         assertThat(result.totalCoins()).isEqualTo(2);
         assertThat(result.query()).isEqualTo("победоносец");
         assertThat(result.investmentOnly()).isTrue();
+        ScraperTestSupport.assertOkWithCoins(result);
+    }
+
+    @Test
+    void fetchFailureReturnsError() {
+        when(fetcher.fetchCatalog(anyString(), anyBoolean()))
+                .thenThrow(new IllegalStateException("network down"));
+
+        var result = scraper.scrape(ScrapeRequest.of(null, false, null));
+
+        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.ERROR);
+        assertThat(result.error()).contains("network down");
     }
 
     @Test

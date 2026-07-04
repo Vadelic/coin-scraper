@@ -1,10 +1,9 @@
 package ru.scraper.coincatalog.scraper.aurumex;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import ru.scraper.coincatalog.model.Coin;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,9 +116,7 @@ public final class AurumexPayloadParser {
         }
 
         List<PriceTier> tiers = new ArrayList<>();
-        Iterator<Map.Entry<String, JsonNode>> fields = prices.fields();
-        while (fields.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fields.next();
+        for (Map.Entry<String, JsonNode> entry : prices.properties()) {
             JsonNode tier = derefCell(store, entry.getValue());
             if (tier == null || !tier.isObject()) {
                 continue;

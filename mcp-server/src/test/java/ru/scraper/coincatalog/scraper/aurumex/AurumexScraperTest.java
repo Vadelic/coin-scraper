@@ -1,7 +1,7 @@
 package ru.scraper.coincatalog.scraper.aurumex;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -30,6 +31,11 @@ class AurumexScraperTest {
     private AurumexScraper scraper;
 
     @Test
+    void slugIsAurumex() {
+        assertThat(scraper.slug()).isEqualTo("aurumex");
+    }
+
+    @Test
     void returnsOkWithCoinsFromPayload() throws Exception {
         when(fetcher.fetchAllPages())
                 .thenReturn(new AurumexPlaywrightFetcher.FetchResult(1, List.of(loadJson("payload_page1.json"))));
@@ -41,6 +47,7 @@ class AurumexScraperTest {
         assertThat(result.totalCoins()).isOne();
         assertThat(result.coins().get(0).catalogNumber()).isEqualTo("5216-0060");
         assertThat(result.investmentOnly()).isNull();
+        ScraperTestSupport.assertOkWithCoins(result);
     }
 
     @Test
@@ -75,6 +82,16 @@ class AurumexScraperTest {
 
         assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.ERROR);
         assertThat(result.error()).contains("0 страниц payload");
+    }
+
+    @Test
+    void fetchFailureReturnsError() {
+        when(fetcher.fetchAllPages()).thenThrow(new IllegalStateException("network down"));
+
+        var result = scraper.scrape(ScrapeRequest.of(null, null, null));
+
+        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.ERROR);
+        assertThat(result.error()).contains("network down");
     }
 
     @Test

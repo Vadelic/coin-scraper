@@ -2,8 +2,10 @@ package ru.scraper.coincatalog.scraper.zolotmd;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.scraper.common.HttpFetcher;
 
+@Service
 public class ZolotoMdCatalogFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(ZolotoMdCatalogFetcher.class);
@@ -16,6 +18,9 @@ public class ZolotoMdCatalogFetcher {
     }
 
     public FetchResult fetchAllPages(String query, boolean investmentOnly) {
+        // Warm-up: сайт отдаёт необработанный MODX-шаблон без cookies с главной.
+        httpFetcher.fetchText(ZolotoMdPageParser.BASE_URL + "/");
+
         String firstUrl = ZolotoMdPageParser.buildCatalogUrl(1, DEFAULT_LIMIT, query, investmentOnly);
         log.info("Loading first page: {}", firstUrl);
         String firstHtml = httpFetcher.fetchText(firstUrl);

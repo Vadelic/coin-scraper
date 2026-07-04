@@ -2,11 +2,13 @@ package ru.scraper.coincatalog.scraper.lanta;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeResult;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 
+@Service
 public class LantaScraper implements CoinScraper {
 
     private static final Logger log = LoggerFactory.getLogger(LantaScraper.class);

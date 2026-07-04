@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 import ru.scraper.coincatalog.scraper.CaptchaBlockedException;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -28,6 +29,11 @@ class GoldenplataScraperTest {
     private GoldenplataScraper scraper;
 
     @Test
+    void slugIsGoldenplata() {
+        assertThat(scraper.slug()).isEqualTo("goldenplata");
+    }
+
+    @Test
     void returnsOkWithCoinsFromPages() throws Exception {
         when(fetcher.fetchCatalog(anyString(), anyBoolean()))
                 .thenReturn(new GoldenplataPlaywrightFetcher.FetchResult(
@@ -40,6 +46,18 @@ class GoldenplataScraperTest {
         assertThat(result.totalPages()).isEqualTo(2);
         assertThat(result.totalCoins()).isEqualTo(4);
         assertThat(result.investmentOnly()).isTrue();
+        ScraperTestSupport.assertOkWithCoins(result);
+    }
+
+    @Test
+    void fetchFailureReturnsError() {
+        when(fetcher.fetchCatalog(anyString(), anyBoolean()))
+                .thenThrow(new IllegalStateException("network down"));
+
+        var result = scraper.scrape(ScrapeRequest.of(null, false, null));
+
+        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.ERROR);
+        assertThat(result.error()).contains("network down");
     }
 
     @Test

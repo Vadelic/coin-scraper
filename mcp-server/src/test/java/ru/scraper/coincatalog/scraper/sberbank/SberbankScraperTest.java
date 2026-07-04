@@ -1,8 +1,8 @@
 package ru.scraper.coincatalog.scraper.sberbank;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeStatus;
+import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -32,6 +33,11 @@ class SberbankScraperTest {
     private SberbankScraper scraper;
 
     @Test
+    void slugIsSberbank() {
+        assertThat(scraper.slug()).isEqualTo("sberbank");
+    }
+
+    @Test
     void returnsOkWithCoinsFromMergedEntities() throws Exception {
         List<ObjectNode> entities = loadMergedEntities();
         when(apiClient.fetchCatalog(anyString(), anyBoolean()))
@@ -41,11 +47,16 @@ class SberbankScraperTest {
 
         assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
         assertThat(result.totalPages()).isEqualTo(4);
-        assertThat(result.totalCoins()).isOne();
-        assertThat(result.coins().get(0).catalogNumber()).isEqualTo("5216-0060");
-        assertThat(result.coins().get(0).buyPrice()).isEqualTo(89500.0);
+        assertThat(result.totalCoins()).isEqualTo(2);
+        assertThat(result.coins().stream().map(c -> c.catalogNumber()).toList())
+                .containsExactlyInAnyOrder("5216-0060", "5111-0178");
+        assertThat(result.coins().stream().filter(c -> "5216-0060".equals(c.catalogNumber())).findFirst())
+                .get()
+                .extracting(c -> c.buyPrice())
+                .isEqualTo(89500.0);
         assertThat(result.query()).isEqualTo("победоносец");
         assertThat(result.investmentOnly()).isTrue();
+        ScraperTestSupport.assertOkWithCoins(result);
     }
 
     @Test
@@ -59,6 +70,20 @@ class SberbankScraperTest {
         assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
         assertThat(result.totalCoins()).isOne();
         assertThat(result.coins().get(0).catalogNumber()).isEqualTo("5111-0008");
+    }
+
+    @Test
+    void georgiyQueryIncludesSilverPobedonosets() throws Exception {
+        List<ObjectNode> entities = loadMergedEntities();
+        when(apiClient.fetchCatalog(anyString(), anyBoolean()))
+                .thenReturn(new SberbankApiClient.FetchResult(4, entities));
+
+        var result = scraper.scrape(ScrapeRequest.of("георгий победоносец", true, null));
+
+        assertThat(result.scrapeStatus()).isEqualTo(ScrapeStatus.OK);
+        assertThat(result.totalCoins()).isEqualTo(2);
+        assertThat(result.coins().stream().map(c -> c.catalogNumber()).toList())
+                .containsExactlyInAnyOrder("5216-0060", "5111-0178");
     }
 
     @Test
@@ -101,6 +126,7 @@ class SberbankScraperTest {
         List<ObjectNode> silver = SberbankResponseParser.entitiesFromCatalogResponse(loadJson("catalog_silver.json"));
         gold.get(0).put("metal", "Золото");
         silver.get(0).put("metal", "Серебро");
+        silver.get(1).put("metal", "Серебро");
         List<JsonNode> buyout = SberbankResponseParser.entitiesFromBuyoutResponse(loadJson("buyout.json"));
         var catalog = new java.util.ArrayList<>(gold);
         catalog.addAll(silver);

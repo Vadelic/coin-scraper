@@ -1,11 +1,10 @@
 package ru.scraper.coincatalog.mcp.tools;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.aurumex.AurumexPlaywrightFetcher;
 import ru.scraper.coincatalog.scraper.lanta.LantaPlaywrightFetcher;
 import ru.scraper.coincatalog.scraper.rshb.RshbPlaywrightFetcher;
@@ -23,70 +22,59 @@ class CoinCatalogToolsTest {
     @Autowired
     private CoinCatalogTools tools;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @MockitoBean
     private AurumexPlaywrightFetcher aurumexPlaywrightFetcher;
 
-    @MockBean
+    @MockitoBean
     private LantaPlaywrightFetcher lantaPlaywrightFetcher;
 
-    @MockBean
+    @MockitoBean
     private RshbPlaywrightFetcher rshbPlaywrightFetcher;
 
     @Test
-    void rshbToolUsesRegionAndReturnsOk() throws Exception {
+    void rshbToolReturnsCoins() {
         when(rshbPlaywrightFetcher.fetchCatalog("золото", true, "77"))
                 .thenReturn(new RshbPlaywrightFetcher.FetchResult(
                         1,
-                        List.of(new ru.scraper.coincatalog.model.Coin(
-                                "5216-0060", "Георгий Победоносец", "Золото", 7.78, 85000.0, 107000.0))));
+                        List.of(new Coin("5216-0060", "Георгий Победоносец", "Золото", 7.78, 85000.0, 107000.0))));
 
-        String json = tools.scrapeRshb("золото", true, null);
-        JsonNode root = objectMapper.readTree(json);
+        List<Coin> coins = tools.scrapeRshb("золото", true, null);
 
-        assertThat(root.get("scrape_status").asText()).isEqualTo("ok");
-        assertThat(root.get("query").asText()).isEqualTo("золото");
-        assertThat(root.get("investment_only").asBoolean()).isTrue();
-        assertThat(root.get("total_coins").asInt()).isEqualTo(1);
+        assertThat(coins).hasSize(1);
+        assertThat(coins.get(0).catalogNumber()).isEqualTo("5216-0060");
+        assertThat(coins.get(0).sellPrice()).isEqualTo(107000.0);
     }
 
     @Test
-    void lantaToolPassesQuery() throws Exception {
+    void lantaToolReturnsCoins() {
         when(lantaPlaywrightFetcher.fetchCatalog("победоносец", true))
                 .thenReturn(new LantaPlaywrightFetcher.FetchResult(
                         1,
-                        List.of(new ru.scraper.coincatalog.model.Coin(
-                                "5216-0060", "Георгий Победоносец", "Золото", 7.78, null, 99700.0))));
+                        List.of(new Coin("5216-0060", "Георгий Победоносец", "Золото", 7.78, null, 99700.0))));
 
-        String json = tools.scrapeLanta("победоносец", true);
-        JsonNode root = objectMapper.readTree(json);
+        List<Coin> coins = tools.scrapeLanta("победоносец", true);
 
-        assertThat(root.get("scrape_status").asText()).isEqualTo("ok");
-        assertThat(root.get("query").asText()).isEqualTo("победоносец");
-        assertThat(root.get("investment_only").asBoolean()).isTrue();
-        assertThat(root.get("total_coins").asInt()).isEqualTo(1);
+        assertThat(coins).hasSize(1);
+        assertThat(coins.get(0).name()).contains("Победоносец");
+        assertThat(coins.get(0).sellPrice()).isEqualTo(99700.0);
     }
 
     @Test
-    void aurumexToolHasNoInvestmentOnlyField() throws Exception {
+    void aurumexToolReturnsFilteredCoins() throws Exception {
         when(aurumexPlaywrightFetcher.fetchAllPages())
                 .thenReturn(new AurumexPlaywrightFetcher.FetchResult(
                         1, List.of(loadAurumexFixture("payload_page1.json"))));
 
-        String json = tools.scrapeAurumex("золото");
-        JsonNode root = objectMapper.readTree(json);
+        List<Coin> coins = tools.scrapeAurumex("победоносец");
 
-        assertThat(root.has("investment_only")).isFalse();
-        assertThat(root.get("query").asText()).isEqualTo("золото");
-        assertThat(root.get("scrape_status").asText()).isEqualTo("ok");
+        assertThat(coins).hasSize(1);
+        assertThat(coins.get(0).catalogNumber()).isEqualTo("5216-0060");
     }
 
-    private static com.fasterxml.jackson.databind.JsonNode loadAurumexFixture(String name) throws Exception {
+    private static tools.jackson.databind.JsonNode loadAurumexFixture(String name) throws Exception {
         try (var in = CoinCatalogToolsTest.class.getResourceAsStream("/fixtures/aurumex/" + name)) {
             String text = new String(Objects.requireNonNull(in).readAllBytes(), StandardCharsets.UTF_8);
-            return new ObjectMapper().readTree(text);
+            return new tools.jackson.databind.ObjectMapper().readTree(text);
         }
     }
 }
