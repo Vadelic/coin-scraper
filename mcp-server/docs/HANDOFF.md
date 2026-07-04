@@ -9,7 +9,7 @@
 Локальный **MCP-сервер** (`mcp-server/`), stdio, для Cursor / Claude Desktop.
 
 - **8 MCP tools** — те же имена и параметры, что [`tools/tools.json`](../tools/tools.json)
-- Ответ каждого tool — JSON по [`docs/coins_catalog.schema.json`](../docs/coins_catalog.schema.json)
+- Ответ каждого tool — JSON по [`src/test/resources/coins_catalog.schema.json`](../src/test/resources/coins_catalog.schema.json) (camelCase; отличается от корневой Python-схемы)
 - Java-скраперы дублируют логику Python в [`tools/coin-catalog-*/`](../tools/)
 - Skills в [`skills/coin-catalog-*/`](../skills/) применимы без изменений (группировка/таблицы на стороне LLM)
 
@@ -80,10 +80,10 @@ scraper/zolotmd/
 
 Правила:
 - Immutable `record` для моделей
-- Исключения не выходят из MCP — только `scrape_status` + `error`
+- Исключения не выходят из MCP — только `scrapeStatus` + `error`
 - `CaptchaBlockedException` → `captcha_blocked`
-- `total_coins == coins.size()`
-- При `investment_only` в JSON только `"investment_only": true` (не false)
+- `totalCoins == coins.size()`
+- При `investmentOnly` в JSON только `"investmentOnly": true` (не false)
 - Логика 1:1 с Python-эталоном и [`docs/coin-catalog-scraper-requirements.md`](../docs/coin-catalog-scraper-requirements.md)
 
 Регистрация: bean в `ScraperAutoConfiguration`, убрать `NotImplementedScraper` для этого slug.
@@ -94,14 +94,14 @@ scraper/zolotmd/
 
 | Tool | Параметры | Статус |
 |------|-----------|--------|
-| `coin-catalog-zoloto-md` | `query`, `investment_only` | **реализован** |
-| `coin-catalog-sberbank` | `query`, `investment_only` | заглушка |
-| `coin-catalog-vtb` | `query`, `investment_only` | заглушка |
+| `coin-catalog-zoloto-md` | `query`, `investmentOnly` | **реализован** |
+| `coin-catalog-sberbank` | `query`, `investmentOnly` | заглушка |
+| `coin-catalog-vtb` | `query`, `investmentOnly` | заглушка |
 | `coin-catalog-aurumex` | `query` | заглушка |
-| `coin-catalog-atb` | `query`, `investment_only` | заглушка |
-| `coin-catalog-goldenplata` | `query`, `investment_only` | заглушка |
-| `coin-catalog-lanta` | `query`, `investment_only` | заглушка |
-| `coin-catalog-rshb` | `query`, `investment_only`, `region` (default `"77"`) | заглушка |
+| `coin-catalog-atb` | `query`, `investmentOnly` | заглушка |
+| `coin-catalog-goldenplata` | `query`, `investmentOnly` | заглушка |
+| `coin-catalog-lanta` | `query`, `investmentOnly` | заглушка |
+| `coin-catalog-rshb` | `query`, `investmentOnly`, `region` (default `"77"`) | заглушка |
 
 Заглушка: `ScrapeResult.notImplemented(request)` → `error: "not implemented"`.
 
@@ -210,7 +210,7 @@ mcp-server/
 | Документ | Назначение |
 |----------|------------|
 | [`docs/coin-catalog-scraper-requirements.md`](../docs/coin-catalog-scraper-requirements.md) | JSON, CLI, логика сбора, investment_only |
-| [`docs/coins_catalog.schema.json`](../docs/coins_catalog.schema.json) | схема ответа |
+| [`src/test/resources/coins_catalog.schema.json`](../src/test/resources/coins_catalog.schema.json) | схема ответа MCP (camelCase) |
 | [`docs/coin-catalog-skill-requirements.md`](../docs/coin-catalog-skill-requirements.md) | контракт tools для LLM |
 | `tools/coin-catalog-*/tool.json` | параметры MCP tools |
 | `tools/coin-catalog-*/scrape_*_coins.py` | эталон логики |

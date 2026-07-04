@@ -3,9 +3,9 @@ package ru.scraper.coincatalog.model;
 import java.util.Optional;
 
 public record ScrapeRequest(
-        Optional<String> query,
-        Optional<Boolean> investmentOnly,
-        Optional<String> region) {
+                Optional<String> query,
+                Optional<Boolean> investmentOnly,
+                Optional<String> region) {
 
     public static ScrapeRequest of(String query, Boolean investmentOnly, String region) {
         return new ScrapeRequest(

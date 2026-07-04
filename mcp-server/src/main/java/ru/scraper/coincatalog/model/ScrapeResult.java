@@ -1,20 +1,16 @@
 package ru.scraper.coincatalog.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.time.Instant;
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ScrapeResult(
-        @JsonProperty("scraped_at") String scrapedAt,
-        @JsonProperty("scrape_status") ScrapeStatus scrapeStatus,
-        @JsonProperty("total_pages") int totalPages,
-        @JsonProperty("total_coins") int totalCoins,
+        String scrapedAt,
+        ScrapeStatus scrapeStatus,
+        int totalPages,
+        int totalCoins,
         List<Coin> coins,
         String query,
-        @JsonProperty("investment_only") Boolean investmentOnly,
+        Boolean investmentOnly,
         String error) {
 
     public static ScrapeResult ok(ScrapeRequest request, int totalPages, List<Coin> coins) {
