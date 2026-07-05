@@ -2,7 +2,7 @@ package ru.scraper.coincatalog.scraper.rshb;
 
 import lombok.experimental.UtilityClass;
 import ru.scraper.coincatalog.model.Coin;
-import ru.scraper.coincatalog.scraper.common.PriceParser;
+import ru.scraper.coincatalog.scraper.PriceParser;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

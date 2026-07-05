@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import ru.scraper.coincatalog.model.Coin;
-import ru.scraper.coincatalog.scraper.common.HttpFetcher;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.zolotmd.HttpFetcher;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 
 import java.util.List;
 import java.util.stream.Stream;

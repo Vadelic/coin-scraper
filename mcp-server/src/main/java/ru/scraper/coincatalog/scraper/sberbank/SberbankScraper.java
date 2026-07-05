@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CoinScraper;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;

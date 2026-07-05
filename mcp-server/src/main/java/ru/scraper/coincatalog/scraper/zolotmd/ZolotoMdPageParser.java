@@ -2,7 +2,7 @@ package ru.scraper.coincatalog.scraper.zolotmd;
 
 import lombok.experimental.UtilityClass;
 import ru.scraper.coincatalog.model.Coin;
-import ru.scraper.coincatalog.scraper.common.PriceParser;
+import ru.scraper.coincatalog.scraper.PriceParser;
 
 import java.net.URI;
 import java.util.ArrayList;

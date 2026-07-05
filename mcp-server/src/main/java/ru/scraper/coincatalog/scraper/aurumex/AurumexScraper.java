@@ -17,7 +17,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.RequestOptions;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 
 import java.time.Duration;
 import java.util.ArrayList;

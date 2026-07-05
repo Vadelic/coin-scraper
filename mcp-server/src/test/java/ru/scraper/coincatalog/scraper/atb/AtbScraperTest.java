@@ -2,7 +2,7 @@ package ru.scraper.coincatalog.scraper.atb;
 
 import org.junit.jupiter.api.Test;
 import ru.scraper.coincatalog.model.Coin;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

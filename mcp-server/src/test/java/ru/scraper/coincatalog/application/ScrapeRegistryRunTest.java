@@ -12,7 +12,7 @@ import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeSource;
 import ru.scraper.coincatalog.model.ScrapeStatus;
 import ru.scraper.coincatalog.scraper.CoinScraper;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 import ru.scraper.coincatalog.scraper.support.ScraperTestSupport;
 
 import java.util.List;

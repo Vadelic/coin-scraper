@@ -1,4 +1,4 @@
-package ru.scraper.coincatalog.scraper.common;
+package ru.scraper.coincatalog.scraper;
 
 import lombok.experimental.UtilityClass;
 

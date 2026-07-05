@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CoinScraper;
-import ru.scraper.coincatalog.scraper.common.HttpFetcher;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 
 import java.util.ArrayList;
 import java.util.HashSet;

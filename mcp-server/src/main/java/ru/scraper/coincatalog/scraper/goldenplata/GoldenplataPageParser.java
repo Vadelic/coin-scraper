@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import ru.scraper.coincatalog.model.Coin;
-import ru.scraper.coincatalog.scraper.common.PriceParser;
+import ru.scraper.coincatalog.scraper.PriceParser;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

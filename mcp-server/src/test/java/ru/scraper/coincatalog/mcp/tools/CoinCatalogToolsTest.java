@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.aurumex.AurumexScraper;
-import ru.scraper.coincatalog.scraper.common.ScrapePayload;
+import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
 import ru.scraper.coincatalog.scraper.lanta.LantaScraper;
 import ru.scraper.coincatalog.scraper.rshb.RshbScraper;
 
