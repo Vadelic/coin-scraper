@@ -13,6 +13,17 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Разбор ответов BFF API каталога монет ВТБ (JSON, без DOM).
+ *
+ * <p>Уровни:
+ * <ul>
+ *   <li><b>Запрос</b> — URL, тело POST, серверный фильтр {@code coinKind} ({@link #buildPayload}, {@link #resolveApiFilters}).
+ *   <li><b>Страница списка</b> — объект ответа {@code { coins, maxPage }} ({@link #parseListResponse}).
+ *   <li><b>Объект монеты</b> — одна запись массива {@code coins} ({@link #rowToCoin}).
+ *   <li><b>Клиентский фильтр по тексту</b> — {@link #coinMatchesQuery}; вызывается из {@link VtbScraper#toCoins}, не из BFF.
+ * </ul>
+ */
 @UtilityClass
 public class VtbBffResponseParser {
 
@@ -29,10 +40,12 @@ public class VtbBffResponseParser {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /** URL POST-запроса списка монет для страницы {@code page} (1-based). */
     public static String buildListUrl(int page) {
         return BASE_SITE + LIST_PATH + "?page=" + page;
     }
 
+    /** Серверный фильтр BFF: только инвестиционные монеты ({@code coinKind=Инвестиционные}). */
     public static List<ObjectNode> buildInvestmentFilters() {
         ObjectNode filter = MAPPER.createObjectNode();
         filter.put("id", COIN_KIND_FILTER_ID);
@@ -41,6 +54,7 @@ public class VtbBffResponseParser {
         return List.of(filter);
     }
 
+    /** Тело POST {@code /coin/list}: массив {@code filters} для BFF (без текстового поиска). */
     public static ObjectNode buildPayload(List<ObjectNode> filters) {
         ObjectNode payload = MAPPER.createObjectNode();
         ArrayNode filtersNode = payload.putArray("filters");
@@ -50,6 +64,11 @@ public class VtbBffResponseParser {
         return payload;
     }
 
+    /**
+     * Фильтры для BFF в зависимости от режима каталога.
+     *
+     * <p>При {@code investmentOnly} в запрос попадает {@code coinKind}; текстовый {@code query} сюда не входит.
+     */
     public static List<ObjectNode> resolveApiFilters(boolean investmentOnly) {
         if (investmentOnly) {
             return buildInvestmentFilters();
@@ -57,6 +76,11 @@ public class VtbBffResponseParser {
         return List.of();
     }
 
+    /**
+     * Разбор JSON одной страницы списка: извлекает массив {@code coins} и {@code maxPage}.
+     *
+     * <p>Отдельные монеты ещё не преобразованы — для этого {@link #rowToCoin}.
+     */
     public static ListPageResult parseListResponse(JsonNode body) {
         if (body == null || !body.isObject()) {
             return new ListPageResult(List.of(), 1);
@@ -78,6 +102,7 @@ public class VtbBffResponseParser {
         return new ListPageResult(coins, maxPage);
     }
 
+    /** Нормализация поля {@code metal} объекта монеты (золото/серебро/… → «Золото»/«Серебро»). */
     public static String normalizeMetal(String text) {
         if (text == null || text.isBlank()) {
             return null;
@@ -91,6 +116,12 @@ public class VtbBffResponseParser {
         return stripped.isEmpty() ? null : stripped;
     }
 
+    /**
+     * Разбор одного объекта монеты из элемента массива {@code coins}.
+     *
+     * <p>Поля BFF: {@code name}, {@code article}, {@code metal}, {@code mass}, {@code price1} (продажа).
+     * Цена выкупа в API не приходит ({@code buyPrice=null}).
+     */
     public static Optional<Coin> rowToCoin(JsonNode item) {
         if (item == null || !item.isObject()) {
             return Optional.empty();
@@ -111,6 +142,12 @@ public class VtbBffResponseParser {
                 toFloat(item.get("price1"))));
     }
 
+    /**
+     * Клиентская фильтрация по подстроке: name, catalog_number, metal.
+     *
+     * <p>BFF не поддерживает текстовый поиск — фильтр применяется в {@link VtbScraper#toCoins}
+     * после загрузки всех страниц каталога.
+     */
     public static boolean coinMatchesQuery(Coin coin, String query) {
         String q = query == null ? "" : query.strip();
         if (q.isEmpty()) {
@@ -125,6 +162,7 @@ public class VtbBffResponseParser {
         return hay.contains(q.toLowerCase());
     }
 
+    /** Ключ дедупликации: {@code id} из JSON, иначе артикул или название. */
     public static String dedupeKey(JsonNode row, Coin coin) {
         String id = textOrNull(row.get("id"));
         if (id != null && !id.isBlank()) {
@@ -136,6 +174,7 @@ public class VtbBffResponseParser {
         return coin.name();
     }
 
+    /** Признаки CAPTCHA/блокировки в заголовке HTML-страницы каталога. */
     public static boolean isCaptchaTitle(String title) {
         if (title == null) {
             return false;
@@ -144,6 +183,7 @@ public class VtbBffResponseParser {
         return low.contains("captcha") || low.contains("robot") || low.contains("робот");
     }
 
+    /** Признаки CAPTCHA/блокировки в тексте HTML-страницы каталога. */
     public static boolean isCaptchaBody(String body) {
         if (body == null) {
             return false;
@@ -188,5 +228,6 @@ public class VtbBffResponseParser {
         return text.isEmpty() ? null : text;
     }
 
+    /** Результат разбора одной JSON-страницы списка BFF. */
     public record ListPageResult(List<JsonNode> coins, int maxPage) {}
 }

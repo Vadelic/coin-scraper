@@ -24,7 +24,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Скрапер каталога ВТБ через Playwright и BFF API. */
+/**
+ * Скрапер каталога ВТБ через Playwright и BFF API.
+ *
+ * <p>Поток данных:
+ * <ol>
+ *   <li><b>Страница (HTML)</b> — открытие каталога в браузере, cookies, проверка CAPTCHA ({@link #isCaptcha}).
+ *   <li><b>Страница списка (JSON)</b> — POST {@code /api/bff/api/v1/coin/list?page=N} из контекста страницы ({@link #fetchListPage}).
+ *   <li><b>Объект монеты</b> — разбор каждой записи массива {@code coins} в {@link VtbBffResponseParser#rowToCoin}.
+ *   <li><b>Фильтр по тексту на клиенте</b> — параметр {@code query} <em>не</em> передаётся в BFF; отбор после загрузки всех страниц ({@link #toCoins}).
+ * </ol>
+ *
+ * <p>Фильтр «только инвестиционные» ({@code investmentOnly}) задаётся в теле BFF-запроса
+ * ({@link VtbBffResponseParser#resolveApiFilters}), а не локально.
+ */
 @Slf4j
 @Service("VTB")
 public class VtbScraper implements CoinScraper<Coin> {
@@ -82,6 +95,16 @@ public class VtbScraper implements CoinScraper<Coin> {
         this.maxPages = maxPages;
     }
 
+    /**
+     * Собирает каталог: сессия в браузере, обход страниц BFF, локальная фильтрация по {@code query}.
+     *
+     * <p>{@code query} фильтруется на клиенте после загрузки всех страниц списка (см. {@link #toCoins}).
+     * В BFF уходит только фильтр {@code coinKind} при {@code investmentOnly=true}.
+     *
+     * @param query подстрока в name / catalog_number / metal; пустая — вернуть всё загруженное
+     * @param investmentOnly {@code true} — в BFF добавить фильтр «Инвестиционные»
+     * @param region не используется
+     */
     @Override
     public ScrapePayload<Coin> scrape(String query, boolean investmentOnly, String region) {
         String normalizedQuery = query != null ? query.strip() : "";
@@ -164,6 +187,13 @@ public class VtbScraper implements CoinScraper<Coin> {
         return new ScrapePayload(pagesProcessed, toCoins(allRows, normalizedQuery));
     }
 
+    /**
+     * Преобразует сырые строки BFF в список монет: разбор объекта, дедупликация, фильтр по тексту на клиенте.
+     *
+     * <p>Для каждой строки JSON вызывается {@link VtbBffResponseParser#rowToCoin} (анализ объекта).
+     * Затем {@link VtbBffResponseParser#coinMatchesQuery} отсекает записи, не подходящие под {@code query}
+     * — этот шаг выполняется только в скрапере, BFF поисковый запрос не получает.
+     */
     List<Coin> toCoins(List<JsonNode> rows, String query) {
         List<Coin> coins = new ArrayList<>();
         Set<String> seen = new HashSet<>();
@@ -204,6 +234,11 @@ public class VtbScraper implements CoinScraper<Coin> {
         return coins;
     }
 
+    /**
+     * Загружает одну страницу списка через {@code fetch} в контексте открытой HTML-страницы каталога.
+     *
+     * <p>Ответ — JSON тела BFF ({@code coins}, {@code maxPage}); разбор страницы — в {@link VtbBffResponseParser#parseListResponse}.
+     */
     private JsonNode fetchListPage(Page page, int pageNum, ObjectNode payload) {
         String url = VtbBffResponseParser.buildListUrl(pageNum);
         Map<String, Object> args = new LinkedHashMap<>();
@@ -227,6 +262,7 @@ public class VtbScraper implements CoinScraper<Coin> {
         return null;
     }
 
+    /** Анализ HTML-страницы каталога: заголовок и текст {@code body} на признаки CAPTCHA/блокировки. */
     private boolean isCaptcha(Page page) {
         if (VtbBffResponseParser.isCaptchaTitle(page.title())) {
             return true;
