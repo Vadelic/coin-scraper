@@ -3,6 +3,7 @@ package ru.scraper.coincatalog.mcp.tools;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.application.ScrapeRegistry;
 import ru.scraper.coincatalog.model.Coin;
@@ -10,12 +11,16 @@ import ru.scraper.coincatalog.model.ScrapeRequest;
 import ru.scraper.coincatalog.model.ScrapeResult;
 import ru.scraper.coincatalog.model.ScrapeSource;
 import ru.scraper.coincatalog.model.ScrapeStatus;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CoinCatalogTools {
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     private static final String COMMON_RETURN = """
             Возвращает: массив монет с полями catalogNumber, name, metal, weightG, \
@@ -295,7 +300,26 @@ public class CoinCatalogTools {
     }
 
     private List<Coin> invoke(ScrapeSource source, ScrapeRequest request) {
+        log.info(
+                """
+                MCP scrape request:
+                source={}
+                query={}
+                investmentOnly={}
+                region={}""",
+                source,
+                request.query().orElse(null),
+                request.investmentOnly().orElse(null),
+                request.region().orElse(null));
         ScrapeResult<Coin> result = scrapeRegistry.run(source, request);
+        try {
+            log.info(
+                    "MCP scrape {} response:\n{}",
+                    source,
+                    JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+        } catch (Exception e) {
+            log.warn("MCP scrape {} response log failed: {}", source, e.getMessage());
+        }
         if (result.scrapeStatus() != ScrapeStatus.OK) {
             throw new IllegalStateException(result.error() != null ? result.error() : result.scrapeStatus().value());
         }

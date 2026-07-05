@@ -1,5 +1,7 @@
 package ru.scraper.coincatalog.scraper.sberbank;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -34,24 +36,26 @@ public class SberbankScraper implements CoinScraper<Coin> {
     private static final String USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+    private static final Logger log = LoggerFactory.getLogger(SberbankScraper.class);
 
     private final HttpClient client;
     private final ObjectMapper objectMapper;
-    private final Duration timeout;
+    private final Duration requestTimeout;
     private final int retries;
 
     public SberbankScraper() {
-        this(Duration.ofSeconds(60), 3, false);
+        this(Duration.ofSeconds(15), Duration.ofSeconds(60), 3, false);
     }
 
-    SberbankScraper(Duration timeout, int retries, boolean secureSsl) {
-        this.timeout = timeout;
+    SberbankScraper(Duration connectTimeout, Duration requestTimeout, int retries, boolean secureSsl) {
+        this.requestTimeout = requestTimeout;
         this.retries = Math.max(1, retries);
         this.objectMapper = new ObjectMapper();
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         HttpClient.Builder builder = HttpClient.newBuilder()
-                .connectTimeout(timeout)
+                .connectTimeout(connectTimeout)
+                .version(HttpClient.Version.HTTP_1_1)
                 .cookieHandler(cookieManager);
         if (!secureSsl) {
             builder.sslContext(insecureSslContext());
@@ -67,16 +71,7 @@ public class SberbankScraper implements CoinScraper<Coin> {
         Exception lastError = null;
         for (int attempt = 1; attempt <= retries; attempt++) {
             try {
-                log.info("Открываю витрину {} (попытка {}/{})", SberbankResponseParser.CATALOG_URL, attempt, retries);
-                int vitrineCode = request(
-                                SberbankResponseParser.CATALOG_URL,
-                                "GET",
-                                vitrineGetHeaders(),
-                                null)
-                        .statusCode();
-                if (vitrineCode != 200) {
-                    log.warn("Витрина вернула HTTP {} (ожидали cookie-сессию; продолжаем)", vitrineCode);
-                }
+                openVitrineBestEffort(attempt);
 
                 List<ObjectNode> entities;
                 int pagesProcessed;
@@ -115,7 +110,7 @@ public class SberbankScraper implements CoinScraper<Coin> {
                 lastError = e;
                 log.warn("Попытка {}/{} — ошибка: {}", attempt, retries, e.getMessage());
                 if (attempt < retries) {
-                    sleep(timeout.dividedBy(30).multipliedBy(1L << attempt));
+                    sleep(requestTimeout.dividedBy(30).multipliedBy(1L << attempt));
                 }
             }
         }
@@ -174,6 +169,27 @@ public class SberbankScraper implements CoinScraper<Coin> {
         }
     }
 
+    private void openVitrineBestEffort(int attempt) {
+        try {
+            log.info(
+                    "Открываю витрину {} (попытка {}/{})",
+                    SberbankResponseParser.CATALOG_URL,
+                    attempt,
+                    retries);
+            int vitrineCode = request(
+                            SberbankResponseParser.CATALOG_URL,
+                            "GET",
+                            vitrineGetHeaders(),
+                            null)
+                    .statusCode();
+            if (vitrineCode != 200) {
+                log.warn("Витрина вернула HTTP {} (ожидали cookie-сессию; продолжаем)", vitrineCode);
+            }
+        } catch (Exception e) {
+            log.warn("Витрина недоступна (продолжаем без cookie-сессии): {}", e.getMessage());
+        }
+    }
+
     private JsonNode postCatalog(ObjectNode payload) throws Exception {
         String catalogUrl = SberbankResponseParser.absoluteUrl(SberbankResponseParser.API_PATH);
         byte[] body = objectMapper.writeValueAsBytes(payload);
@@ -185,7 +201,7 @@ public class SberbankScraper implements CoinScraper<Coin> {
             throws Exception {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(timeout)
+                .timeout(requestTimeout)
                 .method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofByteArray(body));
         for (int i = 0; i < headers.length; i += 2) {
             builder.header(headers[i], headers[i + 1]);
