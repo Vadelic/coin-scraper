@@ -7,6 +7,7 @@ import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.common.ScrapePayload;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,19 +23,27 @@ class LantaIntegrationTest {
             new ExpectedCoin("5219-0033", null, "Золото", 31.1, 339_000.0, null),
             new ExpectedCoin("5111-0178", null, "Серебро", 31.1, 5_700.0, 6_900.0));
 
+    private static final List<ExpectedCoin> PO_CATALOG_EXTRA = List.of(
+            new ExpectedCoin("5015-0058", null, null, 10.0, null, 1_900.0),
+            new ExpectedCoin("5111-0531", null, "Серебро", 31.1, null, 14_800.0),
+            new ExpectedCoin("5111-0492", null, "Серебро", 31.1, null, 55_000.0));
 
+    // https://www.lanta.ru/metals/coins/ivesticyonnie-monety/?sort=&by=&mem_sort=&mem_by=&price-from=990+%E2%82%BD&price-to=220+000+%E2%82%BD&seriya=&metal=&keywords=%D0%BF%D0%BE
     @Test
     void poInvestmentCatalog() {
         ScrapePayload<Coin> payload =
                 new LantaScraper().scrape("по", true, null);
         assertInvestmentCatalog(payload, PO_EXPECTED, 5, 1);
     }
-//    @Test
-//    void poCatalog() {
-//        ScrapePayload<Coin> payload =
-//                new LantaScraper().scrape("по", false, null);
-//        assertInvestmentCatalog(payload, PO_EXPECTED, 5, 1);
-//    }
+    // https://www.lanta.ru/metals/coins/?sort=&by=&mem_sort=&mem_by=&price-from=990+%E2%82%BD&price-to=220+000+%E2%82%BD&seriya=&metal=&keywords=%D0%BF%D0%BE
+    @Test
+    void poCatalog() {
+        ScrapePayload<Coin> payload =
+                new LantaScraper().scrape("по", false, null);
+        List<ExpectedCoin> expected =
+                Stream.concat(PO_EXPECTED.stream(), PO_CATALOG_EXTRA.stream()).toList();
+        assertInvestmentCatalog(payload, expected, 5, 3);
+    }
 
     private static void assertInvestmentCatalog(
             ScrapePayload<Coin> payload, List<ExpectedCoin> expected, int goldCount, int silverCount) {
