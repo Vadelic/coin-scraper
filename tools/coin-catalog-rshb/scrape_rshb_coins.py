@@ -36,8 +36,9 @@ DEFAULT_PAGE_SIZE = 99
 DEFAULT_PAGE_DELAY = 5.0
 DEFAULT_TIMEOUT_MS = 30_000
 DEFAULT_RETRIES = 3
-# Без x-region сайт отдаёт region=0 — на карточках нет .price-box с ценой.
+# Москва — для инвестиционного каталога; общий каталог с in_stock=true — национальная витрина (0).
 DEFAULT_REGION_CODE = "77"
+IN_STOCK_CATALOG_REGION_CODE = "0"
 REGION_COOKIE_NAME = "x-region"
 
 CARD_LINK_SELECTOR = "a[href^='/p/']"
@@ -122,7 +123,7 @@ def build_url(
     *,
     investment_only: bool = False,
 ) -> str:
-    params: dict[str, str | int] = {"page": page, "page_size": page_size}
+    params: dict[str, str | int] = {"page": page, "page_size": page_size, "in_stock": "true"}
     q = (search_text or "").strip()
     if q:
         params["search_text"] = q
@@ -607,6 +608,12 @@ async def extract_coins_from_page(page) -> list[RshbCoin]:
     return coins
 
 
+def resolve_region_code(region: str | None, investment_only: bool) -> str:
+    if region and region.strip():
+        return region.strip()
+    return DEFAULT_REGION_CODE if investment_only else IN_STOCK_CATALOG_REGION_CODE
+
+
 async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin]]:
     all_coins: list[RshbCoin] = []
     seen_urls: set[str] = set()
@@ -615,7 +622,7 @@ async def scrape_all_pages(args: argparse.Namespace) -> tuple[int, list[RshbCoin
 
     async with async_playwright() as pw:
         browser = await launch_chromium_browser(pw, headless=not args.headful)
-        region = (args.region or DEFAULT_REGION_CODE).strip()
+        region = resolve_region_code(args.region, investment_only)
         context = await browser.new_context(
             user_agent=USER_AGENT,
             locale="ru-RU",
@@ -764,8 +771,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--headful", action="store_true")
     p.add_argument(
         "--region",
-        default=DEFAULT_REGION_CODE,
-        help=f"код региона для cookie {REGION_COOKIE_NAME} (по умолчанию {DEFAULT_REGION_CODE}, Москва)",
+        default=None,
+        help=(
+            f"код региона для cookie {REGION_COOKIE_NAME}; "
+            f"по умолчанию {DEFAULT_REGION_CODE} (Москва) для инвестиционного каталога, "
+            f"{IN_STOCK_CATALOG_REGION_CODE} для общего"
+        ),
     )
     p.add_argument(
         "--log-level",

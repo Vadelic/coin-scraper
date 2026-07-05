@@ -23,6 +23,8 @@ public class RshbPageParser {
             BASE_URL + "/api/catalog/vue_storefront_magento_1_product/product/_search";
     public static final String INVESTMENT_SUBJECTS = "5506";
     public static final String DEFAULT_REGION_CODE = "77";
+    /** Регион по умолчанию для общего каталога с in_stock=true (национальная витрина). */
+    public static final String IN_STOCK_CATALOG_REGION_CODE = "0";
     public static final String REGION_COOKIE_NAME = "x-region";
     public static final int DEFAULT_PAGE_SIZE = 99;
 
@@ -62,6 +64,7 @@ public class RshbPageParser {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("page", String.valueOf(page));
         params.put("page_size", String.valueOf(pageSize));
+        params.put("in_stock", "true");
         String query = searchText != null ? searchText.strip() : "";
         if (!query.isEmpty()) {
             params.put("search_text", query);

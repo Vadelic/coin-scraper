@@ -19,6 +19,7 @@ class RshbPageParserTest {
         String url = RshbPageParser.buildUrl(2, 99, "победоносец", true);
         assertThat(url).contains("page=2");
         assertThat(url).contains("page_size=99");
+        assertThat(url).contains("in_stock=true");
         assertThat(url).contains("search_text=");
         assertThat(url).contains("subjects=" + RshbPageParser.INVESTMENT_SUBJECTS);
     }

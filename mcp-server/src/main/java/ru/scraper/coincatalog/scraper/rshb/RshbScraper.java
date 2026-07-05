@@ -76,7 +76,7 @@ public class RshbScraper implements CoinScraper<Coin> {
     @Override
     public ScrapePayload<Coin> scrape(String query, boolean investmentOnly, String region) {
         String normalizedQuery = query != null ? query.strip() : "";
-        String regionCode = region != null && !region.isBlank() ? region.strip() : RshbPageParser.DEFAULT_REGION_CODE;
+        String regionCode = resolveRegionCode(region, investmentOnly);
 
         try (Playwright playwright = Playwright.create()) {
             Browser browser = launchBrowser(playwright);
@@ -362,6 +362,15 @@ public class RshbScraper implements CoinScraper<Coin> {
             log.info("buy_price из product/_search: {} sku", registry.size());
         }
         return registry;
+    }
+
+    private static String resolveRegionCode(String region, boolean investmentOnly) {
+        if (region != null && !region.isBlank()) {
+            return region.strip();
+        }
+        return investmentOnly
+                ? RshbPageParser.DEFAULT_REGION_CODE
+                : RshbPageParser.IN_STOCK_CATALOG_REGION_CODE;
     }
 
     private Browser launchBrowser(Playwright playwright) {
