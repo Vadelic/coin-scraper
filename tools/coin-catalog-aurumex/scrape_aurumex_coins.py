@@ -204,26 +204,6 @@ def resolve_sell_price(
     return None
 
 
-def resolve_buy_price(
-    raw: dict,
-    store: list,
-    *,
-    title: str,
-    list_price: float | None,
-    price_per_ounce: float | None,
-) -> float | None:
-    purchase = to_float(deref_cell(store, raw.get("pricePurchase")))
-    if purchase is None:
-        return None
-
-    pack_n = parse_pack_count(title)
-    if pack_n and price_per_ounce and list_price is not None:
-        if abs(round(list_price / price_per_ounce) - pack_n) <= 1:
-            if abs(round(purchase / price_per_ounce) - pack_n) <= 1:
-                return purchase / pack_n
-    return purchase
-
-
 def find_catalog_block(store: list) -> dict | None:
     for cell in store:
         if (
@@ -282,21 +262,13 @@ def extract_coins_from_store(store: list) -> list[AurumexCoin]:
             price_per_ounce=price_per_ounce,
             tiers=tiers,
         )
-        buy_price = resolve_buy_price(
-            raw,
-            store,
-            title=name,
-            list_price=list_price,
-            price_per_ounce=price_per_ounce,
-        )
-
         coins.append(
             AurumexCoin(
                 name=name,
                 catalog_number=article,
                 metal=category_to_metal(cat),
                 weight_g=parse_weight_g(weight),
-                buy_price=buy_price,
+                buy_price=None,
                 sell_price=sell_price,
             )
         )

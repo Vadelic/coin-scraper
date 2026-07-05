@@ -37,6 +37,10 @@ public class AtbPageParser {
             "class=\"coins-item__price\"\\s*>(.*?)</(?:motion\\.)?div>",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    private static final Pattern BUY_PRICE_PATTERN = Pattern.compile(
+            "class=\"coins-item__cost\"\\s*>(.*?)</span>",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static final Pattern DETAIL_ROW_PATTERN = Pattern.compile(
             "<tr>\\s*<td>(.*?)</td>\\s*<td>(.*?)</td>\\s*</tr>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -109,12 +113,36 @@ public class AtbPageParser {
             sellPrice = PriceParser.parseRub(stripTags(priceMatcher.group(1)));
         }
 
+        Double buyPrice = buyPriceFromCardHtml(cardHtml);
+
         String coinUrl = resolveUrl(href);
         DetailFields detail = parseDetailFields(detailHtml);
 
         return Optional.of(new ParsedCard(
-                new Coin(detail.catalogNumber(), name, detail.metal(), detail.weightG(), null, sellPrice),
+                new Coin(detail.catalogNumber(), name, detail.metal(), detail.weightG(), buyPrice, sellPrice),
                 coinUrl));
+    }
+
+    public static Double buyPriceFromCardHtml(String cardHtml) {
+        if (cardHtml == null || cardHtml.isBlank()) {
+            return null;
+        }
+        Matcher matcher = BUY_PRICE_PATTERN.matcher(cardHtml);
+        if (!matcher.find()) {
+            return null;
+        }
+        return PriceParser.parseRub(stripTags(matcher.group(1)));
+    }
+
+    public static Double sellPriceFromCardHtml(String cardHtml) {
+        if (cardHtml == null || cardHtml.isBlank()) {
+            return null;
+        }
+        Matcher matcher = PRICE_PATTERN.matcher(cardHtml);
+        if (!matcher.find()) {
+            return null;
+        }
+        return PriceParser.parseRub(stripTags(matcher.group(1)));
     }
 
     public static DetailFields parseDetailFields(String detailHtml) {

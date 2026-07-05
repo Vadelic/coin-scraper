@@ -43,7 +43,7 @@ class AurumexPayloadParserTest {
         assertThat(coins.get(0).metal()).isEqualTo("Золото");
         assertThat(coins.get(0).weightG()).isEqualTo(7.78);
         assertThat(coins.get(0).sellPrice()).isEqualTo(99700.0);
-        assertThat(coins.get(0).buyPrice()).isEqualTo(89500.0);
+        assertThat(coins.get(0).buyPrice()).isNull();
         assertThat(coins.get(1).metal()).isEqualTo("Серебро");
         assertThat(coins.get(1).buyPrice()).isNull();
     }

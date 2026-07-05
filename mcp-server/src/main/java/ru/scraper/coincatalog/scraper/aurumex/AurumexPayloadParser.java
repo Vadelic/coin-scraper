@@ -171,28 +171,6 @@ public class AurumexPayloadParser {
         return null;
     }
 
-    public static Double resolveBuyPrice(
-            JsonNode raw,
-            JsonNode store,
-            String title,
-            Double listPrice,
-            Double pricePerOunce) {
-        Double purchase = toFloat(derefCell(store, raw.get("pricePurchase")));
-        if (purchase == null) {
-            return null;
-        }
-
-        Integer packN = parsePackCount(title);
-        if (packN != null && pricePerOunce != null && listPrice != null) {
-            if (Math.abs(Math.round(listPrice / pricePerOunce) - packN) <= 1) {
-                if (Math.abs(Math.round(purchase / pricePerOunce) - packN) <= 1) {
-                    return purchase / packN;
-                }
-            }
-        }
-        return purchase;
-    }
-
     public static JsonNode findCatalogBlock(JsonNode store) {
         if (!store.isArray()) {
             return null;
@@ -296,14 +274,13 @@ public class AurumexPayloadParser {
 
             List<PriceTier> tiers = parsePriceTiers(raw, store);
             Double sellPrice = resolveSellPrice(raw, store, name, listPrice, pricePerOunce, tiers);
-            Double buyPrice = resolveBuyPrice(raw, store, name, listPrice, pricePerOunce);
 
             return Optional.of(new Coin(
                     article,
                     name,
                     categoryToMetal(cat),
                     parseWeightG(weight),
-                    buyPrice,
+                    null,
                     sellPrice));
         } catch (Exception e) {
             return Optional.empty();
