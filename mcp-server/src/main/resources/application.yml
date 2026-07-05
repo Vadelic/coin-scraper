@@ -11,6 +11,25 @@ spring:
         name: coin-catalog-mcp
         version: 0.1.0
         type: SYNC
+        instructions: |
+          Используйте этот сервер, когда нужно узнать реальные актуальные цены
+          на монеты из драгоценных металлов (золото, серебро и т.д.) у разных
+          российских банков — цены продажи и выкупа с официальных витрин.
+
+          Не используйте для общих вопросов о монетах, истории, коллекционировании
+          или ценах вне банковских каталогов — только для сравнения котировок
+          по конкретным банкам.
+
+          Выбирайте tool по банку: coin-catalog-sberbank, coin-catalog-vtb,
+          coin-catalog-atb, coin-catalog-lanta, coin-catalog-rshb,
+          coin-catalog-goldenplata, coin-catalog-aurumex, coin-catalog-zoloto-md.
+
+          По умолчанию передавайте investmentOnly=true (только инвестиционные монеты),
+          если пользователь явно не просил весь каталог.
+
+          Ответ — JSON: scrapedAt, scrapeStatus, totalPages, totalCoins, coins[]
+          (catalogNumber, name, metal, weightG, buyPrice, sellPrice).
+          При scrapeStatus != ok смотрите поле error.
         annotation-scanner:
           enabled: true
 

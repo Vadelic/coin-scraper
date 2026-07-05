@@ -60,7 +60,9 @@ public class CoinCatalogTools {
                             + """
 
                     Особенности: Playwright; sellPrice; поиск на витрине через query.""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "АТБ: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
@@ -87,12 +89,13 @@ public class CoinCatalogTools {
 
                     Особенности: Playwright; на сайте нет поля поиска — query применяется \
                     как пост-фильтр после загрузки каталога.""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "Aurumex: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
                     openWorldHint = true))
-
     public List<Coin> scrapeAurumex(
             @McpToolParam(
                             description =
@@ -122,7 +125,9 @@ public class CoinCatalogTools {
 
                     Особенности: Playwright; investmentOnly ограничивает разделом российских \
                     инвестиционных монет (rossiyskiye).""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "Золотая плата: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
@@ -157,7 +162,9 @@ public class CoinCatalogTools {
 
                     Особенности: Playwright; sellPrice (buyPrice обычно null); поиск на витрине \
                     через query.""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "Ланта: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
@@ -186,7 +193,9 @@ public class CoinCatalogTools {
 
                     Особенности: Playwright; sellPrice и buyPrice; параметр region задаёт \
                     регион для цен продажи (по умолчанию Москва, код 77).""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "Россельхозбанк: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
@@ -224,7 +233,9 @@ public class CoinCatalogTools {
 
                     Особенности: HTTP API без браузера; sellPrice и buyPrice; query — \
                     локальный фильтр по полному каталогу.""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "Сбербанк: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
@@ -253,7 +264,9 @@ public class CoinCatalogTools {
 
                     Особенности: Playwright + BFF API; sellPrice и buyPrice; query — \
                     пост-фильтр по подстроке в названии, каталожном номере или металле.""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "ВТБ: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
@@ -282,7 +295,9 @@ public class CoinCatalogTools {
 
                     Особенности: HTTP без Playwright; investmentOnly включает фильтр \
                     country=Россия на витрине.""",
+            generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
+                    title = "Золотой монетный двор: каталог монет",
                     readOnlyHint = true,
                     destructiveHint = false,
                     idempotentHint = false,
