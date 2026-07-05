@@ -20,7 +20,7 @@ class LantaIntegrationTest {
 
     private static final List<ExpectedCoin> PO_EXPECTED = List.of(
             new ExpectedCoin("5215-0036", null, "Золото", 3.11, 37_900.0, null),
-            new ExpectedCoin("5216-0060", "СПМД", "Золото", 7.78, 81_501.0, 93_500.0),
+            new ExpectedCoin("5216-0060", "СПМД", "Золото", 7.78, 81_500.0, 93_500.0),
             new ExpectedCoin("5216-0060", "ММД", "Золото", 7.78, 83_000.0, 94_000.0),
             new ExpectedCoin("5217-0048", null, "Золото", 15.55, 166_000.0, 203_500.0),
             new ExpectedCoin("5219-0033", null, "Золото", 31.1, 339_000.0, null),
