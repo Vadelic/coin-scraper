@@ -291,6 +291,13 @@ async def parse_card(
     if sell_price is None and price_match:
         log.warning("Нет цены на карточке: %s", name)
 
+    buy_match = re.search(
+        r'class="coins-item__cost"\s*>(.*?)</span>',
+        card_html,
+        flags=re.S,
+    )
+    buy_price = parse_price(strip_tags(buy_match.group(1))) if buy_match else None
+
     coin_url = urljoin(BASE_URL, href)
     detail_html = await fetch_detail_html(
         request,
@@ -306,7 +313,7 @@ async def parse_card(
         catalog_number=catalog_number,
         metal=metal,
         weight_g=weight_g,
-        buy_price=None,
+        buy_price=buy_price,
         sell_price=sell_price,
         _url=coin_url,
     )

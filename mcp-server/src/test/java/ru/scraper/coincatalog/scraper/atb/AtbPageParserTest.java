@@ -53,7 +53,7 @@ class AtbPageParserTest {
         assertThat(parsed).isPresent();
         assertThat(parsed.get().coin().name()).contains("Победоносец");
         assertThat(parsed.get().coin().sellPrice()).isEqualTo(99700.0);
-        assertThat(parsed.get().coin().buyPrice()).isNull();
+        assertThat(parsed.get().coin().buyPrice()).isEqualTo(81_000.0);
     }
 
     @Test
@@ -68,6 +68,16 @@ class AtbPageParserTest {
         assertThat(parsed.get().coin().catalogNumber()).isEqualTo("5111-0008");
         assertThat(parsed.get().coin().metal()).isEqualTo("Серебро");
         assertThat(parsed.get().coin().weightG()).isEqualTo(31.1);
+    }
+
+    @Test
+    void buyPriceFromCardHtml() {
+        String card =
+                """
+                <div class="coins-item__purchase"><span>Стоимость покупки</span>\
+                <span class="coins-item__cost">324 000 ₽</span></div>""";
+        assertThat(AtbPageParser.buyPriceFromCardHtml(card)).isEqualTo(324_000.0);
+        assertThat(AtbPageParser.buyPriceFromCardHtml("<div></div>")).isNull();
     }
 
     @Test
