@@ -14,11 +14,14 @@ import ru.scraper.coincatalog.model.CaptchaBlockedException;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.common.ScrapePayload;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -32,8 +35,20 @@ public class LantaScraper implements CoinScraper<Coin> {
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
     private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
-    private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
+    private static final List<String> LAUNCH_ARGS = List.of(
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-blink-features=AutomationControlled");
+    private static final List<String> IGNORE_DEFAULT_ARGS = List.of("--enable-automation");
     private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "media", "font");
+    private static final String STEALTH_INIT_SCRIPT =
+            "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });";
+    private static final String CAPTCHA_HINT =
+            "Пройдите CAPTCHA и сохраните сессию: tools/coin-catalog-lanta/save_lanta_session.sh "
+                    + "или задайте LANTA_STORAGE_STATE (файл также ищется в mcp-server/data/lanta-storage-state.json).";
+    private static final Path DEFAULT_STORAGE =
+            Path.of(System.getProperty("user.dir"), "data", "lanta-storage-state.json");
+    private static final String WARM_UP_URL = "https://www.lanta.ru/";
 
     private static final String SEARCH_INPUT_SELECTOR = "input[name=\"keywords\"]";
     private static final int DEFAULT_SCROLL_PASSES = 8;
@@ -76,32 +91,30 @@ public class LantaScraper implements CoinScraper<Coin> {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = launchBrowser(playwright);
             try (browser) {
-                BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-                        .setUserAgent(USER_AGENT)
-                        .setLocale("ru-RU")
-                        .setViewportSize(1366, 900)
-                        .setExtraHTTPHeaders(Map.of(
-                                "Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")));
-                context.route("**/*", route -> {
-                    if (BLOCKED_RESOURCE_TYPES.contains(route.request().resourceType())) {
-                        route.abort();
-                    } else {
-                        route.resume();
-                    }
-                });
-
+                BrowserContext context = createContext(browser);
+                boolean hasSession = resolvedStorageStatePath().isPresent();
                 Page page = context.newPage();
                 page.setDefaultTimeout(timeout.toMillis());
 
+                if (hasSession) {
+                    warmUpSession(page);
+                }
                 if (!navigateWithRetries(page, catalogUrl)) {
                     return new ScrapePayload(0, List.of());
                 }
 
                 page.waitForTimeout(3000);
                 if (isCaptcha(page)) {
+                    log.warn("CAPTCHA после первого захода — повтор через прогрев");
+                    warmUpSession(page);
+                    if (!navigateWithRetries(page, catalogUrl)) {
+                        return new ScrapePayload(0, List.of());
+                    }
+                    page.waitForTimeout(3000);
+                }
+                if (isCaptcha(page)) {
                     throw new CaptchaBlockedException(
-                            "lanta.ru показал CAPTCHA («Вы точно не робот?») вместо каталога. "
-                                    + "Автоматический headless-доступ блокируется.");
+                            "lanta.ru показал CAPTCHA («Вы точно не робот?») вместо каталога. " + CAPTCHA_HINT);
                 }
 
                 if (!normalizedQuery.isEmpty()) {
@@ -113,21 +126,113 @@ public class LantaScraper implements CoinScraper<Coin> {
                 log.info("Найдено карточек в каталоге: {}", listItems.size());
 
                 List<Coin> coins = enrichCoins(page, listItems);
+                saveStorageState(context);
                 return new ScrapePayload(1, coins);
             }
         }
     }
 
+    private BrowserContext createContext(Browser browser) {
+        Browser.NewContextOptions options = new Browser.NewContextOptions()
+                .setUserAgent(USER_AGENT)
+                .setLocale("ru-RU")
+                .setTimezoneId("Europe/Moscow")
+                .setViewportSize(1366, 900)
+                .setExtraHTTPHeaders(Map.of(
+                        "Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"));
+
+        Optional<Path> storageState = resolvedStorageStatePath();
+        storageState.ifPresent(path -> {
+            options.setStorageStatePath(path);
+            log.info("Загружаю сессию Lanta из {}", path);
+        });
+
+        BrowserContext context = browser.newContext(options);
+        context.addInitScript(STEALTH_INIT_SCRIPT);
+        context.route("**/*", route -> {
+            if (BLOCKED_RESOURCE_TYPES.contains(route.request().resourceType())) {
+                route.abort();
+            } else {
+                route.resume();
+            }
+        });
+        return context;
+    }
+
+    private void warmUpSession(Page page) {
+        try {
+            log.info("Прогрев сессии: {}", WARM_UP_URL);
+            page.navigate(
+                    WARM_UP_URL,
+                    new Page.NavigateOptions()
+                            .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED)
+                            .setTimeout(timeout.toMillis()));
+            page.waitForTimeout(2000);
+        } catch (Exception e) {
+            log.warn("Прогрев сессии не удался: {}", e.getMessage());
+        }
+    }
+
+    private void saveStorageState(BrowserContext context) {
+        String env = System.getenv("LANTA_STORAGE_STATE");
+        if (resolvedStorageStatePath().isEmpty() && (env == null || env.isBlank())) {
+            return;
+        }
+        Optional<Path> savePath = resolvedSaveStorageStatePath();
+        if (savePath.isEmpty()) {
+            return;
+        }
+        Path path = savePath.get();
+        try {
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
+            }
+            context.storageState(new BrowserContext.StorageStateOptions().setPath(path));
+            log.info("Сессия Lanta сохранена: {}", path.toAbsolutePath());
+        } catch (Exception e) {
+            log.warn("Не удалось сохранить сессию Lanta ({}): {}", path, e.getMessage());
+        }
+    }
+
+    private static Optional<Path> resolvedStorageStatePath() {
+        String env = System.getenv("LANTA_STORAGE_STATE");
+        if (env != null && !env.isBlank()) {
+            Optional<Path> configured = pathIfReadable(env.strip());
+            if (configured.isPresent()) {
+                return configured;
+            }
+        }
+        return pathIfReadable(DEFAULT_STORAGE.toString());
+    }
+
+    private static Optional<Path> resolvedSaveStorageStatePath() {
+        String env = System.getenv("LANTA_STORAGE_STATE");
+        if (env != null && !env.isBlank()) {
+            return Optional.of(Path.of(env.strip()));
+        }
+        return Optional.of(DEFAULT_STORAGE);
+    }
+
+    private static Optional<Path> pathIfReadable(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return Optional.empty();
+        }
+        Path path = Path.of(raw.strip());
+        return Files.isRegularFile(path) ? Optional.of(path) : Optional.empty();
+    }
+
     private List<Coin> enrichCoins(Page page, List<LantaPageParser.ListItem> listItems) {
-        List<Coin> coins = new ArrayList<>();
-        Set<String> seenKeys = new HashSet<>();
+        List<LantaPageParser.CoinCandidate> candidates = new ArrayList<>();
 
         for (LantaPageParser.ListItem item : listItems) {
             String catalogNumber = null;
+            String popupHtml = null;
+            LantaPageParser.ListItem pricedItem = item;
             if (item.id() != null && !item.id().isBlank()) {
                 try {
-                    String popupHtml = loadPopupHtml(page, item.id(), item.formId());
+                    popupHtml = loadPopupHtml(page, item.id(), item.formId());
                     catalogNumber = LantaPageParser.parseArticleFromPopupHtml(popupHtml);
+                    pricedItem = refreshListPrices(page, item);
                 } catch (Exception e) {
                     log.warn("Попап id={}: {}", item.id(), e.getMessage());
                 }
@@ -136,18 +241,24 @@ public class LantaScraper implements CoinScraper<Coin> {
                 }
             }
 
-            var coinOpt = LantaPageParser.listItemToCoin(item, catalogNumber);
+            var coinOpt = LantaPageParser.listItemToCoin(pricedItem, catalogNumber, popupHtml);
             if (coinOpt.isEmpty()) {
                 log.warn("Пропуск карточки: пустое название, id={}", item.id());
                 continue;
             }
-            Coin coin = coinOpt.get();
-            String key = LantaPageParser.dedupeKey(item, coin);
+            candidates.add(new LantaPageParser.CoinCandidate(item, coinOpt.get()));
+        }
+
+        List<Coin> coins = new ArrayList<>();
+        Set<String> seenKeys = new HashSet<>();
+        for (LantaPageParser.CoinCandidate candidate : LantaPageParser.collapseCatalogVariants(candidates)) {
+            Coin coin = candidate.coin();
+            String key = LantaPageParser.dedupeKey(candidate.item(), coin);
             if (!seenKeys.add(key)) {
                 log.warn(
                         "Дубликат карточки (ключ {}): id={}, «{}», артикул={}, вес={} г",
                         key,
-                        item.id(),
+                        candidate.item().id(),
                         coin.name(),
                         coin.catalogNumber(),
                         coin.weightG());
@@ -203,14 +314,13 @@ public class LantaScraper implements CoinScraper<Coin> {
         log.info("Поиск по запросу: «{}»", query);
         Locator searchInput = page.locator(SEARCH_INPUT_SELECTOR);
         searchInput.waitFor(new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
-        searchInput.click();
         searchInput.fill("");
         searchInput.fill(query);
 
         Locator form = searchInput.locator("xpath=ancestor::form[1]");
         Locator submit = form.locator("button[type=\"submit\"]").first();
         if (submit.count() > 0) {
-            submit.click();
+            submit.click(new Locator.ClickOptions().setForce(true));
         } else {
             searchInput.press("Enter");
         }
@@ -258,9 +368,33 @@ public class LantaScraper implements CoinScraper<Coin> {
     }
 
     @SuppressWarnings("unchecked")
+    private LantaPageParser.ListItem refreshListPrices(Page page, LantaPageParser.ListItem item) {
+        if (item.id() == null || item.id().isBlank()) {
+            return item;
+        }
+        try {
+            Map<String, Object> row =
+                    (Map<String, Object>) page.evaluate(LantaPageParser.readListItemPricesJs(), item.id());
+            if (row == null) {
+                return item;
+            }
+            return new LantaPageParser.ListItem(
+                    item.id(),
+                    item.formId(),
+                    item.name(),
+                    stringOrNull(row.get("sellRaw")),
+                    stringOrNull(row.get("buyRaw")),
+                    Boolean.TRUE.equals(row.get("out")),
+                    item.info());
+        } catch (PlaywrightException e) {
+            log.debug("refreshListPrices id={}: {}", item.id(), e.getMessage());
+            return item;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private List<LantaPageParser.ListItem> collectListItems(Page page) {
         page.waitForSelector(LantaPageParser.COIN_LIST_SELECTOR);
-        @SuppressWarnings("unchecked")
         List<Map<String, Object>> rows =
                 (List<Map<String, Object>>) page.evaluate(LantaPageParser.collectListJs());
         List<LantaPageParser.ListItem> items = new ArrayList<>();
@@ -323,7 +457,8 @@ public class LantaScraper implements CoinScraper<Coin> {
                         .launch(new BrowserType.LaunchOptions()
                                 .setHeadless(headless)
                                 .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
+                                .setArgs(LAUNCH_ARGS)
+                                .setIgnoreDefaultArgs(IGNORE_DEFAULT_ARGS));
                 log.info("Браузер: {}", channel);
                 return browser;
             } catch (PlaywrightException e) {
@@ -332,7 +467,10 @@ public class LantaScraper implements CoinScraper<Coin> {
         }
         try {
             Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
+                    .launch(new BrowserType.LaunchOptions()
+                            .setHeadless(headless)
+                            .setArgs(LAUNCH_ARGS)
+                            .setIgnoreDefaultArgs(IGNORE_DEFAULT_ARGS));
             log.info("Браузер: playwright bundled chromium");
             return browser;
         } catch (PlaywrightException e) {

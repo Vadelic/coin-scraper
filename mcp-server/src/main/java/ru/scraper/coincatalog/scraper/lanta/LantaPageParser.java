@@ -4,9 +4,12 @@ import lombok.experimental.UtilityClass;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.common.PriceParser;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,9 +17,8 @@ import java.util.regex.Pattern;
 public class LantaPageParser {
 
     public static final String BASE_URL = "https://www.lanta.ru";
-    public static final String CATALOG_URL = BASE_URL + "/petersburg/metals/coins/";
-    public static final String INVESTMENT_CATALOG_URL =
-            BASE_URL + "/petersburg/metals/coins/ivesticyonnie-monety/";
+    public static final String CATALOG_URL = BASE_URL + "/metals/coins/";
+    public static final String INVESTMENT_CATALOG_URL = BASE_URL + "/metals/coins/ivesticyonnie-monety/";
     public static final String POPUP_PATH = "/__ajax/coinPopup.php";
     public static final String COIN_ITEM_SELECTOR = "li.js-openCoinLightbox";
     public static final String COIN_LIST_SELECTOR = ".coinList";
@@ -40,10 +42,34 @@ public class LantaPageParser {
             "не робот",
             "not a robot",
             "you're not a robot",
-            "you're not a robot",
             "ползунк",
             "выровнять картинку",
             "align the image");
+
+    private static final String EXTRACT_CARD_PRICES_JS = """
+            (cont) => {
+              const priceBlocks = [...(cont?.querySelectorAll('.coinList-price') || [])];
+              const priceEl = priceBlocks.find(el => !el.classList.contains('out'))
+                || priceBlocks[priceBlocks.length - 1]
+                || null;
+              let sellRaw = '';
+              if (priceEl) {
+                const clone = priceEl.cloneNode(true);
+                clone.querySelectorAll('small').forEach(el => el.remove());
+                sellRaw = (clone.innerText || '').replace(/\\s+/g, ' ').trim();
+              }
+              const buyRaw = [...(priceEl?.querySelectorAll('small') || [])]
+                .map(s => (s.innerText || '').trim())
+                .find(t => /покупка|выкуп/i.test(t))
+                || priceEl?.querySelector('small')?.innerText?.trim()
+                || '';
+              return {
+                sellRaw,
+                buyRaw,
+                out: priceEl?.classList.contains('out') || false,
+              };
+            }
+            """;
 
     public record ListItem(
             String id,
@@ -54,6 +80,8 @@ public class LantaPageParser {
             boolean outOfStock,
             List<String> info) {}
 
+    public record CoinCandidate(ListItem item, Coin coin) {}
+
     public static String resolveCatalogUrl(boolean investmentOnly) {
         return investmentOnly ? INVESTMENT_CATALOG_URL : CATALOG_URL;
     }
@@ -62,14 +90,7 @@ public class LantaPageParser {
         return """
                 () => [...document.querySelectorAll(%s)].map(li => {
                   const cont = li.querySelector('.coinList-cont');
-                  const priceEl = cont?.querySelector('.coinList-price');
-                  let sellRaw = '';
-                  if (priceEl) {
-                    const clone = priceEl.cloneNode(true);
-                    clone.querySelectorAll('small').forEach(s => s.remove());
-                    sellRaw = (clone.innerText || '').replace(/\\s+/g, ' ').trim();
-                  }
-                  const buyRaw = priceEl?.querySelector('small')?.innerText?.trim() || '';
+                  const prices = (%s)(cont);
                   const info = [...(cont?.querySelectorAll('.coinList-infoFull li') || [])]
                     .map(el => (el.innerText || '').replace(/\\s+/g, ' ').trim())
                     .filter(Boolean);
@@ -77,14 +98,28 @@ public class LantaPageParser {
                     id: li.getAttribute('data-id'),
                     formId: li.getAttribute('data-form-id') || '892',
                     name: cont?.querySelector('.coinList-title')?.innerText?.trim() || '',
-                    sellRaw,
-                    buyRaw,
-                    out: priceEl?.classList.contains('out') || false,
+                    sellRaw: prices.sellRaw,
+                    buyRaw: prices.buyRaw,
+                    out: prices.out,
                     info,
                   };
                 })
                 """
-                .formatted(jsonString(COIN_ITEM_SELECTOR));
+                .formatted(jsonString(COIN_ITEM_SELECTOR), EXTRACT_CARD_PRICES_JS);
+    }
+
+    public static String readListItemPricesJs() {
+        return """
+                (coinId) => {
+                  const li = document.querySelector(`li.js-openCoinLightbox[data-id="${coinId}"]`);
+                  const cont = li?.querySelector('.coinList-cont');
+                  if (!cont) {
+                    return null;
+                  }
+                  return (%s)(cont);
+                }
+                """
+                .formatted(EXTRACT_CARD_PRICES_JS);
     }
 
     public static String fetchPopupJs() {
@@ -182,12 +217,17 @@ public class LantaPageParser {
     }
 
     public static Optional<Coin> listItemToCoin(ListItem item, String catalogNumber) {
+        return listItemToCoin(item, catalogNumber, null);
+    }
+
+    public static Optional<Coin> listItemToCoin(ListItem item, String catalogNumber, String popupHtml) {
         String name = item.name() != null ? item.name().strip() : "";
         if (name.isEmpty()) {
             return Optional.empty();
         }
         List<String> infoLines = item.info() != null ? item.info() : List.of();
         var prices = parseListPrices(item.sellRaw(), item.buyRaw(), item.outOfStock());
+        prices = applyPopupTradeSides(prices, popupHtml);
         return Optional.of(new Coin(
                 catalogNumber,
                 name,
@@ -198,19 +238,65 @@ public class LantaPageParser {
     }
 
     public static ListPrices parseListPrices(String sellRaw, String buyRaw, boolean outOfStock) {
-        Double buyPrice = PriceParser.parseRub(buyRaw);
+        Double buyPrice = parseBuyPrice(buyRaw);
         Double sellPrice = null;
         if (sellRaw != null && !sellRaw.isBlank()) {
             String normalizedSell = normalize(sellRaw);
             boolean markedOut = OUT_OF_STOCK_MARKERS.stream().anyMatch(normalizedSell::contains);
             if (!markedOut) {
-                sellPrice = PriceParser.parseRub(sellRaw);
+                sellPrice = PriceParser.parseLastRub(sellRaw);
             }
         }
         if (outOfStock) {
             sellPrice = null;
         }
         return new ListPrices(buyPrice, sellPrice);
+    }
+
+    /**
+     * В popup «Купить» — банк продаёт клиенту (sellPrice), «Продать» — выкуп (buyPrice).
+     */
+    public static ListPrices applyPopupTradeSides(ListPrices prices, String popupHtml) {
+        if (popupHtml == null || popupHtml.isBlank()) {
+            return prices;
+        }
+        boolean canBuyFromBank = popupHtml.contains("data-type=\"Купить\"");
+        boolean canSellToBank = popupHtml.contains("data-type=\"Продать\"");
+        return new ListPrices(
+                canSellToBank ? prices.buyPrice() : null,
+                canBuyFromBank ? prices.sellPrice() : null);
+    }
+
+    /**
+     * Схлопывает дубли одного артикула, когда на сайте «нет в продаже» и «в наличии» — это одна позиция
+     * (5217-0048). Если все варианты в наличии (5216-0060 СПМД/ММД) — оставляем отдельными монетами.
+     */
+    public static List<CoinCandidate> collapseCatalogVariants(List<CoinCandidate> candidates) {
+        if (candidates.isEmpty()) {
+            return List.of();
+        }
+        List<CoinCandidate> collapsed = new ArrayList<>();
+        Set<String> processedCatalogs = new HashSet<>();
+
+        for (CoinCandidate candidate : candidates) {
+            String catalogNumber = candidate.coin().catalogNumber();
+            if (catalogNumber == null || catalogNumber.isBlank()) {
+                collapsed.add(candidate);
+                continue;
+            }
+            if (!processedCatalogs.add(catalogNumber)) {
+                continue;
+            }
+            List<CoinCandidate> group = candidates.stream()
+                    .filter(c -> catalogNumber.equals(c.coin().catalogNumber()))
+                    .toList();
+            if (group.size() > 1 && hasMixedAvailability(group)) {
+                collapsed.add(mergePreferInStock(group));
+            } else {
+                collapsed.addAll(group);
+            }
+        }
+        return collapsed;
     }
 
     public static String dedupeKey(ListItem item, Coin coin) {
@@ -221,6 +307,68 @@ public class LantaPageParser {
             return "art:" + coin.catalogNumber();
         }
         return "fb:" + coin.name() + "|" + coin.weightG() + "|" + coin.metal();
+    }
+
+    private static boolean hasMixedAvailability(List<CoinCandidate> group) {
+        boolean hasUnavailable = false;
+        boolean hasAvailable = false;
+        for (CoinCandidate candidate : group) {
+            if (isUnavailableForSale(candidate)) {
+                hasUnavailable = true;
+            } else {
+                hasAvailable = true;
+            }
+            if (hasUnavailable && hasAvailable) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isUnavailableForSale(CoinCandidate candidate) {
+        if (candidate.item().outOfStock()) {
+            return true;
+        }
+        if (candidate.coin().sellPrice() == null) {
+            return true;
+        }
+        String sellRaw = candidate.item().sellRaw();
+        if (sellRaw == null || sellRaw.isBlank()) {
+            return true;
+        }
+        return OUT_OF_STOCK_MARKERS.stream().anyMatch(normalize(sellRaw)::contains);
+    }
+
+    private static CoinCandidate mergePreferInStock(List<CoinCandidate> group) {
+        CoinCandidate primary = group.stream()
+                .filter(c -> !isUnavailableForSale(c))
+                .findFirst()
+                .orElse(group.getFirst());
+        Coin coin = primary.coin();
+        String name = stripMintSuffix(coin.name());
+        if (name.isBlank()) {
+            name = coin.name();
+        }
+        Coin merged = new Coin(coin.catalogNumber(), name, coin.metal(), coin.weightG(), coin.buyPrice(), coin.sellPrice());
+        return new CoinCandidate(primary.item(), merged);
+    }
+
+    private static String stripMintSuffix(String name) {
+        if (name == null) {
+            return "";
+        }
+        return name.replaceAll("\\s*\\([^)]*\\)\\s*$", "").strip();
+    }
+
+    private static Double parseBuyPrice(String buyRaw) {
+        if (buyRaw == null || buyRaw.isBlank()) {
+            return null;
+        }
+        String normalized = normalize(buyRaw);
+        if (!normalized.contains("покупка") && !normalized.contains("выкуп")) {
+            return null;
+        }
+        return PriceParser.parseLastRub(buyRaw);
     }
 
     private static String normalize(String value) {

@@ -2,20 +2,16 @@ package ru.scraper.coincatalog.scraper.lanta;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.common.ScrapePayload;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("integration")
 @EnabledIfEnvironmentVariable(named = "RUN_INTEGRATION_TESTS", matches = "true")
-@EnabledIf("lantaSessionAvailable")
 class LantaIntegrationTest {
 
     private static final List<ExpectedCoin> PO_EXPECTED = List.of(
@@ -26,30 +22,29 @@ class LantaIntegrationTest {
             new ExpectedCoin("5219-0033", null, "Золото", 31.1, 339_000.0, null),
             new ExpectedCoin("5111-0178", null, "Серебро", 31.1, 5_700.0, 6_900.0));
 
-    static boolean lantaSessionAvailable() {
-        String env = System.getenv("LANTA_STORAGE_STATE");
-        if (env != null && !env.isBlank()) {
-            return Files.isRegularFile(Path.of(env.strip()));
-        }
-        return LantaScraperSettings.defaults().resolvedStorageStatePath().isPresent();
-    }
 
     @Test
     void poInvestmentCatalog() {
         ScrapePayload<Coin> payload =
-                new LantaScraper(LantaScraperSettings.defaults()).scrape("по", true, null);
+                new LantaScraper().scrape("по", true, null);
         assertInvestmentCatalog(payload, PO_EXPECTED, 5, 1);
     }
+//    @Test
+//    void poCatalog() {
+//        ScrapePayload<Coin> payload =
+//                new LantaScraper().scrape("по", false, null);
+//        assertInvestmentCatalog(payload, PO_EXPECTED, 5, 1);
+//    }
 
     private static void assertInvestmentCatalog(
             ScrapePayload<Coin> payload, List<ExpectedCoin> expected, int goldCount, int silverCount) {
         List<Coin> coins = payload.coins();
 
         assertThat(payload.pagesProcessed()).isEqualTo(1);
-        assertThat(coins).hasSize(expected.size());
         assertThat(coins.stream().filter(c -> "Серебро".equals(c.metal()))).hasSize(silverCount);
         assertThat(coins.stream().filter(c -> "Золото".equals(c.metal()))).hasSize(goldCount);
 
+        assertThat(coins).hasSize(expected.size());
         for (ExpectedCoin exp : expected) {
             Coin coin = findCoin(coins, exp);
             assertThat(coin.name()).isNotBlank();
