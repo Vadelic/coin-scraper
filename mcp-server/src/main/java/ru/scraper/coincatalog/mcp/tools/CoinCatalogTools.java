@@ -160,8 +160,9 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: HTTP + cookies из LANTA_STORAGE_STATE (CAPTCHA вне runtime); \
-                    sellPrice/buyPrice; поиск через query.""",
+                    Особенности: Playwright; путь к браузеру — --browser=/path/to/chrome; \
+                    при CAPTCHA — --lanta.headful=true; сессия LANTA_STORAGE_STATE / \
+                    data/lanta-storage-state.json.""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
                     title = "Ланта: каталог монет",

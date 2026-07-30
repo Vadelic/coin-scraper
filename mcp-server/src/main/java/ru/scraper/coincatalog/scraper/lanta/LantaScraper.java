@@ -2,17 +2,19 @@ package ru.scraper.coincatalog.scraper.lanta;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.CaptchaBlockedException;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.PlaywrightBrowserLauncher;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +36,6 @@ public class LantaScraper implements CoinScraper<Coin> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
     private static final List<String> LAUNCH_ARGS = List.of(
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -44,8 +45,9 @@ public class LantaScraper implements CoinScraper<Coin> {
     private static final String STEALTH_INIT_SCRIPT =
             "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });";
     private static final String CAPTCHA_HINT =
-            "Пройдите CAPTCHA и сохраните сессию: tools/coin-catalog-lanta/save_lanta_session.sh "
-                    + "или задайте LANTA_STORAGE_STATE (файл также ищется в mcp-server/data/lanta-storage-state.json).";
+            "Пройдите CAPTCHA в headful-режиме: --lanta.headful=true "
+                    + "(и при необходимости --browser=/path/to/chrome). "
+                    + "Сессия сохранится в LANTA_STORAGE_STATE или data/lanta-storage-state.json.";
     private static final Path DEFAULT_STORAGE =
             Path.of(System.getProperty("user.dir"), "data", "lanta-storage-state.json");
     private static final String WARM_UP_URL = "https://www.lanta.ru/";
@@ -53,6 +55,7 @@ public class LantaScraper implements CoinScraper<Coin> {
     private static final String SEARCH_INPUT_SELECTOR = "input[name=\"keywords\"]";
     private static final int DEFAULT_SCROLL_PASSES = 8;
 
+    private final PlaywrightBrowserLauncher browserLauncher;
     private final boolean headless;
     private final Duration timeout;
     private final int retries;
@@ -61,20 +64,49 @@ public class LantaScraper implements CoinScraper<Coin> {
     private final BiFunction<String, String, String> popupLoaderOverride;
 
     public LantaScraper() {
-        this(null);
+        this(new PlaywrightBrowserLauncher(), false, null);
+    }
+
+    @Autowired
+    public LantaScraper(
+            PlaywrightBrowserLauncher browserLauncher,
+            @Value("${lanta.headful:false}") boolean headful) {
+        this(browserLauncher, headful, null);
     }
 
     LantaScraper(BiFunction<String, String, String> popupLoaderOverride) {
-        this(true, Duration.ofMillis(60_000), 3, 0.5, DEFAULT_SCROLL_PASSES, popupLoaderOverride);
+        this(new PlaywrightBrowserLauncher(), false, popupLoaderOverride);
     }
 
     LantaScraper(
+            PlaywrightBrowserLauncher browserLauncher,
+            BiFunction<String, String, String> popupLoaderOverride) {
+        this(browserLauncher, false, popupLoaderOverride);
+    }
+
+    LantaScraper(
+            PlaywrightBrowserLauncher browserLauncher,
+            boolean headful,
+            BiFunction<String, String, String> popupLoaderOverride) {
+        this(
+                browserLauncher,
+                !headful,
+                Duration.ofMillis(60_000),
+                3,
+                0.5,
+                DEFAULT_SCROLL_PASSES,
+                popupLoaderOverride);
+    }
+
+    LantaScraper(
+            PlaywrightBrowserLauncher browserLauncher,
             boolean headless,
             Duration timeout,
             int retries,
             double delaySeconds,
             int scrollPasses,
             BiFunction<String, String, String> popupLoaderOverride) {
+        this.browserLauncher = browserLauncher;
         this.headless = headless;
         this.timeout = timeout;
         this.retries = Math.max(1, retries);
@@ -450,34 +482,7 @@ public class LantaScraper implements CoinScraper<Coin> {
     }
 
     private Browser launchBrowser(Playwright playwright) {
-        List<String> errors = new ArrayList<>();
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS)
-                                .setIgnoreDefaultArgs(IGNORE_DEFAULT_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException e) {
-                errors.add(channel + ": " + e.getMessage());
-            }
-        }
-        try {
-            Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions()
-                            .setHeadless(headless)
-                            .setArgs(LAUNCH_ARGS)
-                            .setIgnoreDefaultArgs(IGNORE_DEFAULT_ARGS));
-            log.info("Браузер: playwright bundled chromium");
-            return browser;
-        } catch (PlaywrightException e) {
-            errors.add("bundled: " + e.getMessage());
-        }
-        throw new IllegalStateException(
-                "Не найден браузер для Playwright.\n" + String.join("\n", errors));
+        return browserLauncher.launch(playwright, headless, LAUNCH_ARGS, IGNORE_DEFAULT_ARGS);
     }
 
     private static void sleep(double seconds) {

@@ -7,11 +7,29 @@
 
 Контракт ответа MCP (camelCase): [`src/test/resources/coins_catalog.schema.json`](src/test/resources/coins_catalog.schema.json). Корневая Python-схема в `docs/` — snake_case, для MCP не используется.  
 Аудит Python-скраперов: [`docs/scraper-audit.md`](docs/scraper-audit.md).  
-Миграция на HTTP (без Playwright в runtime): [`docs/http-migration-spikes.md`](docs/http-migration-spikes.md).
+Миграция на HTTP: [`docs/http-migration-spikes.md`](docs/http-migration-spikes.md).
 
-Скраперы используют `java.net.http.HttpClient` (`HttpScrapeClient`). Браузер в MCP runtime не нужен.
-Для **Ланта** при CAPTCHA нужна заранее сохранённая сессия: `LANTA_STORAGE_STATE` или
-`data/lanta-storage-state.json` (обновление вручную: `tools/coin-catalog-lanta/save_lanta_session.sh`).
+Скраперы (кроме **Ланта**) используют `java.net.http.HttpClient` (`HttpScrapeClient`) — браузер не нужен.  
+**Ланта** — Playwright: системный Chrome/Edge или путь через `--browser=`.
+
+## Запуск (Streamable HTTP)
+
+```bash
+java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar
+```
+
+Lanta с корпоративным браузером и headful (для CAPTCHA):
+
+```bash
+java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar \
+  --browser=/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --lanta.headful=true
+```
+
+Сессия после успешного прохода сохраняется в `data/lanta-storage-state.json` (или `LANTA_STORAGE_STATE`).  
+Без `--browser` Playwright пробует каналы chrome → msedge → chromium, затем bundled Chromium.
+
+Эндпоинт MCP: `http://localhost:8042/mcp`
 
 ## Документация
 
@@ -29,14 +47,6 @@ mvn package
 ```
 
 JAR: `target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar`
-
-## Запуск (Streamable HTTP)
-
-```bash
-java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar
-```
-
-Эндпоинт MCP: `http://localhost:8042/mcp`
 
 ## Отладка через MCP Inspector
 

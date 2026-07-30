@@ -7,8 +7,8 @@
 | Проверка | Результат |
 |----------|-----------|
 | GET `/metals/coins/` без cookies | HTTP 200, ~13 KB, Yandex interstitial (`gorizontal-vertikal`, `noindex, noarchive`), нет `.coinList` |
-| Вывод | Runtime без браузера возможен только с заранее сохранённой сессией (`LANTA_STORAGE_STATE` / `data/lanta-storage-state.json`) |
-| Решение (этап 7) | **HTTP + cookies-only**: скрапер на `HttpScrapeClient`; обновление сессии вручную через `tools/coin-catalog-lanta/save_lanta_session.sh` (Playwright вне MCP runtime) |
+| Вывод (spike) | Чистый HTTP без сессии не работает |
+| Решение | **Playwright** с `--browser=/path/to/chrome` и при необходимости `--lanta.headful=true`; storage-state в `LANTA_STORAGE_STATE` / `data/lanta-storage-state.json` |
 
 ## Goldenplata
 
@@ -28,4 +28,4 @@
 | Aurumex | GET `_payload.json` без браузера — OK |
 | АТБ | Warm-up + AJAX POST fragment — OK |
 
-Playwright удалён из runtime MCP (`pom.xml`) после портов.
+Playwright в MCP runtime нужен **только для Lanta** (`pom.xml` + `--browser=`).

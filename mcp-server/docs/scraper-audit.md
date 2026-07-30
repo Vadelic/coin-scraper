@@ -14,7 +14,7 @@
 | Aurumex | `aurumex` | 587 | HTTP JSON | Высокая | Nuxt payload deref, CAPTCHA | `HttpScrapeClient` + Jackson |
 | АТБ | `atb` | 525 | HTTP Hybrid | Высокая | CAPTCHA, N+1 detail GET | `HttpScrapeClient` |
 | Золотая плата | `goldenplata` | 510 | HTTP | Высокая | CAPTCHA редка; корневой `/catalog/` без JS | `HttpScrapeClient` + analytics JSON |
-| Ланта | `lanta` | 658 | HTTP + session cookies | Средняя | CAPTCHA без storage-state | `HttpScrapeClient` + `LANTA_STORAGE_STATE` |
+| Ланта | `lanta` | 658 | Playwright | Средняя | CAPTCHA без headful/session | Playwright + `--browser=` / storage-state |
 | РСХБ | `rshb` | 833 | HTTP SSR + ES | Высокая | region cookie | `HttpScrapeClient` + SSR HTML |
 
 См. также [`http-migration-spikes.md`](http-migration-spikes.md) — результаты миграции с Playwright на HTTP.

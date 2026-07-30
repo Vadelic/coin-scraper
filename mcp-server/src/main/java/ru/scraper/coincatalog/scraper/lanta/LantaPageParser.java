@@ -44,7 +44,31 @@ public class LantaPageParser {
             "you're not a robot",
             "ползунк",
             "выровнять картинку",
-            "align the image");
+            "align the image",
+            "gorizontal-vertikal",
+            "noindex, noarchive");
+
+    private static final Pattern LIST_ITEM_RE = Pattern.compile(
+            "<li\\b([^>]*\\bjs-openCoinLightbox\\b[^>]*)>([\\s\\S]*?)(?=<li\\b[^>]*\\bjs-openCoinLightbox\\b|\\z)",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern ATTR_ID_RE = Pattern.compile(
+            "data-id=\"([^\"]*)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ATTR_FORM_RE = Pattern.compile(
+            "data-form-id=\"([^\"]*)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TITLE_RE = Pattern.compile(
+            "class=\"[^\"]*coinList-title[^\"]*\"[^>]*>([\\s\\S]*?)</",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern PRICE_BLOCK_RE = Pattern.compile(
+            "class=\"([^\"]*coinList-price[^\"]*)\"[^>]*>([\\s\\S]*?)</div>",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern INFO_LI_RE = Pattern.compile(
+            "class=\"[^\"]*coinList-infoFull[^\"]*\"[^>]*>\\s*<ul[^>]*>([\\s\\S]*?)</ul>",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern LI_TEXT_RE = Pattern.compile(
+            "<li[^>]*>([\\s\\S]*?)</li>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SMALL_RE = Pattern.compile(
+            "<small[^>]*>([\\s\\S]*?)</small>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TAG_RE = Pattern.compile("<[^>]+>");
 
     private static final String EXTRACT_CARD_PRICES_JS = """
             (cont) => {
@@ -84,6 +108,109 @@ public class LantaPageParser {
 
     public static String resolveCatalogUrl(boolean investmentOnly) {
         return investmentOnly ? INVESTMENT_CATALOG_URL : CATALOG_URL;
+    }
+
+    /** Yandex/anti-bot interstitial без списка монет. */
+    public static boolean isCaptchaInterstitial(String html) {
+        if (html == null || html.isBlank()) {
+            return true;
+        }
+        if (html.contains("js-openCoinLightbox") || html.contains("coinList")) {
+            return false;
+        }
+        return isCaptchaBody(html) || html.toLowerCase(Locale.ROOT).contains("gorizontal-vertikal");
+    }
+
+    /** Парсит карточки списка из HTML каталога (без Playwright evaluate). */
+    public static List<ListItem> parseListItemsFromHtml(String html) {
+        List<ListItem> items = new ArrayList<>();
+        if (html == null || html.isBlank()) {
+            return items;
+        }
+        Matcher itemMatcher = LIST_ITEM_RE.matcher(html);
+        while (itemMatcher.find()) {
+            String attrs = itemMatcher.group(1);
+            String body = itemMatcher.group(2);
+            String id = matchGroup(ATTR_ID_RE, attrs);
+            String formId = matchGroup(ATTR_FORM_RE, attrs);
+            if (formId == null || formId.isBlank()) {
+                formId = "892";
+            }
+            String name = stripHtml(matchGroup(TITLE_RE, body));
+            var prices = extractListPricesFromHtml(body);
+            List<String> info = extractInfoLines(body);
+            items.add(new ListItem(id, formId, name, prices.sellRaw(), prices.buyRaw(), prices.out(), info));
+        }
+        return items;
+    }
+
+    private record RawPrices(String sellRaw, String buyRaw, boolean out) {}
+
+    private static RawPrices extractListPricesFromHtml(String body) {
+        Matcher matcher = PRICE_BLOCK_RE.matcher(body);
+        String sellRaw = "";
+        String buyRaw = "";
+        boolean out = false;
+        String chosenInner = null;
+        boolean chosenOut = false;
+        while (matcher.find()) {
+            String classes = matcher.group(1);
+            String inner = matcher.group(2);
+            boolean isOut = classes != null && classes.contains("out");
+            if (chosenInner == null || !isOut) {
+                chosenInner = inner;
+                chosenOut = isOut;
+                if (!isOut) {
+                    break;
+                }
+            }
+        }
+        if (chosenInner != null) {
+            out = chosenOut;
+            Matcher small = SMALL_RE.matcher(chosenInner);
+            while (small.find()) {
+                String t = stripHtml(small.group(1));
+                if (buyRaw.isEmpty()
+                        || t.toLowerCase(Locale.ROOT).contains("покупка")
+                        || t.toLowerCase(Locale.ROOT).contains("выкуп")) {
+                    buyRaw = t;
+                }
+            }
+            String withoutSmall = SMALL_RE.matcher(chosenInner).replaceAll("");
+            sellRaw = stripHtml(withoutSmall);
+        }
+        return new RawPrices(sellRaw, buyRaw, out);
+    }
+
+    private static List<String> extractInfoLines(String body) {
+        List<String> lines = new ArrayList<>();
+        Matcher block = INFO_LI_RE.matcher(body);
+        if (!block.find()) {
+            return lines;
+        }
+        Matcher li = LI_TEXT_RE.matcher(block.group(1));
+        while (li.find()) {
+            String text = stripHtml(li.group(1));
+            if (!text.isBlank()) {
+                lines.add(text);
+            }
+        }
+        return lines;
+    }
+
+    public static String stripHtml(String html) {
+        if (html == null || html.isBlank()) {
+            return "";
+        }
+        return TAG_RE.matcher(html).replaceAll(" ").replace('\u00a0', ' ').replaceAll("\\s+", " ").strip();
+    }
+
+    private static String matchGroup(Pattern pattern, String text) {
+        if (text == null) {
+            return null;
+        }
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     public static String collectListJs() {
