@@ -18,7 +18,21 @@
 java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar
 ```
 
-Lanta с корпоративным браузером и headful (для CAPTCHA):
+Эндпоинт MCP: `http://localhost:8042/mcp`
+
+### Параметры браузера (только Lanta)
+
+Скрапер **Ланта** использует Playwright. Остальные банки ходят по HTTP — браузер им не нужен.
+
+Параметры передаются как **аргументы Spring Boot** после JAR (или через env для пути к сессии):
+
+| Параметр | Тип | По умолчанию | Назначение |
+|----------|-----|--------------|------------|
+| `--browser=/path/to/chrome` | CLI | пусто | Исполняемый файл браузера (`executablePath`). Нужен в корп. среде без bundled Chromium |
+| `--lanta.headful=true` | CLI | `false` (headless) | Окно браузера — для ручного прохождения CAPTCHA |
+| `LANTA_STORAGE_STATE` | env | `data/lanta-storage-state.json` | Путь к файлу cookies/localStorage (чтение и запись после успешного scrape) |
+
+Пример (macOS, системный Chrome, headful):
 
 ```bash
 java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar \
@@ -26,10 +40,17 @@ java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar \
   --lanta.headful=true
 ```
 
-Сессия после успешного прохода сохраняется в `data/lanta-storage-state.json` (или `LANTA_STORAGE_STATE`).  
-Без `--browser` Playwright пробует каналы chrome → msedge → chromium, затем bundled Chromium.
+Свой путь к сессии:
 
-Эндпоинт MCP: `http://localhost:8042/mcp`
+```bash
+LANTA_STORAGE_STATE=/path/to/lanta-storage-state.json \
+  java -jar target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar \
+  --browser=/opt/google/chrome/chrome \
+  --lanta.headful=true
+```
+
+Без `--browser` Playwright по очереди пробует каналы **chrome → msedge → chromium**, затем bundled Chromium.  
+После успешного прохода CAPTCHA сессия пишется в `LANTA_STORAGE_STATE` (или в `data/lanta-storage-state.json` относительно рабочей директории процесса) — следующие запуски могут идти headless.
 
 ## Документация
 
@@ -108,6 +129,28 @@ mvn test
         "/absolute/path/to/Scraper/mcp-server/target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar",
         "--spring.profiles.active=stdio"
       ]
+    }
+  }
+}
+```
+
+С параметрами браузера для Lanta (те же флаги, что при `java -jar`):
+
+```json
+{
+  "mcpServers": {
+    "coin-catalog": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/absolute/path/to/Scraper/mcp-server/target/coin-catalog-mcp-0.1.0-SNAPSHOT.jar",
+        "--spring.profiles.active=stdio",
+        "--browser=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "--lanta.headful=true"
+      ],
+      "env": {
+        "LANTA_STORAGE_STATE": "/absolute/path/to/lanta-storage-state.json"
+      }
     }
   }
 }
