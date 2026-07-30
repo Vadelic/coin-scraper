@@ -5,16 +5,17 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.CaptchaBlockedException;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.PlaywrightBrowserLauncher;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -46,7 +47,6 @@ public class VtbScraper implements CoinScraper<Coin> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
     private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
 
     private static final String FETCH_JS =
@@ -74,6 +74,7 @@ public class VtbScraper implements CoinScraper<Coin> {
             }
             """;
 
+    private final PlaywrightBrowserLauncher browserLauncher;
     private final ObjectMapper objectMapper;
     private final boolean headless;
     private final Duration timeout;
@@ -82,11 +83,22 @@ public class VtbScraper implements CoinScraper<Coin> {
     private final Integer maxPages;
 
     public VtbScraper() {
-        this(true, Duration.ofMillis(45_000), 3, 0.35, null);
+        this(new PlaywrightBrowserLauncher());
+    }
+
+    @Autowired
+    public VtbScraper(PlaywrightBrowserLauncher browserLauncher) {
+        this(browserLauncher, true, Duration.ofMillis(45_000), 3, 0.35, null);
     }
 
     VtbScraper(
-            boolean headless, Duration timeout, int retries, double delaySeconds, Integer maxPages) {
+            PlaywrightBrowserLauncher browserLauncher,
+            boolean headless,
+            Duration timeout,
+            int retries,
+            double delaySeconds,
+            Integer maxPages) {
+        this.browserLauncher = browserLauncher;
         this.objectMapper = new ObjectMapper();
         this.headless = headless;
         this.timeout = timeout;
@@ -276,31 +288,7 @@ public class VtbScraper implements CoinScraper<Coin> {
     }
 
     private Browser launchBrowser(Playwright playwright) {
-        List<String> errors = new ArrayList<>();
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException e) {
-                errors.add(channel + ": " + e.getMessage());
-            }
-        }
-        try {
-            Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
-            log.info("Браузер: playwright bundled chromium");
-            return browser;
-        } catch (PlaywrightException e) {
-            errors.add("bundled: " + e.getMessage());
-        }
-        throw new IllegalStateException(
-                "Не найден браузер для Playwright. Установите Google Chrome или Microsoft Edge.\n"
-                        + String.join("\n", errors));
+        return browserLauncher.launch(playwright, headless, LAUNCH_ARGS);
     }
 
     private static void sleep(double seconds) {

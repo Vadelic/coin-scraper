@@ -1,6 +1,7 @@
 package ru.scraper.coincatalog.scraper.aurumex;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.CaptchaBlockedException;
@@ -12,12 +13,12 @@ import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.RequestOptions;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.PlaywrightBrowserLauncher;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,9 +35,9 @@ public class AurumexScraper implements CoinScraper<Coin> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
     private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
 
+    private final PlaywrightBrowserLauncher browserLauncher;
     private final ObjectMapper objectMapper;
     private final boolean headless;
     private final Duration timeout;
@@ -45,11 +46,22 @@ public class AurumexScraper implements CoinScraper<Coin> {
     private final int maxPages;
 
     public AurumexScraper() {
-        this(true, Duration.ofMillis(60_000), 3, 0.5, AurumexPayloadParser.DEFAULT_MAX_PAGES);
+        this(new PlaywrightBrowserLauncher());
+    }
+
+    @Autowired
+    public AurumexScraper(PlaywrightBrowserLauncher browserLauncher) {
+        this(browserLauncher, true, Duration.ofMillis(60_000), 3, 0.5, AurumexPayloadParser.DEFAULT_MAX_PAGES);
     }
 
     AurumexScraper(
-            boolean headless, Duration timeout, int retries, double delaySeconds, int maxPages) {
+            PlaywrightBrowserLauncher browserLauncher,
+            boolean headless,
+            Duration timeout,
+            int retries,
+            double delaySeconds,
+            int maxPages) {
+        this.browserLauncher = browserLauncher;
         this.objectMapper = new ObjectMapper();
         this.headless = headless;
         this.timeout = timeout;
@@ -193,30 +205,7 @@ public class AurumexScraper implements CoinScraper<Coin> {
     }
 
     private Browser launchBrowser(Playwright playwright) {
-        List<String> errors = new ArrayList<>();
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException e) {
-                errors.add(channel + ": " + e.getMessage());
-            }
-        }
-        try {
-            Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
-            log.info("Браузер: playwright bundled chromium");
-            return browser;
-        } catch (PlaywrightException e) {
-            errors.add("bundled: " + e.getMessage());
-        }
-        throw new IllegalStateException(
-                "Не найден браузер для Playwright.\n" + String.join("\n", errors));
+        return browserLauncher.launch(playwright, headless, LAUNCH_ARGS);
     }
 
     private static void sleep(double seconds) {

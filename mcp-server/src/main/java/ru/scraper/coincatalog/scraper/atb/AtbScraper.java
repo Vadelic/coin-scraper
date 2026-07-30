@@ -4,17 +4,17 @@ import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
-import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.RequestOptions;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.CaptchaBlockedException;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.PlaywrightBrowserLauncher;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -32,9 +32,9 @@ public class AtbScraper implements CoinScraper<Coin> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
     private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
 
+    private final PlaywrightBrowserLauncher browserLauncher;
     private final boolean headless;
     private final Duration timeout;
     private final int retries;
@@ -42,19 +42,30 @@ public class AtbScraper implements CoinScraper<Coin> {
     private final Function<String, String> detailLoaderOverride;
 
     public AtbScraper() {
-        this(null);
+        this(new PlaywrightBrowserLauncher(), null);
+    }
+
+    @Autowired
+    public AtbScraper(PlaywrightBrowserLauncher browserLauncher) {
+        this(browserLauncher, null);
     }
 
     AtbScraper(Function<String, String> detailLoaderOverride) {
-        this(true, Duration.ofMillis(30_000), 3, 0.5, detailLoaderOverride);
+        this(new PlaywrightBrowserLauncher(), detailLoaderOverride);
+    }
+
+    AtbScraper(PlaywrightBrowserLauncher browserLauncher, Function<String, String> detailLoaderOverride) {
+        this(browserLauncher, true, Duration.ofMillis(30_000), 3, 0.5, detailLoaderOverride);
     }
 
     AtbScraper(
+            PlaywrightBrowserLauncher browserLauncher,
             boolean headless,
             Duration timeout,
             int retries,
             double delaySeconds,
             Function<String, String> detailLoaderOverride) {
+        this.browserLauncher = browserLauncher;
         this.headless = headless;
         this.timeout = timeout;
         this.retries = Math.max(1, retries);
@@ -194,23 +205,7 @@ public class AtbScraper implements CoinScraper<Coin> {
     }
 
     private Browser launchBrowser(Playwright playwright) {
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException ignored) {
-                // try next channel
-            }
-        }
-        Browser browser = playwright.chromium()
-                .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
-        log.info("Браузер: playwright bundled chromium");
-        return browser;
+        return browserLauncher.launch(playwright, headless, LAUNCH_ARGS);
     }
 
     private static void sleep(double seconds) {
