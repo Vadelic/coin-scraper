@@ -161,6 +161,23 @@ class LantaPageParserTest {
         assertThat(LantaPageParser.isCaptchaTitle("Captcha Challenge")).isTrue();
         assertThat(LantaPageParser.isCaptchaBody("Подтвердите, что вы не робот")).isTrue();
         assertThat(LantaPageParser.isCaptchaBody("Каталог монет")).isFalse();
+        assertThat(LantaPageParser.isCaptchaInterstitial(
+                        "<html><body><div class=\"gorizontal-vertikal\"></div></body></html>"))
+                .isTrue();
+    }
+
+    @Test
+    void parseListItemsFromHtml() throws Exception {
+        List<LantaPageParser.ListItem> items =
+                LantaPageParser.parseListItemsFromHtml(loadFixture("catalog_list.html"));
+
+        assertThat(items).hasSize(2);
+        assertThat(items.get(0).id()).isEqualTo("111");
+        assertThat(items.get(0).name()).contains("Победоносец");
+        assertThat(items.get(0).sellRaw()).contains("99 700");
+        assertThat(items.get(0).buyRaw()).contains("85 000");
+        assertThat(items.get(0).info()).anyMatch(s -> s.contains("Золото"));
+        assertThat(items.get(1).outOfStock()).isTrue();
     }
 
     @Test

@@ -59,7 +59,7 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: Playwright; sellPrice; поиск на витрине через query.""",
+                    Особенности: HTTP (AJAX fragment + detail GET); sellPrice; поиск на витрине через query.""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
                     title = "АТБ: каталог монет",
@@ -87,7 +87,7 @@ public class CoinCatalogTools {
                             + COMMON_RETURN
                             + """
 
-                    Особенности: Playwright; на сайте нет поля поиска — query применяется \
+                    Особенности: HTTP (Nuxt _payload.json); на сайте нет поля поиска — query применяется \
                     как пост-фильтр после загрузки каталога.""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
@@ -123,7 +123,7 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: Playwright; investmentOnly ограничивает разделом российских \
+                    Особенности: HTTP (analytics JSON в HTML); investmentOnly ограничивает разделом российских \
                     инвестиционных монет (rossiyskiye).""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
@@ -160,8 +160,8 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: Playwright; sellPrice (buyPrice обычно null); поиск на витрине \
-                    через query.""",
+                    Особенности: HTTP + cookies из LANTA_STORAGE_STATE (CAPTCHA вне runtime); \
+                    sellPrice/buyPrice; поиск через query.""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
                     title = "Ланта: каталог монет",
@@ -191,7 +191,7 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: Playwright; sellPrice и buyPrice; параметр region задаёт \
+                    Особенности: HTTP (SSR HTML + ES buyout API); sellPrice и buyPrice; параметр region задаёт \
                     регион для цен продажи (по умолчанию Москва, код 77).""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
@@ -262,7 +262,7 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: Playwright + BFF API; sellPrice и buyPrice; query — \
+                    Особенности: HTTP + BFF API; sellPrice и buyPrice; query — \
                     пост-фильтр по подстроке в названии, каталожном номере или металле.""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(
@@ -293,7 +293,7 @@ public class CoinCatalogTools {
                             + COMMON_INVESTMENT_RECOMMENDATION
                             + """
 
-                    Особенности: HTTP без Playwright; investmentOnly включает фильтр \
+                    Особенности: HTTP; investmentOnly включает фильтр \
                     country=Россия на витрине.""",
             generateOutputSchema = true,
             annotations = @McpTool.McpAnnotations(

@@ -31,6 +31,17 @@ public class RshbPageParser {
     public static final String CARD_LINK_SELECTOR = "a[href^='/p/']";
     public static final String PAGINATION_LINK_SELECTOR = "a[href*='page=']";
 
+    private static final Pattern PRODUCT_WRAPPER_RE = Pattern.compile(
+            "<div class=\"product-wrapper\"[^>]*>([\\s\\S]*?)(?=<div class=\"product-wrapper\"|$)",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern PRODUCT_HREF_RE = Pattern.compile(
+            "href=\"(/p/[^\"]+)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PRICE_BOX_RE = Pattern.compile(
+            "class=\"price-box\"[^>]*>([\\s\\S]*?)</div>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAGINATION_HREF_RE = Pattern.compile(
+            "href=\"([^\"]*page=\\d+[^\"]*)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TAG_RE = Pattern.compile("<[^>]+>");
+
     private static final Pattern METAL_LINE_RE = Pattern.compile(
             "^(золото|серебро|платина|палладий)",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
@@ -87,6 +98,57 @@ public class RshbPageParser {
             }
         }
         return maxPage;
+    }
+
+    /** Извлекает href пагинации из SSR HTML. */
+    public static List<String> parsePaginationHrefs(String html) {
+        List<String> hrefs = new ArrayList<>();
+        if (html == null || html.isBlank()) {
+            return hrefs;
+        }
+        Matcher matcher = PAGINATION_HREF_RE.matcher(html);
+        while (matcher.find()) {
+            hrefs.add(matcher.group(1));
+        }
+        return hrefs;
+    }
+
+    /** Парсит карточки каталога из SSR HTML (без Playwright). */
+    public static List<ParsedCard> parseCardsFromHtml(String html) {
+        List<ParsedCard> cards = new ArrayList<>();
+        if (html == null || html.isBlank()) {
+            return cards;
+        }
+        Matcher wrapper = PRODUCT_WRAPPER_RE.matcher(html);
+        while (wrapper.find()) {
+            String block = wrapper.group(0);
+            Matcher hrefMatcher = PRODUCT_HREF_RE.matcher(block);
+            if (!hrefMatcher.find()) {
+                continue;
+            }
+            String href = hrefMatcher.group(1);
+            String priceBoxText = "";
+            Matcher priceMatcher = PRICE_BOX_RE.matcher(block);
+            if (priceMatcher.find()) {
+                priceBoxText = stripHtml(priceMatcher.group(1));
+            }
+            String cardText = stripHtml(block);
+            String linkText = cardText;
+            parseCard(new CardInput(cardText, href, linkText, priceBoxText)).ifPresent(cards::add);
+        }
+        return cards;
+    }
+
+    public static String stripHtml(String html) {
+        if (html == null || html.isBlank()) {
+            return "";
+        }
+        String withBreaks = html
+                .replaceAll("(?i)</div>", "\n")
+                .replaceAll("(?i)</span>", "\n")
+                .replaceAll("(?i)<br\\s*/?>", "\n");
+        String text = TAG_RE.matcher(withBreaks).replaceAll(" ");
+        return text.replace('\u00a0', ' ').replaceAll("[ \\t\\x0B\\f\\r]+", " ").replaceAll(" *\\n *", "\n").strip();
     }
 
     public static String parseSkuFromProductHref(String href) {
@@ -248,23 +310,6 @@ public class RshbPageParser {
             return null;
         }
         return Double.parseDouble(matcher.group(1).replace(',', '.'));
-    }
-
-    public static String cardTextJs() {
-        return """
-                el => {
-                  const wrapper = el.closest('.product-wrapper');
-                  const root = wrapper || el.closest(
-                    'article, li, [class*="product"], [class*="card"], [class*="item"]'
-                  ) || el.parentElement;
-                  const priceEl = (wrapper || root || el).querySelector('.price-box');
-                  return {
-                    card: (root || el).innerText || el.innerText || '',
-                    link: el.innerText || '',
-                    priceBox: (priceEl && priceEl.innerText) ? priceEl.innerText.trim() : '',
-                  };
-                }
-                """;
     }
 
     private static String extractLabeledValue(String text, String label) {

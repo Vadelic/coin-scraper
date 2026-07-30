@@ -8,14 +8,16 @@
 
 | Банк | Slug | LOC | Механизм | Реализуемость | Риски | Java-стек (рекомендация) |
 |------|------|-----|----------|---------------|-------|--------------------------|
-| Золотой МД | `zoloto-md` | 356 | HTTP | Очень высокая | хрупкий HTML regex | `HttpClient` + Jsoup |
+| Золотой МД | `zoloto-md` | 356 | HTTP | Очень высокая | хрупкий HTML regex | `HttpClient` + regex |
 | Сбербанк | `sberbank` | 689 | HTTP REST | Высокая | WAF, 4 POST по металлам | `HttpClient` + Jackson |
-| ВТБ | `vtb` | 473 | Hybrid | Средне-высокая | CAPTCHA, cookie-bound BFF | Playwright Java + Jackson BFF |
-| Aurumex | `aurumex` | 587 | Hybrid | Средняя | Nuxt payload deref, CAPTCHA | Playwright + Jackson `JsonNode` |
-| АТБ | `atb` | 525 | Hybrid | Средняя | CAPTCHA, N+1 detail GET | Playwright + `HttpClient` |
-| Золотая плата | `goldenplata` | 510 | Playwright | Низкая | CAPTCHA (slider), Bitrix | Playwright headful + storage-state |
-| Ланта | `lanta` | 658 | Playwright | Низкая | CAPTCHA, N+1 popup AJAX | Playwright headful + storage-state |
-| РСХБ | `rshb` | 833 | Hybrid | Средняя | region cookie, DOM + ES API | Playwright + `HttpClient` batch API |
+| ВТБ | `vtb` | 473 | HTTP BFF | Высокая | CAPTCHA, cookie-bound BFF | `HttpScrapeClient` + Jackson BFF |
+| Aurumex | `aurumex` | 587 | HTTP JSON | Высокая | Nuxt payload deref, CAPTCHA | `HttpScrapeClient` + Jackson |
+| АТБ | `atb` | 525 | HTTP Hybrid | Высокая | CAPTCHA, N+1 detail GET | `HttpScrapeClient` |
+| Золотая плата | `goldenplata` | 510 | HTTP | Высокая | CAPTCHA редка; корневой `/catalog/` без JS | `HttpScrapeClient` + analytics JSON |
+| Ланта | `lanta` | 658 | HTTP + session cookies | Средняя | CAPTCHA без storage-state | `HttpScrapeClient` + `LANTA_STORAGE_STATE` |
+| РСХБ | `rshb` | 833 | HTTP SSR + ES | Высокая | region cookie | `HttpScrapeClient` + SSR HTML |
+
+См. также [`http-migration-spikes.md`](http-migration-spikes.md) — результаты миграции с Playwright на HTTP.
 
 ## Порядок реализации (этап 3)
 

@@ -1,20 +1,13 @@
 package ru.scraper.coincatalog.scraper.goldenplata;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import com.microsoft.playwright.PlaywrightException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.CaptchaBlockedException;
+import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.support.HttpScrapeClient;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -23,43 +16,36 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-/** Скрапер каталога Goldenplata через Playwright. */
+/** Скрапер каталога Goldenplata через HTTP (analytics JSON в HTML). */
 @Slf4j
 @Service("GOLDENPLATA")
 public class GoldenplataScraper implements CoinScraper<Coin> {
 
-    private static final String USER_AGENT =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                    + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
-    private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
-    private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "media", "font");
-
-    private final boolean headless;
-    private final Duration timeout;
+    private final HttpScrapeClient http;
     private final int retries;
     private final double delaySeconds;
     private final int maxPages;
     private final Function<PageFetchRequest, String> pageHtmlOverride;
 
     public GoldenplataScraper() {
-        this(null);
+        this(HttpScrapeClient.defaults(), null);
     }
 
     GoldenplataScraper(Function<PageFetchRequest, String> pageHtmlOverride) {
-        this(true, Duration.ofMillis(60_000), 3, 0.4, 0, pageHtmlOverride);
+        this(HttpScrapeClient.defaults(), pageHtmlOverride);
+    }
+
+    GoldenplataScraper(HttpScrapeClient http, Function<PageFetchRequest, String> pageHtmlOverride) {
+        this(http, 3, 0.35, 0, pageHtmlOverride);
     }
 
     GoldenplataScraper(
-            boolean headless,
-            Duration timeout,
+            HttpScrapeClient http,
             int retries,
             double delaySeconds,
             int maxPages,
             Function<PageFetchRequest, String> pageHtmlOverride) {
-        this.headless = headless;
-        this.timeout = timeout;
+        this.http = http;
         this.retries = Math.max(1, retries);
         this.delaySeconds = Math.max(0, delaySeconds);
         this.maxPages = maxPages;
@@ -72,61 +58,41 @@ public class GoldenplataScraper implements CoinScraper<Coin> {
         String normalizedQuery = query != null ? query.strip() : "";
         List<String> htmlPages = new ArrayList<>();
 
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = launchBrowser(playwright);
-            try (browser) {
-                BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-                        .setUserAgent(USER_AGENT)
-                        .setLocale("ru-RU")
-                        .setViewportSize(1366, 900)
-                        .setExtraHTTPHeaders(Map.of(
-                                "Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")));
-                context.route("**/*", route -> {
-                    if (BLOCKED_RESOURCE_TYPES.contains(route.request().resourceType())) {
-                        route.abort();
-                    } else {
-                        route.resume();
-                    }
-                });
-
-                Page page = context.newPage();
-                page.setDefaultTimeout(timeout.toMillis());
-
-                String firstUrl = GoldenplataPageParser.buildCatalogUrl(catalogBase, 1, normalizedQuery);
-                String firstHtml = fetchPageHtml(page, firstUrl, 1);
-                if (GoldenplataPageParser.isCaptchaTitle(page.title())
-                        || GoldenplataPageParser.isCaptchaBody(snippetBody(page))) {
-                    throw new CaptchaBlockedException(
-                            "goldenplata.ru показал CAPTCHA вместо каталога. "
-                                    + "Попробуйте headful-режим и пройдите проверку вручную.");
-                }
-
-                int pagesToVisit = GoldenplataPageParser.parseTotalPages(firstHtml);
-                if (maxPages > 0) {
-                    pagesToVisit = Math.min(pagesToVisit, maxPages);
-                }
-                log.info("Страниц к обходу: {}", pagesToVisit);
-
-                for (int pageNum = 1; pageNum <= pagesToVisit; pageNum++) {
-                    String html = pageNum == 1
-                            ? firstHtml
-                            : fetchPageHtml(
-                                    page,
-                                    GoldenplataPageParser.buildCatalogUrl(catalogBase, pageNum, normalizedQuery),
-                                    pageNum);
-                    htmlPages.add(html);
-                    log.info(
-                            "Страница {}: найдено {}",
-                            pageNum,
-                            GoldenplataPageParser.parseCoinsFromHtml(html).size());
-                    if (pageNum < pagesToVisit && delaySeconds > 0) {
-                        sleep(delaySeconds);
-                    }
-                }
-            }
+        String firstUrl = GoldenplataPageParser.buildCatalogUrl(catalogBase, 1, normalizedQuery);
+        String firstHtml = fetchPageHtml(firstUrl, 1);
+        if (GoldenplataPageParser.isCaptchaTitle(extractTitle(firstHtml))
+                || GoldenplataPageParser.isCaptchaBody(firstHtml)
+                || GoldenplataPageParser.isCaptchaInterstitial(firstHtml)) {
+            throw new CaptchaBlockedException(
+                    "goldenplata.ru показал CAPTCHA вместо каталога.");
         }
 
-        return new ScrapePayload(htmlPages.size(), mergeCoins(htmlPages));
+        int pagesToVisit = GoldenplataPageParser.parseTotalPages(firstHtml);
+        if (maxPages > 0) {
+            pagesToVisit = Math.min(pagesToVisit, maxPages);
+        }
+        if (pagesToVisit < 1) {
+            pagesToVisit = 1;
+        }
+        log.info("Страниц каталога: {}", pagesToVisit);
+
+        htmlPages.add(firstHtml);
+        log.info("Страница 1: монет в analytics={}", GoldenplataPageParser.parseCoinsFromHtml(firstHtml).size());
+
+        for (int pageNum = 2; pageNum <= pagesToVisit; pageNum++) {
+            if (delaySeconds > 0) {
+                sleep(delaySeconds);
+            }
+            String url = GoldenplataPageParser.buildCatalogUrl(catalogBase, pageNum, normalizedQuery);
+            String html = fetchPageHtml(url, pageNum);
+            htmlPages.add(html);
+            log.info(
+                    "Страница {}: монет в analytics={}",
+                    pageNum,
+                    GoldenplataPageParser.parseCoinsFromHtml(html).size());
+        }
+
+        return new ScrapePayload<>(htmlPages.size(), mergeCoins(htmlPages));
     }
 
     List<Coin> mergeCoins(List<String> pageHtmls) {
@@ -153,7 +119,7 @@ public class GoldenplataScraper implements CoinScraper<Coin> {
         return new ArrayList<>(byKey.values());
     }
 
-    private String fetchPageHtml(Page page, String url, int pageNum) {
+    private String fetchPageHtml(String url, int pageNum) {
         if (pageHtmlOverride != null) {
             return pageHtmlOverride.apply(new PageFetchRequest(url, pageNum));
         }
@@ -162,20 +128,7 @@ public class GoldenplataScraper implements CoinScraper<Coin> {
         for (int attempt = 1; attempt <= retries; attempt++) {
             try {
                 log.info("Открываю {} (попытка {}/{})", url, attempt, retries);
-                page.navigate(
-                        url,
-                        new Page.NavigateOptions()
-                                .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
-                page.waitForTimeout(2000);
-                dismissCookieBanner(page);
-                String content = page.content();
-                if (GoldenplataPageParser.hasAnalyticsPayload(content)
-                        || GoldenplataPageParser.isCaptchaTitle(page.title())
-                        || GoldenplataPageParser.isCaptchaBody(snippetBody(page))) {
-                    return content;
-                }
-                page.waitForTimeout(1500);
-                return page.content();
+                return http.getText(url, HttpScrapeClient.htmlGetHeaders(GoldenplataPageParser.BASE_URL + "/"));
             } catch (Exception e) {
                 lastError = e;
                 log.warn("Навигация: попытка {}/{} — {}", attempt, retries, e.getMessage());
@@ -187,57 +140,21 @@ public class GoldenplataScraper implements CoinScraper<Coin> {
         throw new IllegalStateException("Не удалось загрузить " + url + ": " + lastError);
     }
 
-    private static void dismissCookieBanner(Page page) {
-        for (String selector : List.of(
-                "button:has-text(\"ОК\")", "button:has-text(\"OK\")", ".cookie-alert button")) {
-            Locator btn = page.locator(selector).first();
-            if (btn.count() > 0) {
-                try {
-                    btn.click(new Locator.ClickOptions().setTimeout(2000));
-                    page.waitForTimeout(500);
-                    return;
-                } catch (PlaywrightException ignored) {
-                    // try next selector
-                }
-            }
-        }
-    }
-
-    private static String snippetBody(Page page) {
-        try {
-            String body = page.locator("body")
-                    .innerText(new Locator.InnerTextOptions().setTimeout(5000));
-            return body.length() > 4000 ? body.substring(0, 4000) : body;
-        } catch (PlaywrightException e) {
+    private static String extractTitle(String html) {
+        if (html == null) {
             return "";
         }
-    }
-
-    private Browser launchBrowser(Playwright playwright) {
-        List<String> errors = new ArrayList<>();
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException e) {
-                errors.add(channel + ": " + e.getMessage());
-            }
+        String low = html.toLowerCase();
+        int t0 = low.indexOf("<title");
+        if (t0 < 0) {
+            return "";
         }
-        try {
-            Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
-            log.info("Браузер: playwright bundled chromium");
-            return browser;
-        } catch (PlaywrightException e) {
-            errors.add("bundled: " + e.getMessage());
+        int t1 = html.indexOf('>', t0);
+        int t2 = low.indexOf("</title>", t1);
+        if (t1 < 0 || t2 < 0) {
+            return "";
         }
-        throw new IllegalStateException(
-                "Не найден браузер для Playwright.\n" + String.join("\n", errors));
+        return html.substring(t1 + 1, t2);
     }
 
     private static void sleep(double seconds) {

@@ -6,7 +6,12 @@
 Для Cursor subprocess: профиль **`stdio`** (см. ниже).
 
 Контракт ответа MCP (camelCase): [`src/test/resources/coins_catalog.schema.json`](src/test/resources/coins_catalog.schema.json). Корневая Python-схема в `docs/` — snake_case, для MCP не используется.  
-Аудит Python-скраперов: [`docs/scraper-audit.md`](docs/scraper-audit.md).
+Аудит Python-скраперов: [`docs/scraper-audit.md`](docs/scraper-audit.md).  
+Миграция на HTTP (без Playwright в runtime): [`docs/http-migration-spikes.md`](docs/http-migration-spikes.md).
+
+Скраперы используют `java.net.http.HttpClient` (`HttpScrapeClient`). Браузер в MCP runtime не нужен.
+Для **Ланта** при CAPTCHA нужна заранее сохранённая сессия: `LANTA_STORAGE_STATE` или
+`data/lanta-storage-state.json` (обновление вручную: `tools/coin-catalog-lanta/save_lanta_session.sh`).
 
 ## Документация
 

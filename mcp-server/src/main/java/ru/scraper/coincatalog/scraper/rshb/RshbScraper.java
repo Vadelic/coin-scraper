@@ -1,193 +1,152 @@
 package ru.scraper.coincatalog.scraper.rshb;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import com.microsoft.playwright.APIRequestContext;
-import com.microsoft.playwright.APIResponse;
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.ElementHandle;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import com.microsoft.playwright.PlaywrightException;
-import com.microsoft.playwright.options.RequestOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.support.HttpScrapeClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-/** Скрапер каталога РСХБ через Playwright и REST API. */
+/** Скрапер каталога РСХБ через HTTP (SSR HTML + Elasticsearch buyout API). */
 @Slf4j
 @Service("RSHB")
 public class RshbScraper implements CoinScraper<Coin> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private static final String USER_AGENT =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                    + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
-    private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
-    private static final Set<String> BLOCKED_RESOURCE_TYPES = Set.of("image", "media", "font");
     private static final int BUYOUT_SKU_BATCH_SIZE = 50;
 
-    private final boolean headless;
-    private final Duration timeout;
+    private final HttpScrapeClient http;
     private final int retries;
     private final double pageDelaySeconds;
     private final int pageSize;
-    private final BiFunction<PageLoadRequest, Page, Boolean> pageLoaderOverride;
+    private final Function<PageLoadRequest, String> pageHtmlOverride;
 
     public RshbScraper() {
-        this(null);
+        this(HttpScrapeClient.defaults(), null);
     }
 
-    RshbScraper(BiFunction<PageLoadRequest, Page, Boolean> pageLoaderOverride) {
-        this(true, Duration.ofMillis(30_000), 3, 5.0, RshbPageParser.DEFAULT_PAGE_SIZE, pageLoaderOverride);
+    RshbScraper(Function<PageLoadRequest, String> pageHtmlOverride) {
+        this(HttpScrapeClient.defaults(), pageHtmlOverride);
+    }
+
+    RshbScraper(HttpScrapeClient http, Function<PageLoadRequest, String> pageHtmlOverride) {
+        this(http, 3, 0.4, RshbPageParser.DEFAULT_PAGE_SIZE, pageHtmlOverride);
     }
 
     RshbScraper(
-            boolean headless,
-            Duration timeout,
+            HttpScrapeClient http,
             int retries,
             double pageDelaySeconds,
             int pageSize,
-            BiFunction<PageLoadRequest, Page, Boolean> pageLoaderOverride) {
-        this.headless = headless;
-        this.timeout = timeout;
+            Function<PageLoadRequest, String> pageHtmlOverride) {
+        this.http = http;
         this.retries = Math.max(1, retries);
         this.pageDelaySeconds = Math.max(0, pageDelaySeconds);
         this.pageSize = pageSize > 0 ? pageSize : RshbPageParser.DEFAULT_PAGE_SIZE;
-        this.pageLoaderOverride = pageLoaderOverride;
+        this.pageHtmlOverride = pageHtmlOverride;
     }
 
     @Override
     public ScrapePayload<Coin> scrape(String query, boolean investmentOnly, String region) {
         String normalizedQuery = query != null ? query.strip() : "";
         String regionCode = resolveRegionCode(region, investmentOnly);
+        http.addCookie(
+                RshbPageParser.REGION_COOKIE_NAME,
+                regionCode,
+                "coins.rshb.ru",
+                "/");
+        log.info("Регион каталога: {}={}", RshbPageParser.REGION_COOKIE_NAME, regionCode);
 
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = launchBrowser(playwright);
-            try (browser) {
-                BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-                        .setUserAgent(USER_AGENT)
-                        .setLocale("ru-RU")
-                        .setViewportSize(1280, 800)
-                        .setExtraHTTPHeaders(Map.of(
-                                "Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")));
-                context.addCookies(List.of(new com.microsoft.playwright.options.Cookie(
-                                RshbPageParser.REGION_COOKIE_NAME,
-                                regionCode)
-                        .setDomain("coins.rshb.ru")
-                        .setPath("/")));
-                log.info("Регион каталога: {}={}", RshbPageParser.REGION_COOKIE_NAME, regionCode);
+        List<Coin> allCoins = new ArrayList<>();
+        Set<String> seenUrls = new HashSet<>();
+        int processed = 0;
+        Integer lastPage = null;
+        int pageNum = 1;
 
-                context.route("**/*", route -> {
-                    if (BLOCKED_RESOURCE_TYPES.contains(route.request().resourceType())) {
-                        route.abort();
-                    } else {
-                        route.resume();
-                    }
-                });
-
-                Page page = context.newPage();
-                page.setDefaultTimeout(timeout.toMillis());
-
-                List<Coin> allCoins = new ArrayList<>();
-                Set<String> seenUrls = new HashSet<>();
-                int processed = 0;
-                Integer lastPage = null;
-                int pageNum = 1;
-
-                while (true) {
-                    if (processed > 0 && pageDelaySeconds > 0) {
-                        sleep(pageDelaySeconds);
-                    }
-
-                    log.info("Загружаю страницу {}{}", pageNum, lastPage != null ? "/" + lastPage : "");
-                    boolean loaded = loadPage(page, pageNum, normalizedQuery, investmentOnly);
-                    if (!loaded) {
-                        log.error("Страница {} не загрузилась — пропуск", pageNum);
-                        if (processed == 0) {
-                            break;
-                        }
-                        pageNum++;
-                        if (lastPage != null && pageNum > lastPage) {
-                            break;
-                        }
-                        continue;
-                    }
-
-                    sleep(0.25);
-
-                    if (lastPage == null) {
-                        lastPage = detectLastPage(page);
-                        log.info("Всего страниц: {} (page_size={})", lastPage, pageSize);
-                    }
-
-                    List<RshbPageParser.ParsedCard> pageCards = extractCoinsFromPage(page);
-                    enrichBuyPrices(context.request(), pageCards);
-
-                    List<Coin> newCoins = new ArrayList<>();
-                    for (RshbPageParser.ParsedCard parsed : pageCards) {
-                        String key = parsed.url();
-                        if (!seenUrls.add(key)) {
-                            log.warn(
-                                    "Дубликат карточки (url {}): «{}», артикул={}",
-                                    key,
-                                    parsed.coin().name(),
-                                    parsed.coin().catalogNumber());
-                            continue;
-                        }
-                        if (parsed.coin().sellPrice() == null) {
-                            log.warn(
-                                    "Нет sell_price для «{}» (артикул {})",
-                                    parsed.coin().name(),
-                                    parsed.coin().catalogNumber());
-                        }
-                        newCoins.add(parsed.coin());
-                    }
-                    allCoins.addAll(newCoins);
-                    processed++;
-
-                    log.info(
-                            "Страница {}/{}: {} монет (новых: {}, всего: {})",
-                            pageNum,
-                            lastPage,
-                            pageCards.size(),
-                            newCoins.size(),
-                            allCoins.size());
-
-                    if (pageCards.isEmpty()) {
-                        log.info("Страница {} пустая — остановка", pageNum);
-                        break;
-                    }
-                    if (pageNum >= lastPage) {
-                        break;
-                    }
-                    pageNum++;
-                }
-
-                return new ScrapePayload(processed, allCoins);
+        while (true) {
+            if (processed > 0 && pageDelaySeconds > 0) {
+                sleep(pageDelaySeconds);
             }
+
+            log.info("Загружаю страницу {}{}", pageNum, lastPage != null ? "/" + lastPage : "");
+            String html = loadPageHtml(pageNum, normalizedQuery, investmentOnly);
+            if (html == null || html.isBlank()) {
+                log.error("Страница {} не загрузилась — пропуск", pageNum);
+                if (processed == 0) {
+                    break;
+                }
+                pageNum++;
+                if (lastPage != null && pageNum > lastPage) {
+                    break;
+                }
+                continue;
+            }
+
+            if (lastPage == null) {
+                lastPage = RshbPageParser.parsePaginationMax(RshbPageParser.parsePaginationHrefs(html));
+                log.info("Всего страниц: {} (page_size={})", lastPage, pageSize);
+            }
+
+            List<RshbPageParser.ParsedCard> pageCards = RshbPageParser.parseCardsFromHtml(html);
+            enrichBuyPrices(pageCards);
+
+            List<Coin> newCoins = new ArrayList<>();
+            for (RshbPageParser.ParsedCard parsed : pageCards) {
+                String key = parsed.url();
+                if (!seenUrls.add(key)) {
+                    log.warn(
+                            "Дубликат карточки (url {}): «{}», артикул={}",
+                            key,
+                            parsed.coin().name(),
+                            parsed.coin().catalogNumber());
+                    continue;
+                }
+                if (parsed.coin().sellPrice() == null) {
+                    log.warn(
+                            "Нет sell_price для «{}» (артикул {})",
+                            parsed.coin().name(),
+                            parsed.coin().catalogNumber());
+                }
+                newCoins.add(parsed.coin());
+            }
+            allCoins.addAll(newCoins);
+            processed++;
+
+            log.info(
+                    "Страница {}/{}: {} монет (новых: {}, всего: {})",
+                    pageNum,
+                    lastPage,
+                    pageCards.size(),
+                    newCoins.size(),
+                    allCoins.size());
+
+            if (pageCards.isEmpty()) {
+                log.info("Страница {} пустая — остановка", pageNum);
+                break;
+            }
+            if (pageNum >= lastPage) {
+                break;
+            }
+            pageNum++;
         }
+
+        return new ScrapePayload<>(processed, allCoins);
     }
 
-    private boolean loadPage(Page page, int pageNum, String searchText, boolean investmentOnly) {
-        if (pageLoaderOverride != null) {
-            return pageLoaderOverride.apply(new PageLoadRequest(pageNum, searchText, investmentOnly), page);
+    private String loadPageHtml(int pageNum, String searchText, boolean investmentOnly) {
+        PageLoadRequest request = new PageLoadRequest(pageNum, searchText, investmentOnly);
+        if (pageHtmlOverride != null) {
+            return pageHtmlOverride.apply(request);
         }
 
         String url = RshbPageParser.buildUrl(pageNum, pageSize, searchText, investmentOnly);
@@ -201,18 +160,7 @@ public class RshbScraper implements CoinScraper<Coin> {
         Exception lastError = null;
         for (int attempt = 1; attempt <= retries; attempt++) {
             try {
-                page.navigate(
-                        url,
-                        new Page.NavigateOptions()
-                                .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED)
-                                .setTimeout(timeout.toMillis()));
-                page.waitForSelector(RshbPageParser.CARD_LINK_SELECTOR);
-                try {
-                    page.waitForLoadState(com.microsoft.playwright.options.LoadState.NETWORKIDLE);
-                } catch (PlaywrightException e) {
-                    log.debug("страница {}: networkidle не наступил — продолжаю", pageNum);
-                }
-                return true;
+                return http.getText(url, HttpScrapeClient.htmlGetHeaders(RshbPageParser.BASE_URL + "/"));
             } catch (Exception e) {
                 lastError = e;
                 log.warn("Страница {}, попытка {}/{} — ошибка: {}", pageNum, attempt, retries, e.getMessage());
@@ -222,62 +170,10 @@ public class RshbScraper implements CoinScraper<Coin> {
             }
         }
         log.error("Страница {}: все попытки исчерпаны: {}", pageNum, lastError != null ? lastError.getMessage() : "");
-        return false;
+        return null;
     }
 
-    private int detectLastPage(Page page) {
-        List<String> hrefs = new ArrayList<>();
-        for (ElementHandle link : page.querySelectorAll(RshbPageParser.PAGINATION_LINK_SELECTOR)) {
-            String href = link.getAttribute("href");
-            if (href != null) {
-                hrefs.add(href);
-            }
-        }
-        return RshbPageParser.parsePaginationMax(hrefs);
-    }
-
-    private List<RshbPageParser.ParsedCard> extractCoinsFromPage(Page page) {
-        List<RshbPageParser.ParsedCard> coins = new ArrayList<>();
-        for (ElementHandle link : page.querySelectorAll(RshbPageParser.CARD_LINK_SELECTOR)) {
-            String href = link.getAttribute("href");
-            if (href == null) {
-                href = "";
-            }
-            String rawText;
-            String linkText;
-            String priceBoxText;
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> block =
-                        (Map<String, Object>) link.evaluate(RshbPageParser.cardTextJs());
-                rawText = stringOrEmpty(block.get("card"));
-                if (rawText.isBlank()) {
-                    rawText = stringOrEmpty(block.get("link"));
-                }
-                linkText = stringOrEmpty(block.get("link"));
-                priceBoxText = stringOrEmpty(block.get("priceBox"));
-            } catch (PlaywrightException e) {
-                rawText = link.innerText();
-                linkText = rawText;
-                priceBoxText = "";
-            }
-
-            var parsed = RshbPageParser.parseCard(
-                    new RshbPageParser.CardInput(rawText, href, linkText, priceBoxText));
-            if (parsed.isEmpty()) {
-                log.warn("Пропуск карточки: не удалось распарсить href={}", href);
-                continue;
-            }
-            if (parsed.get().coin().name() == null || parsed.get().coin().name().isBlank()) {
-                log.warn("Пропуск карточки: пустое название, url={}", parsed.get().url());
-                continue;
-            }
-            coins.add(parsed.get());
-        }
-        return coins;
-    }
-
-    private void enrichBuyPrices(APIRequestContext request, List<RshbPageParser.ParsedCard> cards) {
+    private void enrichBuyPrices(List<RshbPageParser.ParsedCard> cards) {
         List<String> skus = new ArrayList<>();
         for (RshbPageParser.ParsedCard card : cards) {
             Coin coin = card.coin();
@@ -288,7 +184,7 @@ public class RshbScraper implements CoinScraper<Coin> {
         if (skus.isEmpty()) {
             return;
         }
-        Map<String, Double> buyoutBySku = fetchBuyoutPrices(request, skus);
+        Map<String, Double> buyoutBySku = fetchBuyoutPrices(skus);
         if (buyoutBySku.isEmpty()) {
             return;
         }
@@ -316,7 +212,7 @@ public class RshbScraper implements CoinScraper<Coin> {
         }
     }
 
-    private Map<String, Double> fetchBuyoutPrices(APIRequestContext request, List<String> skus) {
+    private Map<String, Double> fetchBuyoutPrices(List<String> skus) {
         List<String> unique = skus.stream().filter(s -> s != null && !s.isBlank()).distinct().toList();
         Map<String, Double> registry = new HashMap<>();
         if (unique.isEmpty()) {
@@ -330,16 +226,12 @@ public class RshbScraper implements CoinScraper<Coin> {
                     "size", batch.size());
             try {
                 String body = MAPPER.writeValueAsString(payload);
-                APIResponse response = request.post(
+                String response = http.postJson(
                         RshbPageParser.PRODUCT_SEARCH_URL,
-                        RequestOptions.create()
-                                .setHeader("Content-Type", "application/json")
-                                .setData(body));
-                if (!response.ok()) {
-                    log.warn("product/_search (buyout) HTTP {} для {} sku", response.status(), batch.size());
-                    continue;
-                }
-                JsonNode data = MAPPER.readTree(response.text());
+                        body,
+                        RshbPageParser.BASE_URL,
+                        RshbPageParser.BASE_URL + "/");
+                JsonNode data = MAPPER.readTree(response);
                 for (JsonNode hit : data.path("hits").path("hits")) {
                     JsonNode source = hit.get("_source");
                     if (source == null || !source.isObject()) {
@@ -371,37 +263,6 @@ public class RshbScraper implements CoinScraper<Coin> {
         return investmentOnly
                 ? RshbPageParser.DEFAULT_REGION_CODE
                 : RshbPageParser.IN_STOCK_CATALOG_REGION_CODE;
-    }
-
-    private Browser launchBrowser(Playwright playwright) {
-        List<String> errors = new ArrayList<>();
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException e) {
-                errors.add(channel + ": " + e.getMessage());
-            }
-        }
-        try {
-            Browser browser = playwright.chromium()
-                    .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
-            log.info("Браузер: playwright bundled chromium");
-            return browser;
-        } catch (PlaywrightException e) {
-            errors.add("bundled: " + e.getMessage());
-        }
-        throw new IllegalStateException(
-                "Не найден браузер для Playwright.\n" + String.join("\n", errors));
-    }
-
-    private static String stringOrEmpty(Object value) {
-        return value == null ? "" : value.toString();
     }
 
     private static void sleep(double seconds) {

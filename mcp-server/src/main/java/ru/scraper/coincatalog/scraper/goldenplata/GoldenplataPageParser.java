@@ -20,7 +20,8 @@ import java.util.regex.Pattern;
 public class GoldenplataPageParser {
 
     public static final String BASE_URL = "https://goldenplata.ru";
-    public static final String CATALOG_URL = BASE_URL + "/catalog/";
+    /** Корневой /catalog/ — только категории; листинг монет без браузера — секция investment. */
+    public static final String CATALOG_URL = BASE_URL + "/catalog/investitsionnye-monety/";
     public static final String INVESTMENT_CATALOG_URL =
             BASE_URL + "/catalog/investitsionnye-monety/rossiyskiye/";
 
@@ -169,6 +170,18 @@ public class GoldenplataPageParser {
                 || low.contains("not a robot")
                 || low.contains("ползунк")
                 || low.contains("выровнять картинку");
+    }
+
+    /** Антибот-заглушка без analytics payload. */
+    public static boolean isCaptchaInterstitial(String html) {
+        if (html == null || html.isBlank()) {
+            return true;
+        }
+        if (hasAnalyticsPayload(html)) {
+            return false;
+        }
+        String low = html.toLowerCase();
+        return low.contains("captcha") || low.contains("gorizontal-vertikal");
     }
 
     private static String unescapeHtml(String text) {

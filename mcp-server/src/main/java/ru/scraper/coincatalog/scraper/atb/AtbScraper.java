@@ -1,62 +1,48 @@
 package ru.scraper.coincatalog.scraper.atb;
 
-import com.microsoft.playwright.APIRequestContext;
-import com.microsoft.playwright.APIResponse;
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import com.microsoft.playwright.PlaywrightException;
-import com.microsoft.playwright.options.RequestOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.model.CaptchaBlockedException;
+import ru.scraper.coincatalog.model.Coin;
 import ru.scraper.coincatalog.scraper.CoinScraper;
 import ru.scraper.coincatalog.scraper.CoinScraper.ScrapePayload;
+import ru.scraper.coincatalog.scraper.support.HttpScrapeClient;
 
-import java.time.Duration;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-/** Скрапер каталога АТБ через Playwright и AJAX-фрагменты. */
+/** Скрапер каталога АТБ через HTTP и AJAX-фрагменты. */
 @Slf4j
 @Service("ATB")
 public class AtbScraper implements CoinScraper<Coin> {
 
-    private static final String USER_AGENT =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                    + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-
-    private static final List<String> BROWSER_CHANNELS = List.of("chrome", "msedge", "chromium");
-    private static final List<String> LAUNCH_ARGS = List.of("--no-sandbox", "--disable-setuid-sandbox");
-
-    private final boolean headless;
-    private final Duration timeout;
+    private final HttpScrapeClient http;
     private final int retries;
     private final double delaySeconds;
     private final Function<String, String> detailLoaderOverride;
 
     public AtbScraper() {
-        this(null);
+        this(HttpScrapeClient.defaults(), null);
     }
 
     AtbScraper(Function<String, String> detailLoaderOverride) {
-        this(true, Duration.ofMillis(30_000), 3, 0.5, detailLoaderOverride);
+        this(HttpScrapeClient.defaults(), detailLoaderOverride);
+    }
+
+    AtbScraper(HttpScrapeClient http, Function<String, String> detailLoaderOverride) {
+        this(http, 3, 0.35, detailLoaderOverride);
     }
 
     AtbScraper(
-            boolean headless,
-            Duration timeout,
+            HttpScrapeClient http,
             int retries,
             double delaySeconds,
             Function<String, String> detailLoaderOverride) {
-        this.headless = headless;
-        this.timeout = timeout;
+        this.http = http;
         this.retries = Math.max(1, retries);
         this.delaySeconds = Math.max(0, delaySeconds);
         this.detailLoaderOverride = detailLoaderOverride;
@@ -67,45 +53,32 @@ public class AtbScraper implements CoinScraper<Coin> {
         String category = AtbPageParser.resolveCategory(investmentOnly);
         String normalizedQuery = query != null ? query.strip() : "";
 
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = launchBrowser(playwright);
-            try (browser) {
-                BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-                        .setUserAgent(USER_AGENT)
-                        .setIgnoreHTTPSErrors(true));
-                Page page = context.newPage();
-                page.setDefaultTimeout(timeout.toMillis());
-
-                log.info("Открываю каталог: {}", AtbPageParser.CATALOG_URL);
-                page.navigate(
-                        AtbPageParser.CATALOG_URL,
-                        new Page.NavigateOptions()
-                                .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
-
-                String mainHtml = page.content();
-                if (AtbPageParser.detectCaptcha(mainHtml)) {
-                    throw new CaptchaBlockedException("CAPTCHA на странице каталога ATB");
-                }
-
-                APIRequestContext request = context.request();
-                String fragment = fetchAjaxFragment(request, category, normalizedQuery);
-                List<Coin> coins = parseCoinsFromFragment(request, fragment);
-                return buildResult(fragment, coins);
-            }
+        log.info("Открываю каталог: {}", AtbPageParser.CATALOG_URL);
+        String mainHtml = requestWithRetry(
+                "GET",
+                AtbPageParser.CATALOG_URL,
+                null,
+                HttpScrapeClient.htmlGetHeaders(AtbPageParser.BASE_URL + "/"));
+        if (AtbPageParser.detectCaptcha(mainHtml)) {
+            throw new CaptchaBlockedException("CAPTCHA на странице каталога ATB");
         }
+
+        String fragment = fetchAjaxFragment(category, normalizedQuery);
+        List<Coin> coins = parseCoinsFromFragment(fragment);
+        return buildResult(fragment, coins);
     }
 
     static ScrapePayload<Coin> buildResult(String fragment, List<Coin> coins) {
         if (coins.isEmpty()) {
             if (AtbPageParser.isEmptySearchResult(fragment)) {
-                return new ScrapePayload(1, List.of());
+                return new ScrapePayload<>(1, List.of());
             }
             throw new IllegalStateException("Не удалось распарсить монеты из ответа");
         }
-        return new ScrapePayload(1, coins);
+        return new ScrapePayload<>(1, coins);
     }
 
-    private List<Coin> parseCoinsFromFragment(APIRequestContext request, String fragmentHtml) {
+    private List<Coin> parseCoinsFromFragment(String fragmentHtml) {
         List<AtbPageParser.CardMatch> cards = AtbPageParser.parseCardsFromFragment(fragmentHtml);
         log.info("Карточек в ответе: {}", cards.size());
 
@@ -114,7 +87,10 @@ public class AtbScraper implements CoinScraper<Coin> {
         int index = 0;
         for (AtbPageParser.CardMatch card : cards) {
             index++;
-            String detailHtml = loadDetailHtml(request, AtbPageParser.BASE_URL, card.href());
+            if (delaySeconds > 0 && index > 1) {
+                sleep(delaySeconds);
+            }
+            String detailHtml = loadDetailHtml(card.href());
             var parsed = AtbPageParser.parseCard(card.cardHtml(), card.href(), detailHtml);
             if (parsed.isEmpty()) {
                 log.warn("Пропуск карточки: пустое имя");
@@ -136,52 +112,32 @@ public class AtbScraper implements CoinScraper<Coin> {
         return coins;
     }
 
-    private String loadDetailHtml(APIRequestContext request, String baseUrl, String href) {
+    private String loadDetailHtml(String href) {
+        String url = href.startsWith("http") ? href : AtbPageParser.BASE_URL + href;
         if (detailLoaderOverride != null) {
-            String url = href.startsWith("http") ? href : baseUrl + href;
             return detailLoaderOverride.apply(url);
         }
-        String url = href.startsWith("http") ? href : baseUrl + href;
         return requestWithRetry(
-                request,
                 "GET",
                 url,
-                RequestOptions.create()
-                        .setTimeout(timeout.toMillis())
-                        .setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                        .setHeader("Referer", AtbPageParser.CATALOG_URL));
+                null,
+                HttpScrapeClient.htmlGetHeaders(AtbPageParser.CATALOG_URL));
     }
 
-    private String fetchAjaxFragment(APIRequestContext request, String category, String query) {
+    private String fetchAjaxFragment(String category, String query) {
         String body = AtbPageParser.buildRequestBody(category, query);
         return requestWithRetry(
-                request,
                 "POST",
                 AtbPageParser.CATALOG_URL,
-                RequestOptions.create()
-                        .setTimeout(timeout.toMillis())
-                        .setHeader("Accept", "text/html, */*;q=0.1")
-                        .setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                        .setHeader("Origin", AtbPageParser.BASE_URL)
-                        .setHeader("Referer", AtbPageParser.CATALOG_URL)
-                        .setHeader("X-Requested-With", "XMLHttpRequest")
-                        .setData(body));
+                body.getBytes(StandardCharsets.UTF_8),
+                HttpScrapeClient.formHeaders(AtbPageParser.BASE_URL, AtbPageParser.CATALOG_URL));
     }
 
-    private String requestWithRetry(APIRequestContext request, String method, String url, RequestOptions options) {
+    private String requestWithRetry(String method, String url, byte[] body, java.util.Map<String, String> headers) {
         Exception lastError = null;
         for (int attempt = 1; attempt <= retries; attempt++) {
             try {
-                APIResponse response =
-                        "POST".equals(method) ? request.post(url, options) : request.get(url, options);
-                if (!response.ok()) {
-                    throw new IllegalStateException("HTTP " + response.status() + " для " + url);
-                }
-                String text = response.text();
-                if (text == null || text.isBlank()) {
-                    throw new IllegalStateException("Пустой ответ: " + url);
-                }
-                return text;
+                return http.requestText(method, url, body, headers);
             } catch (Exception e) {
                 lastError = e;
                 log.warn("Попытка {}/{}: {}", attempt, retries, e.getMessage());
@@ -191,26 +147,6 @@ public class AtbScraper implements CoinScraper<Coin> {
             }
         }
         throw new IllegalStateException("Не удалось получить " + url + ": " + lastError);
-    }
-
-    private Browser launchBrowser(Playwright playwright) {
-        for (String channel : BROWSER_CHANNELS) {
-            try {
-                Browser browser = playwright.chromium()
-                        .launch(new BrowserType.LaunchOptions()
-                                .setHeadless(headless)
-                                .setChannel(channel)
-                                .setArgs(LAUNCH_ARGS));
-                log.info("Браузер: {}", channel);
-                return browser;
-            } catch (PlaywrightException ignored) {
-                // try next channel
-            }
-        }
-        Browser browser = playwright.chromium()
-                .launch(new BrowserType.LaunchOptions().setHeadless(headless).setArgs(LAUNCH_ARGS));
-        log.info("Браузер: playwright bundled chromium");
-        return browser;
     }
 
     private static void sleep(double seconds) {

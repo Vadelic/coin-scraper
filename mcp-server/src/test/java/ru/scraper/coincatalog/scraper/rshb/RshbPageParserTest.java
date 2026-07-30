@@ -83,6 +83,21 @@ class RshbPageParserTest {
         assertThat(RshbPageParser.extractNameFromListing(text)).contains("Победоносец");
     }
 
+    @Test
+    void parseCardsFromHtml() throws Exception {
+        String html = loadFixture("catalog_page.html");
+        List<RshbPageParser.ParsedCard> cards = RshbPageParser.parseCardsFromHtml(html);
+
+        assertThat(cards).hasSize(2);
+        assertThat(cards.get(0).coin().catalogNumber()).isEqualTo("5216-0060с");
+        assertThat(cards.get(0).coin().metal()).isEqualTo("Золото");
+        assertThat(cards.get(0).coin().sellPrice()).isEqualTo(98000.0);
+        assertThat(cards.get(0).coin().buyPrice()).isEqualTo(85000.0);
+        assertThat(cards.get(1).coin().catalogNumber()).isEqualTo("5111-0008");
+        assertThat(RshbPageParser.parsePaginationMax(RshbPageParser.parsePaginationHrefs(html)))
+                .isEqualTo(3);
+    }
+
     private static String loadFixture(String name) throws Exception {
         try (var in = RshbPageParserTest.class.getResourceAsStream("/fixtures/rshb/" + name)) {
             return new String(Objects.requireNonNull(in).readAllBytes(), StandardCharsets.UTF_8);
