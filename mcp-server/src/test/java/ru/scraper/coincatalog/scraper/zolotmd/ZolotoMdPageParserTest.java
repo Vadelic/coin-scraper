@@ -43,12 +43,23 @@ class ZolotoMdPageParserTest {
     void normalizeMetalFromName() {
         assertThat(ZolotoMdPageParser.normalizeMetal("7,78 г чистого золота"))
                 .isEqualTo("Золото");
+        assertThat(ZolotoMdPageParser.normalizeMetal("Золотая инвестиционная монета Канады"))
+                .isEqualTo("Золото");
+        assertThat(ZolotoMdPageParser.normalizeMetal("Золотой червонец Сеятель"))
+                .isEqualTo("Золото");
+        assertThat(ZolotoMdPageParser.normalizeMetal("Серебряная инвестиционная монета США"))
+                .isEqualTo("Серебро");
     }
 
     @Test
     void parseWeightFromName() {
         assertThat(ZolotoMdPageParser.parseWeightG("монета 7,78 г чистого золота"))
                 .isEqualTo(7.78);
+        assertThat(ZolotoMdPageParser.parseWeightG(
+                        "Золотой червонец Сеятель, 2023 г.в., вес чистого золота - 7.78 г (проба 999)"))
+                .isEqualTo(7.78);
+        assertThat(ZolotoMdPageParser.parseWeightG("31,1 гр чистого золота")).isEqualTo(31.1);
+        assertThat(ZolotoMdPageParser.parseWeightG("монета 2026 г.в.")).isNull();
     }
 
     private static String loadFixture(String name) throws Exception {

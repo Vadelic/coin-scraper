@@ -34,7 +34,7 @@ class AllScrapersPobedLiveTest {
     void eachScraperFindsAtLeastOneCoin() {
         Map<String, Supplier<CoinScraper.ScrapePayload<Coin>>> scrapers = new LinkedHashMap<>();
         scrapers.put("SBERBANK", () -> new SberbankScraper().scrape(QUERY, true, null));
-        scrapers.put("ZOLOTO_MD", () -> new ZolotoMdScraper(new ru.scraper.coincatalog.scraper.zolotmd.HttpFetcher()).scrape(QUERY, true, null));
+        scrapers.put("ZOLOTO_MD", () -> new ZolotoMdScraper().scrape(QUERY, true, null));
         scrapers.put("VTB", () -> new VtbScraper().scrape(QUERY, true, null));
         scrapers.put("AURUMEX", () -> new AurumexScraper().scrape(QUERY, true, null));
         scrapers.put("ATB", () -> new AtbScraper().scrape(QUERY, true, null));

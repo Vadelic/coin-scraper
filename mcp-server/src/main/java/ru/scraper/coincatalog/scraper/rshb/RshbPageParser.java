@@ -314,13 +314,11 @@ public class RshbPageParser {
 
     private static String extractLabeledValue(String text, String label) {
         String target = normalizeLabel(label);
-        String[] lines = text.split("\\R");
-        for (int i = 0; i < lines.length; i++) {
-            if (normalizeLabel(lines[i]).equals(target) && i + 1 < lines.length) {
-                String value = lines[i + 1].strip();
-                if (!value.isEmpty()) {
-                    return value;
-                }
+        // Live SSR leaves blank lines between label and value after stripping nested </div>.
+        List<String> lines = nonEmptyLines(text);
+        for (int i = 0; i < lines.size(); i++) {
+            if (normalizeLabel(lines.get(i)).equals(target) && i + 1 < lines.size()) {
+                return lines.get(i + 1);
             }
         }
         return null;

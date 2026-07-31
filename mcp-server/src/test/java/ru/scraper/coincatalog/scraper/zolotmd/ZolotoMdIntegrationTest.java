@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnabledIfEnvironmentVariable(named = "RUN_INTEGRATION_TESTS", matches = "true")
 class ZolotoMdIntegrationTest {
 
-    private final ZolotoMdScraper scraper = new ZolotoMdScraper(new HttpFetcher());
+    private final ZolotoMdScraper scraper = new ZolotoMdScraper();
 
     private static final List<ExpectedCoin> PO_EXPECTED = List.of(
             new ExpectedCoin(
@@ -30,7 +30,7 @@ class ZolotoMdIntegrationTest {
                     "15045",
                     "Золотой червонец Сеятель, 2023 г.в., вес чистого золота - 7.78 г (проба 999)",
                     "Золото",
-                    2023.0,
+                    7.78,
                     88_559.0,
                     101_587.0));
 

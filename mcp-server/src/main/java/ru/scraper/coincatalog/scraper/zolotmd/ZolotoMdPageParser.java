@@ -99,6 +99,16 @@ public class ZolotoMdPageParser {
         return sb.toString();
     }
 
+    private static final String GRAM_UNIT = "г(?:рамм(?:а|ов)?|р)?";
+    private static final Pattern WEIGHT_BEFORE_CHISTOGO =
+            Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*(?:" + GRAM_UNIT + ")?\\s*чистого");
+    private static final Pattern WEIGHT_AFTER_CHISTOGO = Pattern.compile(
+            "чистого\\s+(?:золота|серебра|платины|палладия)\\s*[-–—:]?\\s*(\\d+(?:[.,]\\d+)?)\\s*"
+                    + GRAM_UNIT);
+    // Exclude year-of-issue "г.в." / "г в" without relying on \\b (broken for Cyrillic in Java).
+    private static final Pattern WEIGHT_GENERIC =
+            Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*" + GRAM_UNIT + "(?!\\s*\\.?\\s*в)");
+
     static String normalizeMetal(String name) {
         String n = name.toLowerCase();
         Matcher m = Pattern.compile("чистого\\s+(золота|серебра|платины|палладия)").matcher(n);
@@ -115,22 +125,32 @@ public class ZolotoMdPageParser {
         if (n.contains("медно-никелев")) {
             return METAL_LABELS.get("медно-никелевый сплав");
         }
-        if (n.contains("золотая монета") || n.contains("золотой жетон")) {
+        if (n.contains("золотая") || n.contains("золотой") || n.contains("золотые") || n.contains("золото")) {
             return METAL_LABELS.get("золото");
         }
-        if (n.contains("серебряная монета") || n.contains("серебряный жетон")) {
+        if (n.contains("серебрян") || n.contains("серебро")) {
             return METAL_LABELS.get("серебро");
+        }
+        if (n.contains("платинов") || n.contains("платина")) {
+            return METAL_LABELS.get("платина");
+        }
+        if (n.contains("палладиев") || n.contains("палладий")) {
+            return METAL_LABELS.get("палладий");
         }
         return null;
     }
 
     static Double parseWeightG(String name) {
         String n = name.toLowerCase();
-        Matcher m = Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*(?:г\\s*)?чистого").matcher(n);
+        Matcher m = WEIGHT_BEFORE_CHISTOGO.matcher(n);
         if (m.find()) {
             return parseWeightValue(m.group(1));
         }
-        m = Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*г(?!\\s*\\.?\\s*в\\b)").matcher(n);
+        m = WEIGHT_AFTER_CHISTOGO.matcher(n);
+        if (m.find()) {
+            return parseWeightValue(m.group(1));
+        }
+        m = WEIGHT_GENERIC.matcher(n);
         if (m.find()) {
             return parseWeightValue(m.group(1));
         }

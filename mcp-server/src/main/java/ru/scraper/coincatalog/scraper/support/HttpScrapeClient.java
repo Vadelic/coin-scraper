@@ -1,6 +1,7 @@
 package ru.scraper.coincatalog.scraper.support;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -29,6 +30,7 @@ import java.util.Objects;
  * Общий HTTP-клиент для скраперов: cookie jar, retries, UA, опционально insecure SSL.
  */
 @Slf4j
+@Service
 public class HttpScrapeClient {
 
     public static final String DEFAULT_USER_AGENT =
@@ -175,7 +177,9 @@ public class HttpScrapeClient {
         throw new IllegalStateException("Failed to " + method + " " + url + ": " + lastError);
     }
 
-    /** Best-effort GET: логирует ошибку и не бросает. */
+    /**
+     * Best-effort GET: логирует ошибку и не бросает.
+     */
     public void warmUpBestEffort(String url) {
         try {
             int code = requestOnce("GET", url, null, htmlGetHeaders(null)).statusCode();
@@ -273,19 +277,21 @@ public class HttpScrapeClient {
 
     private static SSLContext insecureSslContext() {
         try {
-            TrustManager[] trustAll = new TrustManager[] {
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+            TrustManager[] trustAll = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                        }
 
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                        }
 
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
                     }
-                }
             };
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, trustAll, new SecureRandom());

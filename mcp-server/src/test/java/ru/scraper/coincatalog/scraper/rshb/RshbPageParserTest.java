@@ -56,6 +56,55 @@ class RshbPageParserTest {
     }
 
     @Test
+    void parseCardSkipsBlankLinesBetweenLabelAndValue() {
+        // Live SSR HTML yields blank lines between attribute labels and values.
+        String rawText = """
+                98 000
+
+
+
+                Георгий Победоносец 50 руб. (7,78гр.)
+
+
+                Номинал
+
+
+                50 RUB
+
+
+
+                Металл
+
+
+                Золото
+
+
+
+                Проба
+
+
+                999
+
+
+
+                Чистого металла
+
+
+                7.78 г
+                """;
+        var parsed = RshbPageParser.parseCard(new RshbPageParser.CardInput(
+                        rawText,
+                        "/p/5216-0060%D1%81/pobedonosec",
+                        rawText,
+                        "98 000"))
+                .orElseThrow();
+
+        assertThat(parsed.coin().metal()).isEqualTo("Золото");
+        assertThat(parsed.coin().weightG()).isEqualTo(7.78);
+        assertThat(parsed.coin().sellPrice()).isEqualTo(98000.0);
+    }
+
+    @Test
     void parseOutOfStockCardHasNoSellPrice() throws Exception {
         var parsed = RshbPageParser.parseCard(new RshbPageParser.CardInput(
                         loadFixture("card_silver_out.txt"),

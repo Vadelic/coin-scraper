@@ -21,7 +21,6 @@ import java.util.function.Function;
 @Slf4j
 @Service("RSHB")
 public class RshbScraper implements CoinScraper<Coin> {
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final int BUYOUT_SKU_BATCH_SIZE = 50;
 
